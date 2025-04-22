@@ -9,7 +9,7 @@ The **obuild** project aims to be the next-generation successor to current [unbu
 - 🌱 Fresh rewrite with cleanups and removal of legacy features.
 - 🚀 Uses [**oxc**](https://oxc.rs/) and [**rolldown**](https://rolldown.rs/) instead of rollup and mkdist.
 - 👌 Strict ESM-compliant imports with explicit extensions.
-- 🔒 Types are build with iolsated declaration constraints.
+- 🔒 Types are build with isolated declaration constraints.
 - 🪦 No support for CommonJS output.
 
 Some differences are not easy to adopt. Developing as a standalone project allows faster progress and dogfooding in real projects.
