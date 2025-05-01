@@ -36,3 +36,13 @@ export type TransformEntry = {
 };
 
 export type BuildEntry = BundleEntry | TransformEntry;
+
+export interface BuildConfig {
+  entries?: (BuildEntry | string)[];
+}
+
+export function defineBuildConfig(
+  config: BuildConfig | BuildConfig[]
+): BuildConfig[] {
+  return (Array.isArray(config) ? config : [config]).filter(Boolean)
+}
