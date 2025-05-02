@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import type { BuildEntry } from "./types.ts";
+import type { BuildEntry, BuildOptions } from "./types.ts";
 
 import { parseArgs } from "node:util";
 import { consola } from "consola";
@@ -15,6 +15,9 @@ const args = parseArgs({
       type: "string",
       default: ".",
     },
+    tsconfig: {
+      type: "string",
+    },
   },
 });
 
@@ -26,6 +29,10 @@ if (!dir || rawEntries.length === 0) {
   process.exit(1);
 }
 
+const opts: BuildOptions = {
+  tsconfigPath: args.values.tsconfig,
+};
+
 const entries: BuildEntry[] = rawEntries.map((entry) => {
   const [input, outDir] = entry.split(":") as [string, string | undefined];
   return input.endsWith("/")
@@ -33,4 +40,4 @@ const entries: BuildEntry[] = rawEntries.map((entry) => {
     : { type: "bundle", input, outDir };
 });
 
-await build(dir, entries);
+await build(dir, entries, opts);

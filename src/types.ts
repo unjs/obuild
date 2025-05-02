@@ -36,3 +36,10 @@ export type TransformEntry = {
 };
 
 export type BuildEntry = BundleEntry | TransformEntry;
+
+export interface BuildOptions {
+  /**
+   * Path to a tsconfig.json file to use for type checking and compilation.
+   */
+  tsconfigPath?: string;
+}

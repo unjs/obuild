@@ -1,5 +1,6 @@
-import type { BuildContext, BundleEntry } from "../types.ts";
+import type { BuildContext, BundleEntry, BuildOptions } from "../types.ts";
 
+import { resolve } from "node:path";
 import { builtinModules } from "node:module";
 import { consola } from "consola";
 import { rolldown } from "rolldown";
@@ -10,6 +11,7 @@ import { resolveModulePath } from "exsolve";
 export async function rolldownBuild(
   ctx: BuildContext,
   entry: BundleEntry,
+  opts: BuildOptions,
 ): Promise<void> {
   const start = Date.now();
 
@@ -23,6 +25,11 @@ export async function rolldownBuild(
     cwd: ctx.pkgDir,
     input: input,
     plugins: [dts({ isolatedDeclarations: true })],
+    resolve: {
+      tsconfigFilename: opts.tsconfigPath
+        ? resolve(opts.tsconfigPath)
+        : undefined,
+    },
     external: [
       ...builtinModules,
       ...builtinModules.map((m) => `node:${m}`),

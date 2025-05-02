@@ -1,4 +1,4 @@
-import type { BuildEntry, BuildContext } from "./types.ts";
+import type { BuildEntry, BuildContext, BuildOptions } from "./types.ts";
 
 import { fileURLToPath } from "node:url";
 import { isAbsolute, join, resolve } from "node:path";
@@ -14,6 +14,7 @@ import { fmtPath } from "./utils.ts";
 export async function build(
   _cwd: string | URL,
   _entries: BuildEntry[],
+  _opts: BuildOptions,
 ): Promise<void> {
   const start = Date.now();
 
@@ -52,7 +53,7 @@ export async function build(
 
   for (const entry of entries) {
     await (entry.type === "bundle"
-      ? rolldownBuild(ctx, entry)
+      ? rolldownBuild(ctx, entry, _opts)
       : transformDir(ctx, entry));
   }
 
