@@ -4,27 +4,27 @@
 
 Powered by [**oxc**](https://oxc.rs/), [**rolldown**](https://rolldown.rs/) and [**rolldown-plugin-dts**](https://github.com/sxzz/rolldown-plugin-dts).
 
-The **obuild** project aims to be the next-generation successor to current [unbuild](https://github.com/unjs/unbuild).
+The **obuild** project aims to be the next-generation successor to the current [unbuild](https://github.com/unjs/unbuild).
 
 - 🌱 Fresh rewrite with cleanups and removal of legacy features.
 - 🚀 Uses [**oxc**](https://oxc.rs/) and [**rolldown**](https://rolldown.rs/) instead of rollup and mkdist.
 - 👌 Strict ESM-compliant imports with explicit extensions.
-- 🔒 Types are build with isolated declaration constraints.
+- 🔒 Types are built with isolated declaration constraints.
 - 🪦 No support for CommonJS output.
 
-Some differences are not easy to adopt. Developing as a standalone project allows faster progress and dogfooding in real projects.
+Some differences are not easy to adopt. Developing as a standalone project allows for faster progress and dogfooding in real projects.
 
 ## Usage
 
 ```sh
 # bundle
-npx obuild ./src.index.ts
+npx obuild ./src/index.ts
 
 # transform
 npx obuild ./src/runtime/:./dist/runtime
 ```
 
-You can use `--dir` to set working directory.
+You can use `--dir` to set the working directory.
 
 > [!NOTE]
 > Auto inference similar to unbuild coming soon ([#4](https://github.com/unjs/obuild/issues/4)).
