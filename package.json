@@ -7,7 +7,7 @@
   "sideEffects": false,
   "type": "module",
   "exports": {
-    ".": "./dist/index.mjs"
+    "./config": "./dist/config.mjs"
   },
   "types": "./dist/index.d.mts",
   "bin": "./dist/cli.mjs",
@@ -15,7 +15,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "pnpm obuild ./src/index.ts ./src/cli.ts && chmod +x ./dist/cli.mjs",
+    "build": "pnpm obuild && chmod +x ./dist/cli.mjs",
     "obuild": "pnpm node-ts src/cli.ts",
     "lint": "eslint . && prettier -c src test",
     "lint:fix": "automd && eslint . --fix && prettier -w src test",
