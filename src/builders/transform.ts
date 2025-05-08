@@ -62,7 +62,7 @@ export async function transformDir(
   await Promise.all(promises);
 
   consola.log(
-    `Transformed ${promises.length} files from \`${fmtPath(entry.outDir!)}\` to \`${fmtPath(entry.outDir!)}\` in ${Date.now() - start}ms`,
+    `Transformed ${promises.length} files from \`${fmtPath(entry.input!)}\` to \`${fmtPath(entry.outDir!)}\` in ${Date.now() - start}ms`,
   );
 }
 
