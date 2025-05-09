@@ -23,7 +23,7 @@ export async function rolldownBuild(
   const rolldownConfig: InputOptions = {
     cwd: ctx.pkgDir,
     input: input,
-    plugins: [dts({ isolatedDeclarations: true })],
+    plugins: [dts({ isolatedDeclarations: entry.declaration })],
     external: [
       ...builtinModules,
       ...builtinModules.map((m) => `node:${m}`),
@@ -42,6 +42,7 @@ export async function rolldownBuild(
     dir: entry.outDir,
     entryFileNames: "[name].mjs",
     chunkFileNames: "[name].mjs",
+    minify: entry.minify,
   });
 
   await res.close();
