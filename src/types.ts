@@ -19,17 +19,17 @@ export type BundleEntry = {
    * Defaults to `dist/` if not provided.
    */
   outDir?: string;
-  
+
   /**
    * Minify the output via oxc-minify.
-   * 
+   *
    * Defaults `false` if not provided.
    */
   minify?: boolean;
 
   /**
    * Generate and bundle dts files via rolldown-plugin-dts.
-   * 
+   *
    * Defaults `false` if not provided or `isolatedDeclarations` in `compilerOptions` is set to `false`.
    */
   declaration?: boolean;
