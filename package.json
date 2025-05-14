@@ -35,7 +35,8 @@
     "oxc-parser": "^0.69.0",
     "oxc-transform": "^0.69.0",
     "rolldown": "npm:rolldown@1.0.0-beta.8-commit.d95f99e",
-    "rolldown-plugin-dts": "^0.12.1"
+    "rolldown-plugin-dts": "^0.12.1",
+    "tinyglobby": "^0.2.13"
   },
   "devDependencies": {
     "@types/node": "^22.15.17",
