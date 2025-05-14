@@ -1,5 +1,13 @@
-import type { InputOptions, OutputOptions, RolldownBuild } from "rolldown";
+import type {
+  InputOptions,
+  MinifyOptions,
+  OutputOptions,
+  RolldownBuild,
+} from "rolldown";
+
 import type { IsolatedDeclarationsOptions } from "oxc-transform";
+
+import type { MinifyOptions as OXCMinifyOptions } from "oxc-minify";
 
 export interface BuildContext {
   pkgDir: string;
@@ -22,11 +30,11 @@ export type BundleEntry = {
   outDir?: string;
 
   /**
-   * Minify the output via oxc-minify.
+   * Minify the output using rolldown.
    *
-   * Defaults `false` if not provided.
+   * Defaults to `false` if not provided.
    */
-  minify?: boolean;
+  minify?: boolean | "dce-only" | MinifyOptions;
 
   /**
    * Generate and bundle dts files via rolldown-plugin-dts.
@@ -50,6 +58,13 @@ export type TransformEntry = {
    * Defaults to `dist/` if not provided.
    */
   outDir?: string;
+
+  /**
+   * Minify the output using oxc-minify.
+   *
+   * Defaults to `false` if not provided.
+   */
+  minify?: boolean | OXCMinifyOptions;
 
   /**
    * Generate and bundle dts files via rolldown-plugin-dts.

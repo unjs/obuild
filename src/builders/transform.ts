@@ -1,5 +1,6 @@
 import type { BuildContext, TransformEntry } from "../types.ts";
 import type { IsolatedDeclarationsOptions } from "oxc-transform";
+import type { MinifyOptions } from "oxc-minify";
 
 import { pathToFileURL } from "node:url";
 import { dirname, extname, join, relative } from "node:path";
@@ -11,6 +12,7 @@ import oxcTransform from "oxc-transform";
 import oxcParser from "oxc-parser";
 import { fmtPath } from "../utils.ts";
 import { glob } from "tinyglobby";
+import { minify } from "oxc-minify";
 
 /**
  * Transform all .ts modules in a directory using oxc-transform.
@@ -34,6 +36,7 @@ export async function transformDir(
               const transformed = await transformModule(
                 entryPath,
                 entry.declaration,
+                entry.minify,
               );
               const entryDistPath = join(
                 entry.outDir!,
@@ -77,6 +80,7 @@ export async function transformDir(
 async function transformModule(
   entryPath: string,
   declaration: undefined | boolean | IsolatedDeclarationsOptions,
+  minifyOpts: undefined | boolean | MinifyOptions,
 ) {
   let sourceText = await readFile(entryPath, "utf8");
 
@@ -171,6 +175,16 @@ async function transformModule(
         cause: transformErrors,
       },
     );
+  }
+
+  if (minifyOpts) {
+    const res = minify(
+      entryPath,
+      transformed.code,
+      minifyOpts === true ? undefined : minifyOpts,
+    );
+    transformed.code = res.code;
+    transformed.map = res.map;
   }
 
   return transformed;
