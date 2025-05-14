@@ -1,4 +1,5 @@
 import type { BuildContext, TransformEntry } from "../types.ts";
+import type { IsolatedDeclarationsOptions } from "oxc-transform";
 
 import { pathToFileURL } from "node:url";
 import { dirname, extname, join, relative } from "node:path";
@@ -31,7 +32,7 @@ export async function transformDir(
         switch (ext) {
           case ".ts": {
             {
-              const transformed = await transformModule(entryPath);
+              const transformed = await transformModule(entryPath, entry.declaration!);
               const entryDistPath = join(
                 entry.outDir!,
                 entryName.replace(/\.ts$/, ".mjs"),
@@ -69,7 +70,7 @@ export async function transformDir(
 /**
  * Transform a .ts module using oxc-transform.
  */
-async function transformModule(entryPath: string) {
+async function transformModule(entryPath: string, declaration: IsolatedDeclarationsOptions) {
   let sourceText = await readFile(entryPath, "utf8");
 
   const sourceOptions = {
@@ -135,7 +136,7 @@ async function transformModule(entryPath: string) {
   const transformed = oxcTransform.transform(entryPath, sourceText, {
     ...sourceOptions,
     cwd: dirname(entryPath),
-    typescript: { declaration: { stripInternal: true } },
+    typescript: { declaration },
   });
 
   const transformErrors = transformed.errors.filter(

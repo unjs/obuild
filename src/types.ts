@@ -1,4 +1,5 @@
 import type { InputOptions } from "rolldown";
+import type { IsolatedDeclarationsOptions } from "oxc-transform";
 
 export interface BuildContext {
   pkgDir: string;
@@ -49,6 +50,8 @@ export type TransformEntry = {
    * Defaults to `dist/` if not provided.
    */
   outDir?: string;
+
+  declaration?: IsolatedDeclarationsOptions;
 };
 
 export type BuildEntry = BundleEntry | TransformEntry;
