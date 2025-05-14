@@ -32,6 +32,9 @@ importers:
       rolldown-plugin-dts:
         specifier: ^0.12.1
         version: 0.12.1(rolldown@1.0.0-beta.8-commit.d95f99e)(typescript@5.8.3)
+      tinyglobby:
+        specifier: ^0.2.13
+        version: 0.2.13
     devDependencies:
       '@types/node':
         specifier: ^22.15.17

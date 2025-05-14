@@ -9,6 +9,7 @@ import MagicString from "magic-string";
 import oxcTransform from "oxc-transform";
 import oxcParser from "oxc-parser";
 import { fmtPath } from "../utils.ts";
+import { glob } from "tinyglobby";
 
 /**
  * Transform all .ts modules in a directory using oxc-transform.
@@ -21,9 +22,7 @@ export async function transformDir(
 
   const promises: Promise<void>[] = [];
 
-  const { glob } = await import("node:fs/promises");
-
-  for await (const entryName of glob("**/*.*", { cwd: entry.input })) {
+  for await (const entryName of await glob("**/*.*", { cwd: entry.input })) {
     promises.push(
       (async () => {
         const entryPath = join(entry.input, entryName);
