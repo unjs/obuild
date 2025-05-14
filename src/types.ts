@@ -31,9 +31,9 @@ export type BundleEntry = {
   /**
    * Generate and bundle dts files via rolldown-plugin-dts.
    *
-   * Defaults `false` if not provided or `isolatedDeclarations` in `compilerOptions` is set to `false`.
+   * Set to `false` to disable.
    */
-  declaration?: boolean;
+  declaration?: boolean | IsolatedDeclarationsOptions;
 };
 
 export type TransformEntry = {
@@ -51,7 +51,12 @@ export type TransformEntry = {
    */
   outDir?: string;
 
-  declaration?: IsolatedDeclarationsOptions;
+  /**
+   * Generate and bundle dts files via rolldown-plugin-dts.
+   *
+   * Set to `false` to disable.
+   */
+  declaration?: boolean | IsolatedDeclarationsOptions;
 };
 
 export type BuildEntry = BundleEntry | TransformEntry;

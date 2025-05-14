@@ -33,7 +33,7 @@ export async function transformDir(
             {
               const transformed = await transformModule(
                 entryPath,
-                entry.declaration!,
+                entry.declaration,
               );
               const entryDistPath = join(
                 entry.outDir!,
@@ -41,11 +41,13 @@ export async function transformDir(
               );
               await mkdir(dirname(entryDistPath), { recursive: true });
               await writeFile(entryDistPath, transformed.code, "utf8");
-              await writeFile(
-                entryDistPath.replace(/\.mjs$/, ".d.mts"),
-                transformed.declaration!,
-                "utf8",
-              );
+              if (transformed.declaration) {
+                await writeFile(
+                  entryDistPath.replace(/\.mjs$/, ".d.mts"),
+                  transformed.declaration,
+                  "utf8",
+                );
+              }
             }
             break;
           }
@@ -74,7 +76,7 @@ export async function transformDir(
  */
 async function transformModule(
   entryPath: string,
-  declaration: IsolatedDeclarationsOptions,
+  declaration: undefined | boolean | IsolatedDeclarationsOptions,
 ) {
   let sourceText = await readFile(entryPath, "utf8");
 
@@ -141,7 +143,15 @@ async function transformModule(
   const transformed = oxcTransform.transform(entryPath, sourceText, {
     ...sourceOptions,
     cwd: dirname(entryPath),
-    typescript: { declaration },
+    typescript: {
+      declaration:
+        declaration === false
+          ? undefined
+          : {
+              stripInternal: true,
+              ...(declaration as IsolatedDeclarationsOptions),
+            },
+    },
   });
 
   const transformErrors = transformed.errors.filter(

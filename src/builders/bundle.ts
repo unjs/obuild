@@ -5,6 +5,7 @@ import { dts } from "rolldown-plugin-dts";
 import { fmtPath } from "../utils.ts";
 import { resolveModulePath } from "exsolve";
 
+import type { Plugin } from "rolldown";
 import type { BuildContext, BuildHooks, BundleEntry } from "../types.ts";
 import type { InputOptions, OutputOptions } from "rolldown";
 
@@ -21,10 +22,10 @@ export async function rolldownBuild(
       i,
   );
 
-  const rolldownConfig: InputOptions = {
+  const rolldownConfig = {
     cwd: ctx.pkgDir,
     input: input,
-    plugins: [dts({ isolatedDeclarations: entry.declaration })],
+    plugins: [] as Plugin[],
     external: [
       ...builtinModules,
       ...builtinModules.map((m) => `node:${m}`),
@@ -33,7 +34,13 @@ export async function rolldownBuild(
         ...Object.keys(ctx.pkg.peerDependencies || {}),
       ].flatMap((p) => [p, new RegExp(`^${p}/`)]),
     ],
-  };
+  } satisfies InputOptions;
+
+  if (entry.declaration !== false) {
+    rolldownConfig.plugins!.push(
+      ...dts({ isolatedDeclarations: entry.declaration }),
+    );
+  }
 
   await hooks.rolldownConfig?.(rolldownConfig, ctx);
 
