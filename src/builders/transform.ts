@@ -32,7 +32,10 @@ export async function transformDir(
         switch (ext) {
           case ".ts": {
             {
-              const transformed = await transformModule(entryPath, entry.declaration!);
+              const transformed = await transformModule(
+                entryPath,
+                entry.declaration!,
+              );
               const entryDistPath = join(
                 entry.outDir!,
                 entryName.replace(/\.ts$/, ".mjs"),
@@ -70,7 +73,10 @@ export async function transformDir(
 /**
  * Transform a .ts module using oxc-transform.
  */
-async function transformModule(entryPath: string, declaration: IsolatedDeclarationsOptions) {
+async function transformModule(
+  entryPath: string,
+  declaration: IsolatedDeclarationsOptions,
+) {
   let sourceText = await readFile(entryPath, "utf8");
 
   const sourceOptions = {
