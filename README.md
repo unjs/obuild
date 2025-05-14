@@ -41,10 +41,12 @@ await build(".", ["./src/index.ts"]);
 
 ## Currently used by
 
-- [📦 obuild](https://github.com/unjs/obuild/) itself
+- [📦 obuild](https://github.com/unjs/obuild/)
 - [🌳 rou3](https://github.com/h3js/rou3/)
+- [💥 srvx](https://github.com/h3js/srvx)
+- [🕊️ unenv](https://github.com/unjs/unenv)
 - [🕰️ omnichron](https://github.com/oritwoen/omnichron)
-- [add yours]
+- [...add yours...]
 
 ## Proof of concept
 

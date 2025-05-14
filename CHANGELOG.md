@@ -1,6 +1,33 @@
 # Changelog
 
 
+## v0.0.7
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.0.6...v0.0.7)
+
+### 🚀 Enhancements
+
+- `rolldownOutput` hook ([473da81](https://github.com/unjs/obuild/commit/473da81))
+
+### 🩹 Fixes
+
+- Safe hash for rolldown chunks ([7c8dacc](https://github.com/unjs/obuild/commit/7c8dacc))
+
+### 📦 Build
+
+- Update dependencies ([21f6e1b](https://github.com/unjs/obuild/commit/21f6e1b))
+
+### 🏡 Chore
+
+- Use `.nvmrc` ([#19](https://github.com/unjs/obuild/pull/19))
+- Update used by ([643ad16](https://github.com/unjs/obuild/commit/643ad16))
+- Update type imports ([0344c18](https://github.com/unjs/obuild/commit/0344c18))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Bushuai <bushuai@yahoo.com>
+
 ## v0.0.6
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.0.5...v0.0.6)
