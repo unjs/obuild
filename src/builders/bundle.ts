@@ -54,7 +54,9 @@ export async function rolldownBuild(
   };
 
   await hooks.rolldownOutput?.(outConfig, res, ctx);
+
   await res.write(outConfig);
+
   await res.close();
 
   consola.log(
