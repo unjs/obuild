@@ -24,7 +24,7 @@
     "prepack": "pnpm build",
     "release": "pnpm test && changelogen --release && npm publish && git push --follow-tags",
     "test": "pnpm lint && pnpm test:types && pnpm test:fixture",
-    "test:fixture": "pnpm obuild --dir test/fixture src/index src/runtime/:dist/runtime",
+    "test:fixture": "pnpm obuild --dir test/fixture src/index src/cli src/runtime/:dist/runtime",
     "test:types": "tsc --noEmit --skipLibCheck"
   },
   "dependencies": {

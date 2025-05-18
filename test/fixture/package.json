@@ -2,6 +2,7 @@
   "name": "test-fixture",
   "exports": {
     ".": "./dist/index.mjs",
+    "./cli": "./dist/cli.mjs",
     "./runtime/**": "./dist/runtime/**.mjs"
   },
   "scripts": {
