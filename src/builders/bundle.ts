@@ -11,6 +11,7 @@ import prettyBytes from "pretty-bytes";
 import type { OutputChunk, Plugin } from "rolldown";
 import type { BuildContext, BuildHooks, BundleEntry } from "../types.ts";
 import type { InputOptions, OutputOptions } from "rolldown";
+import { shebangPlugin } from "./plugins/shebang.ts";
 
 export async function rolldownBuild(
   ctx: BuildContext,
@@ -49,7 +50,7 @@ export async function rolldownBuild(
   const rolldownConfig = {
     cwd: ctx.pkgDir,
     input: inputs,
-    plugins: [] as Plugin[],
+    plugins: [shebangPlugin()] as Plugin[],
     platform: "neutral",
     external: [
       ...builtinModules,

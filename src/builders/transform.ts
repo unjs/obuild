@@ -14,6 +14,7 @@ import oxcParser from "oxc-parser";
 import { fmtPath } from "../utils.ts";
 import { glob } from "tinyglobby";
 import { minify } from "oxc-minify";
+import { makeExecutable, SHEBANG_RE } from "./plugins/shebang.ts";
 
 /**
  * Transform all .ts modules in a directory using oxc-transform.
@@ -43,6 +44,11 @@ export async function transformDir(
               );
               await mkdir(dirname(entryDistPath), { recursive: true });
               await writeFile(entryDistPath, transformed.code, "utf8");
+
+              if (SHEBANG_RE.test(transformed.code)) {
+                await makeExecutable(entryDistPath);
+              }
+
               if (transformed.declaration) {
                 await writeFile(
                   entryDistPath.replace(/\.mjs$/, ".d.mts"),
@@ -57,7 +63,13 @@ export async function transformDir(
             {
               const entryDistPath = join(entry.outDir!, entryName);
               await mkdir(dirname(entryDistPath), { recursive: true });
-              await writeFile(entryDistPath, await readFile(entryPath), "utf8");
+              const code = await readFile(entryPath, "utf8");
+              await writeFile(entryDistPath, code, "utf8");
+
+              if (SHEBANG_RE.test(code)) {
+                await makeExecutable(entryDistPath);
+              }
+
               return entryDistPath;
             }
           }
