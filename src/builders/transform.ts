@@ -4,7 +4,7 @@ import type { MinifyOptions } from "oxc-minify";
 
 import { pathToFileURL } from "node:url";
 import { dirname, extname, join, relative } from "node:path";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, symlink, writeFile } from "node:fs/promises";
 import { consola } from "consola";
 import { colors as c } from "consola/utils";
 import { resolveModulePath } from "exsolve";
@@ -22,6 +22,14 @@ export async function transformDir(
   ctx: BuildContext,
   entry: TransformEntry,
 ): Promise<void> {
+  if (entry.stub) {
+    consola.log(
+      `${c.magenta("[transform] [stub]   ")} ${c.underline(fmtPath(entry.outDir!) + "/")}`,
+    );
+    await symlink(entry.input, entry.outDir!, "junction");
+    return;
+  }
+
   const promises: Promise<string>[] = [];
 
   for await (const entryName of await glob("**/*.*", { cwd: entry.input })) {

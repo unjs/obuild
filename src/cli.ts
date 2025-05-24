@@ -16,6 +16,10 @@ const args = parseArgs({
       type: "string",
       default: ".",
     },
+    stub: {
+      type: "boolean",
+      default: false,
+    },
   },
 });
 
@@ -41,6 +45,12 @@ const entries: BuildEntry[] = rawEntries.map((entry) => {
   }
   return entry;
 });
+
+if (args.values.stub) {
+  for (const entry of entries) {
+    entry.stub = true;
+  }
+}
 
 if (rawEntries.length === 0) {
   consola.error("No build entries specified.");

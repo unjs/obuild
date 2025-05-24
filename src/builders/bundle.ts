@@ -1,12 +1,14 @@
 import { builtinModules } from "node:module";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, relative, join, basename, extname, resolve } from "node:path";
 import { consola } from "consola";
 import { colors as c } from "consola/utils";
 import { rolldown } from "rolldown";
 import { dts } from "rolldown-plugin-dts";
-import { distSize, fmtPath, sideEffectSize } from "../utils.ts";
+import oxcParser from "oxc-parser";
 import { resolveModulePath } from "exsolve";
 import prettyBytes from "pretty-bytes";
+import { distSize, fmtPath, sideEffectSize } from "../utils.ts";
 
 import type { OutputChunk, Plugin } from "rolldown";
 import type { BuildContext, BuildHooks, BundleEntry } from "../types.ts";
@@ -17,33 +19,38 @@ export async function rolldownBuild(
   entry: BundleEntry,
   hooks: BuildHooks,
 ): Promise<void> {
-  const inputs: Record<string, string> = {};
+  const inputs: Record<string, string> = normalizeBundleInputs(
+    entry.input,
+    ctx,
+  );
 
-  for (let src of Array.isArray(entry.input) ? entry.input : [entry.input]) {
-    src = resolveModulePath(src, {
-      from: ctx.pkgDir,
-      extensions: [".ts", ".mjs", ".js"],
-    });
-    let relativeSrc = relative(join(ctx.pkgDir, "src"), src);
-    if (relativeSrc.startsWith("..")) {
-      relativeSrc = relative(join(ctx.pkgDir), src);
-    }
-    if (relativeSrc.startsWith("..")) {
-      throw new Error(
-        `Source should be within the package directory (${ctx.pkgDir}): ${src}`,
+  if (entry.stub) {
+    for (const [distName, srcPath] of Object.entries(inputs)) {
+      const distPath = join(ctx.pkgDir, "dist", `${distName}.mjs`);
+      await mkdir(dirname(distPath), { recursive: true });
+      consola.log(
+        `${c.magenta("[transform] [bundle] ")} ${c.underline(fmtPath(distPath))}`,
+      );
+      const srcContents = await readFile(srcPath, "utf8");
+      const parsed = await oxcParser.parseSync(srcPath, srcContents);
+      const exportNames = parsed.module.staticExports.flatMap((e) =>
+        e.entries.map((e) =>
+          e.exportName.kind === "Default" ? "default" : e.exportName.name,
+        ),
+      );
+      const hasDefaultExport = exportNames.includes("default");
+      await writeFile(
+        distPath,
+        `export * from "${srcPath}";\n${hasDefaultExport ? `export { default } from "${srcPath}";\n` : ""}`,
+        "utf8",
+      );
+      await writeFile(
+        distPath.replace(/\.mjs$/, ".d.mts"),
+        `export * from "${srcPath}";\n${hasDefaultExport ? `export { default } from "${srcPath}";\n` : ""}`,
+        "utf8",
       );
     }
-
-    const distName = join(
-      dirname(relativeSrc),
-      basename(relativeSrc, extname(relativeSrc)),
-    );
-    if (inputs[distName]) {
-      throw new Error(
-        `Rename one of the entries to avoid a conflict in the dist name "${distName}":\n - ${src}\n - ${inputs[distName]}`,
-      );
-    }
-    inputs[distName] = src;
+    return;
   }
 
   const rolldownConfig = {
@@ -157,4 +164,40 @@ export async function rolldownBuild(
       )
       .join("\n\n")}`,
   );
+}
+
+export function normalizeBundleInputs(
+  input: string | string[],
+  ctx: BuildContext,
+): Record<string, string> {
+  const inputs: Record<string, string> = {};
+
+  for (let src of Array.isArray(input) ? input : [input]) {
+    src = resolveModulePath(src, {
+      from: ctx.pkgDir,
+      extensions: [".ts", ".mjs", ".js"],
+    });
+    let relativeSrc = relative(join(ctx.pkgDir, "src"), src);
+    if (relativeSrc.startsWith("..")) {
+      relativeSrc = relative(join(ctx.pkgDir), src);
+    }
+    if (relativeSrc.startsWith("..")) {
+      throw new Error(
+        `Source should be within the package directory (${ctx.pkgDir}): ${src}`,
+      );
+    }
+
+    const distName = join(
+      dirname(relativeSrc),
+      basename(relativeSrc, extname(relativeSrc)),
+    );
+    if (inputs[distName]) {
+      throw new Error(
+        `Rename one of the entries to avoid a conflict in the dist name "${distName}":\n - ${src}\n - ${inputs[distName]}`,
+      );
+    }
+    inputs[distName] = src;
+  }
+
+  return inputs;
 }

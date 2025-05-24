@@ -14,20 +14,27 @@ export interface BuildContext {
   pkg: { name: string } & Record<string, unknown>;
 }
 
-export type BundleEntry = {
-  type: "bundle";
-
-  /**
-   * Entry point(s) to bundle relative to the project root.
-   * */
-  input: string | string[];
-
+export type _BuildEntry = {
   /**
    * Output directory relative to project root.
    *
    * Defaults to `dist/` if not provided.
    */
   outDir?: string;
+
+  /**
+   * Avoid actual build but instead link to the source files.
+   */
+  stub?: boolean;
+};
+
+export type BundleEntry = _BuildEntry & {
+  type: "bundle";
+
+  /**
+   * Entry point(s) to bundle relative to the project root.
+   * */
+  input: string | string[];
 
   /**
    * Minify the output using rolldown.
@@ -44,20 +51,13 @@ export type BundleEntry = {
   declaration?: boolean | IsolatedDeclarationsOptions;
 };
 
-export type TransformEntry = {
+export type TransformEntry = _BuildEntry & {
   type: "transform";
 
   /**
    * Directory to transform relative to the project root.
    */
   input: string;
-
-  /**
-   * Output directory relative to project root.
-   *
-   * Defaults to `dist/` if not provided.
-   */
-  outDir?: string;
 
   /**
    * Minify the output using oxc-minify.
