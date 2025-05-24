@@ -14,13 +14,17 @@ export function shebangPlugin(): Plugin {
         if (output.type !== "chunk") {
           continue;
         }
-        if (SHEBANG_RE.test(output.code)) {
+        if (hasShebang(output.code)) {
           const outFile = resolve(options.dir!, fileName);
           await makeExecutable(outFile);
         }
       }
     },
   };
+}
+
+export function hasShebang(code: string): boolean {
+  return SHEBANG_RE.test(code);
 }
 
 export async function makeExecutable(filePath: string): Promise<void> {

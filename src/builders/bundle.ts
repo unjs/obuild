@@ -13,7 +13,11 @@ import { distSize, fmtPath, sideEffectSize } from "../utils.ts";
 import type { OutputChunk, Plugin } from "rolldown";
 import type { BuildContext, BuildHooks, BundleEntry } from "../types.ts";
 import type { InputOptions, OutputOptions } from "rolldown";
-import { shebangPlugin } from "./plugins/shebang.ts";
+import {
+  hasShebang,
+  makeExecutable,
+  shebangPlugin,
+} from "./plugins/shebang.ts";
 
 export async function rolldownBuild(
   ctx: BuildContext,
@@ -40,11 +44,16 @@ export async function rolldownBuild(
         ),
       );
       const hasDefaultExport = exportNames.includes("default");
+      const firstLine = srcContents.split("\n")[0];
+      const hasShebangLine = firstLine.startsWith("#!");
       await writeFile(
         distPath,
-        `export * from "${srcPath}";\n${hasDefaultExport ? `export { default } from "${srcPath}";\n` : ""}`,
+        `${hasShebangLine ? firstLine + "\n" : ""}export * from "${srcPath}";\n${hasDefaultExport ? `export { default } from "${srcPath}";\n` : ""}`,
         "utf8",
       );
+      if (hasShebangLine) {
+        await makeExecutable(distPath);
+      }
       await writeFile(
         distPath.replace(/\.mjs$/, ".d.mts"),
         `export * from "${srcPath}";\n${hasDefaultExport ? `export { default } from "${srcPath}";\n` : ""}`,
