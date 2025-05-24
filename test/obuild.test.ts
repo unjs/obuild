@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeAll } from "vitest";
 
 import { build } from "../src/build.ts";
-import { readdir, readFile, rm } from "node:fs/promises";
+import { readdir, readFile, rm, stat } from "node:fs/promises";
 
 const fixtureDir = new URL("fixture/", import.meta.url);
 const distDir = new URL("dist/", fixtureDir);
@@ -51,5 +51,11 @@ describe("obuild", () => {
       "utf8",
     );
     expect(runtimeIndexMts).contain("./test.mjs");
+  });
+
+  test("cli shebang is executable", async () => {
+    const cliPath = new URL("cli.mjs", distDir);
+    const stats = await stat(cliPath);
+    expect(stats.mode & 0o111).toBe(0o111); // Check if executable
   });
 });
