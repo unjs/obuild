@@ -67,7 +67,7 @@ You can use `stub: true` (per entry config) or the `--stub` CLI flag. In this mo
 
 (1) For Node.js, you have several options:
 
-- Using `--experimental-strip-types` or `NODE_OPTIONS="--experimental-strip-types"`
+- Using `node --experimental-strip-types` (Available in [22.6](https://nodejs.org/en/blog/release/v22.6.0))
 - Using [jiti](https://github.com/unjs/jiti) (`node --import jiti/register`)
 - Using [oxc-node](https://github.com/oxc-project/oxc-node) (`node --import @oxc-node/core/register`)
 - Using [unloader](https://github.com/sxzz/unloader) (`node --import unloader/register`)
