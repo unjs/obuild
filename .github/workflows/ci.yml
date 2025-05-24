@@ -21,9 +21,8 @@ jobs:
       - run: pnpm install
       - run: pnpm lint
       - run: pnpm test:types
-      - run: pnpm test:fixture
       - run: pnpm build
-      # - run: pnpm vitest --coverage
-      # - uses: codecov/codecov-action@v4
-      #   with:
-      #     token: ${{ secrets.CODECOV_TOKEN }}
+      - run: pnpm vitest --coverage
+      - uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
