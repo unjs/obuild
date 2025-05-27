@@ -49,7 +49,7 @@ describe("obuild", () => {
 
     const distRuntimeIndex = await import(new URL("index.mjs", distDir).href);
     expect(distRuntimeIndex.test).instanceOf(Function);
-    
+
     const distUtils = await import(new URL("utils.mjs", distDir).href);
     expect(distUtils.test).instanceOf(Function);
   });
