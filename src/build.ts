@@ -33,12 +33,19 @@ export async function build(config: BuildConfig): Promise<void> {
 
   await hooks.start?.(ctx);
 
-  const entries = (config.entries || []).map((entry) => {
-    if (typeof entry === "string") {
-      const [input, outDir] = entry.split(":") as [string, string | undefined];
-      return input.endsWith("/")
+  const entries = (config.entries || []).map((rawEntry) => {
+    let entry: TransformEntry | BundleEntry;
+
+    if (typeof rawEntry === "string") {
+      const [input, outDir] = rawEntry.split(":") as [
+        string,
+        string | undefined,
+      ];
+      entry = input.endsWith("/")
         ? ({ type: "transform", input, outDir } as TransformEntry)
         : ({ type: "bundle", input: input.split(","), outDir } as BundleEntry);
+    } else {
+      entry = rawEntry;
     }
 
     if (!entry.input) {
