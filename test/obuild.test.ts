@@ -17,6 +17,7 @@ describe("obuild", () => {
       entries: [
         { type: "bundle", input: ["src/index", "src/cli"] },
         { type: "transform", input: "src/runtime", outDir: "dist/runtime" },
+        "src/utils.ts",
       ],
     });
   });
@@ -36,6 +37,8 @@ describe("obuild", () => {
         "runtime/index.mjs",
         "runtime/test.d.mts",
         "runtime/test.mjs",
+        "utils.d.mts",
+        "utils.mjs",
       ]
     `);
   });
@@ -46,6 +49,9 @@ describe("obuild", () => {
 
     const distRuntimeIndex = await import(new URL("index.mjs", distDir).href);
     expect(distRuntimeIndex.test).instanceOf(Function);
+    
+    const distUtils = await import(new URL("utils.mjs", distDir).href);
+    expect(distUtils.test).instanceOf(Function);
   });
 
   test("runtime .dts files use .mjs extension", async () => {
