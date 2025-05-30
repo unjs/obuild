@@ -10,9 +10,6 @@ export default defineBuildConfig({
         "./src/config.ts",
         "./src/transformers/index.ts",
       ],
-      rolldown: {
-        external: ["vue-sfc-transformer/mkdist"],
-      },
     },
   ],
 });
