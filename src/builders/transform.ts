@@ -1,14 +1,23 @@
-import type { BuildContext, TransformEntry } from "../types.ts";
-
-import { consola } from "consola";
-import { colors as c } from "consola/utils";
 import { mkdir, readFile, symlink, writeFile } from "node:fs/promises";
 import { basename, dirname, extname, join } from "node:path";
+
+import { defu } from "defu";
+import { consola } from "consola";
 import { glob } from "tinyglobby";
-import { fmtPath } from "../utils.ts";
+import { colors as c } from "consola/utils";
+import type { TSConfig } from "pkg-types";
+
 import { makeExecutable, SHEBANG_RE } from "./plugins/shebang.ts";
 import { createTransformer } from "../transformers/index.ts";
+import { getVueDeclarations } from "./utils/vue-dts.ts";
+import { fmtPath } from "../utils.ts";
 import type { OutputFile } from "../transformers/types.ts";
+import type { BuildContext, TransformEntry } from "../types.ts";
+import {
+  getDeclarations,
+  normalizeCompilerOptions,
+  type DeclarationOutput,
+} from "./utils/dts.ts";
 
 /**
  * Transform all files in a directory using oxc-transform.
@@ -46,6 +55,67 @@ export async function transformDir(
     results.flat(),
   );
 
+  const dtsOutputFiles = outputFiles.filter(
+    (output) =>
+      output.srcPath !== undefined &&
+      !output.skip &&
+      output.declaration === "generate",
+  ) as Array<OutputFile & { srcPath: string }>;
+
+  if (dtsOutputFiles.length > 0) {
+    const tsConfig: TSConfig = {};
+
+    // Read and normalise TypeScript compiler options for emitting declarations
+    if (tsConfig.compilerOptions) {
+      tsConfig.compilerOptions = await normalizeCompilerOptions(
+        tsConfig.compilerOptions,
+      );
+    }
+    tsConfig.compilerOptions = defu(
+      { noEmit: false } satisfies TSConfig["compilerOptions"],
+      tsConfig.compilerOptions,
+      {
+        allowJs: true,
+        declaration: true,
+        skipLibCheck: true,
+        strictNullChecks: true,
+        emitDeclarationOnly: true,
+        allowImportingTsExtensions: true,
+        allowNonTsExtensions: true,
+      } satisfies TSConfig["compilerOptions"],
+    );
+
+    // @todo - Support generating declaration files
+    const vfs = new Map(
+      dtsOutputFiles.map((o) => [o.srcPath, o.contents || ""]),
+    );
+
+    const declarations: DeclarationOutput = Object.create(null);
+    for (const dtsGenerator of [getVueDeclarations, getDeclarations]) {
+      Object.assign(
+        declarations,
+        await dtsGenerator(vfs, {
+          rootDir: context.pkgDir,
+          typescript: tsConfig,
+        }),
+      );
+    }
+
+    for (const output of dtsOutputFiles) {
+      const result = declarations[output.srcPath];
+      output.contents = result?.contents || "";
+
+      if (result.errors) {
+        output.skip = true;
+
+        consola.warn(
+          `\n${c.yellow("[transform] ")}${c.dim(fmtPath(output.srcPath))}:\n` +
+            result.errors.map((e) => `  - ${e}`).join("\n"),
+        );
+      }
+    }
+  }
+
   // Rename output files to their new extensions
   for (const output of outputFiles.filter((output) => output.extension)) {
     const originalExtension = extname(output.path);
@@ -58,21 +128,6 @@ export async function transformDir(
       dirname(output.path),
       basename(output.path, originalExtension) + output.extension,
     );
-  }
-
-  const dtsOutputFiles = outputFiles.filter(
-    (output) => !output.skip && output.declaration === "generate",
-  );
-
-  if (dtsOutputFiles.length > 0) {
-    // @todo - Support generating declaration files
-    for (const dtsOutputFile of dtsOutputFiles) {
-      dtsOutputFile.skip = true;
-
-      consola.warn(
-        `Generating declaration file "${dtsOutputFile.path}" is currently not supported.`,
-      );
-    }
   }
 
   const outputPromises: Promise<string>[] = outputFiles

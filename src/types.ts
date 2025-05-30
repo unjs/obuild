@@ -6,13 +6,14 @@ import type {
   RolldownPluginOption,
 } from "rolldown";
 
+import type { PackageJson } from "pkg-types";
 import type { Options as DtsOptions } from "rolldown-plugin-dts";
 import type { Transformer, TransformerName } from "./transformers/types.ts";
 import type { OxcTransformerOptions } from "./transformers/oxc.ts";
 
 export interface BuildContext {
   pkgDir: string;
-  pkg: { name: string } & Record<string, unknown>;
+  pkg: PackageJson;
 }
 
 export type _BuildEntry = {
