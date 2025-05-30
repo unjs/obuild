@@ -186,7 +186,7 @@ export function normalizeBundleInputs(
   for (let src of Array.isArray(input) ? input : [input]) {
     src = resolveModulePath(src, {
       from: ctx.pkgDir,
-      extensions: [".ts", ".js", ".mjs", ".cjs", ".json"],
+      extensions: [".tsx", ".ts", ".js", ".jsx", ".mjs", ".cjs", ".json"],
     });
     let relativeSrc = relative(join(ctx.pkgDir, "src"), src);
     if (relativeSrc.startsWith("..")) {

@@ -7,9 +7,8 @@ import type {
 } from "rolldown";
 
 import type { Options as DtsOptions } from "rolldown-plugin-dts";
-import type { TransformOptions } from "oxc-transform";
-import type { MinifyOptions as OXCMinifyOptions } from "oxc-minify";
-import type { ResolveOptions } from "exsolve";
+import type { Transformer, TransformerName } from "./transformers/types.ts";
+import type { OxcTransformerOptions } from "./transformers/oxc.ts";
 
 export interface BuildContext {
   pkgDir: string;
@@ -73,25 +72,14 @@ export type TransformEntry = _BuildEntry & {
   input: string;
 
   /**
-   * Minify the output using oxc-minify.
-   *
-   * Defaults to `false` if not provided.
+   * List of transformers to invoke.
    */
-  minify?: boolean | OXCMinifyOptions;
+  transformers?: Array<TransformerName | Transformer>;
 
   /**
-   * Options passed to oxc-transform.
-   *
-   * See [oxc-transform](https://www.npmjs.com/package/oxc-transform) for more details.
+   * Options for the `oxc` transformer.
    */
-  oxc?: TransformOptions;
-
-  /**
-   * Options passed to exsolve for module resolution.
-   *
-   * See [exsolve](https://github.com/unjs/exsolve) for more details.
-   */
-  resolve?: Omit<ResolveOptions, "from">;
+  oxc?: OxcTransformerOptions["oxc"];
 };
 
 export type BuildEntry = BundleEntry | TransformEntry;
