@@ -204,6 +204,16 @@ const msg = ref(1);
 ",
   ],
   [
+    "runtime/components/vue.vue.d.ts",
+    "declare const _default: import("vue").DefineComponent<{
+    msg: string;
+}, {}, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {}, string, import("vue").PublicProps, Readonly<{
+    msg: string;
+}> & Readonly<{}>, {}, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;
+export default _default;
+",
+  ],
+  [
     "runtime/index.d.mts",
     "export { test } from "./test.mjs";
 // Module resolution test imports, using no extensions
