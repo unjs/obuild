@@ -24,11 +24,12 @@ Some differences are not easy to adopt. Developing as a standalone project allow
 
 ## Currently used by
 
-- [📦 obuild](https://github.com/unjs/obuild/)
-- [🌳 rou3](https://github.com/h3js/rou3/)
+- [📦 obuild](https://github.com/unjs/obuild)
+- [🌳 rou3](https://github.com/h3js/rou3)
 - [💥 srvx](https://github.com/h3js/srvx)
 - [🕊️ unenv](https://github.com/unjs/unenv)
 - [🕰️ omnichron](https://github.com/oritwoen/omnichron)
+- [✅ UnOJ](https://github.com/un-oj/core)
 - [...add yours...]
 
 ## Usage
