@@ -80,6 +80,7 @@ describe("obuild", () => {
         "runtime/components/tsx.d.mts",
         "runtime/components/tsx.mjs",
         "runtime/components/vue.vue",
+        "runtime/components/vue.vue.d.ts",
         "runtime/index.d.mts",
         "runtime/index.mjs",
         "runtime/modules/js-module.js",
