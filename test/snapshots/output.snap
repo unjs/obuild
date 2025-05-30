@@ -143,9 +143,6 @@ export const TsxComponent = () => {
   ],
   [
     "runtime/components/jsx.mjs",
-=======
-    "runtime/components/jsx.jsx",
->>>>>>> a04bb38 (test: update snapshots)
     "import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 export const JsxComponent = () => {
 	return /* @__PURE__ */ _jsxs("div", {
