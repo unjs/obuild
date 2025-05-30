@@ -32,9 +32,6 @@ The `vue` transformer processes Vue Single File Components (SFCs) using the [vue
 
 You can configure the `vue` transformer with the `vue` option in your build config.
 
-> [!NOTE]
-> TypeScript declaration (`.d.ts`) generation for Vue SFCs is not available in the current version of obuild. This feature will be added in a future release.
-
 ```ts
 import { defineBuildConfig } from "obuild";
 export default defineBuildConfig({
