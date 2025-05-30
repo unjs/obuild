@@ -63,7 +63,7 @@ await build({
 You can use `build.config.mjs` (or `.ts`) or pass config to `build()` function.
 
 ```js
-import { defineBuildConfig } from "obuild";
+import { defineBuildConfig } from "obuild/config";
 
 export default defineBuildConfig({
   entries: [
