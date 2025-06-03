@@ -3,6 +3,7 @@ import type {
   BuildConfig,
   TransformEntry,
   BundleEntry,
+  BuildEntry,
 } from "./types.ts";
 
 import { join } from "pathe";
@@ -16,22 +17,74 @@ import prettyBytes from "pretty-bytes";
  * Build dist/ from src/
  */
 export async function build(config: BuildConfig): Promise<void> {
+  const ctx: BuildContext = await resolveContext(config);
   const start = Date.now();
-
-  const pkgDir = normalizePath(config.cwd);
-  const pkg = await readJSON(join(pkgDir, "package.json")).catch(() => ({}));
-  const ctx: BuildContext = { pkg, pkgDir };
 
   consola.log(
     `📦 Building \`${ctx.pkg.name || "<no name>"}\` (\`${ctx.pkgDir}\`)`,
   );
 
+  const outDirs = await runBuild(config, ctx);
+
+  printAnalytics(outDirs);
+
+  consola.log(`\n✅ obuild finished in ${Date.now() - start}ms`);
+}
+
+export async function runBuild(
+  config: BuildConfig & { preserveOutDirs?: boolean },
+  ctx: BuildContext,
+): Promise<string[]> {
   const hooks = config.hooks || {};
 
   await hooks.start?.(ctx);
 
-  const entries = (config.entries || []).map((rawEntry) => {
-    let entry: TransformEntry | BundleEntry;
+  const entries = resolveEntries(ctx.pkgDir, config.entries);
+
+  await hooks.entries?.(entries, ctx);
+
+  const outDirs = await prepareOutDirs(entries, config.preserveOutDirs);
+
+  for (const entry of entries) {
+    if (entry.type === "bundle") {
+      const { rolldownBuild } = await import("./builders/bundle.ts");
+      await rolldownBuild(ctx, entry as BundleEntry, hooks);
+      continue;
+    }
+
+    const { transformDir } = await import("./builders/transform.ts");
+    await transformDir(ctx, entry as TransformEntry);
+  }
+
+  await hooks.end?.(ctx);
+
+  return outDirs;
+}
+
+export function printAnalytics(outDirs: string[]): void {
+  const dirSize = analyzeDir(outDirs);
+
+  consola.log(
+    c.dim(
+      `\nΣ Total dist byte size: ${c.underline(prettyBytes(dirSize.size))} (${c.underline(dirSize.files)} files)`,
+    ),
+  );
+}
+
+export async function resolveContext(
+  config: BuildConfig,
+): Promise<BuildContext> {
+  const pkgDir = normalizePath(config.cwd);
+  const pkg = await readJSON(join(pkgDir, "package.json")).catch(() => ({}));
+  return { pkg, pkgDir };
+}
+
+export function resolveEntries(
+  pkgDir: string,
+  rawEntries: Array<string | BuildEntry> = [],
+): BuildEntry[] {
+  return rawEntries.map((rawEntry) => {
+    let entry: BuildEntry;
 
     if (typeof rawEntry === "string") {
       const [input, outDir] = rawEntry.split(":") as [
@@ -57,41 +110,32 @@ export async function build(config: BuildConfig): Promise<void> {
       : normalizePath(entry.input, pkgDir);
     return entry;
   });
+}
 
-  await hooks.entries?.(entries, ctx);
-
+export async function prepareOutDirs(
+  entries: BuildEntry[],
+  preserveFiles?: boolean,
+): Promise<string[]> {
   const outDirs: Array<string> = [];
   for (const outDir of entries.map((e) => e.outDir).sort() as string[]) {
     if (!outDirs.some((dir) => outDir.startsWith(dir))) {
       outDirs.push(outDir);
     }
   }
-  for (const outDir of outDirs) {
-    consola.log(`🧻 Cleaning up \`${fmtPath(outDir)}\``);
-    await rm(outDir, { recursive: true, force: true });
+
+  if (preserveFiles === true) {
+    return outDirs;
   }
 
-  for (const entry of entries) {
-    if (entry.type === "bundle") {
-      const { rolldownBuild } = await import("./builders/bundle.ts");
-      await rolldownBuild(ctx, entry as BundleEntry, hooks);
-      continue;
-    }
+  await Promise.all(
+    outDirs.map(async (outDir) => {
+      consola.log(`🧻 Cleaning up \`${fmtPath(outDir)}\``);
 
-    const { transformDir } = await import("./builders/transform.ts");
-    await transformDir(ctx, entry as TransformEntry);
-  }
-
-  await hooks.end?.(ctx);
-
-  const dirSize = analyzeDir(outDirs);
-  consola.log(
-    c.dim(
-      `\nΣ Total dist byte size: ${c.underline(prettyBytes(dirSize.size))} (${c.underline(dirSize.files)} files)`,
-    ),
+      return rm(outDir, { recursive: true, force: true });
+    }),
   );
 
-  consola.log(`\n✅ obuild finished in ${Date.now() - start}ms`);
+  return outDirs;
 }
 
 function readJSON(specifier: string) {

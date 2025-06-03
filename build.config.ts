@@ -6,5 +6,10 @@ export default defineBuildConfig({
       type: "bundle",
       input: ["./src/index.ts", "./src/cli.ts", "./src/config.ts"],
     },
+    {
+      type: "bundle",
+      input: "./src/worker.ts",
+      dts: false,
+    },
   ],
 });
