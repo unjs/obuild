@@ -11,5 +11,10 @@ export default defineBuildConfig({
         "./src/transformers/index.ts",
       ],
     },
+    {
+      type: "bundle",
+      input: "./src/worker.ts",
+      dts: false,
+    },
   ],
 });
