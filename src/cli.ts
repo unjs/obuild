@@ -34,6 +34,7 @@ const args = parseArgs({
     parallel: {
       type: "boolean",
       default: undefined,
+      short: "p",
     },
   },
 });
