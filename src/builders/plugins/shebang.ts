@@ -1,7 +1,7 @@
 // Ported from https://github.com/unjs/unbuild/blob/main/src/builders/rollup/plugins/shebang.ts
 
 import { promises as fsp } from "node:fs";
-import { resolve } from "node:path";
+import { resolve } from "pathe";
 import type { Plugin } from "rolldown";
 
 export const SHEBANG_RE: RegExp = /^#![^\n]*/;

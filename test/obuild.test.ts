@@ -2,9 +2,10 @@ import { describe, test, expect, beforeAll } from "vitest";
 
 import { build } from "../src/build.ts";
 import { readdir, readFile, rm, stat } from "node:fs/promises";
+import {resolve}  from "pathe";
 
-const fixtureDir = new URL("fixture/", import.meta.url);
-const distDir = new URL("dist/", fixtureDir);
+const fixtureDir = resolve(__dirname, "fixture/");
+const distDir = resolve(fixtureDir, "dist/");
 
 describe("obuild", () => {
   beforeAll(async () => {
@@ -24,7 +25,7 @@ describe("obuild", () => {
 
   test("dist files match expected", async () => {
     const distFiles = await readdir(distDir, { recursive: true }).then((r) =>
-      r.sort(),
+        r.sort().map((p) => p.replace(/\\/g, "/")),
     );
     expect(distFiles).toMatchInlineSnapshot(`
       [
@@ -47,26 +48,26 @@ describe("obuild", () => {
   });
 
   test("validate dist entries", async () => {
-    const distIndex = await import(new URL("index.mjs", distDir).href);
+    const distIndex = await import(resolve(distDir, "index.mjs"));
     expect(distIndex.test).instanceOf(Function);
 
-    const distRuntimeIndex = await import(new URL("index.mjs", distDir).href);
+    const distRuntimeIndex = await import(resolve(distDir, "index.mjs"));
     expect(distRuntimeIndex.test).instanceOf(Function);
 
-    const distUtils = await import(new URL("utils.mjs", distDir).href);
+    const distUtils = await import(resolve(distDir, "utils.mjs"));
     expect(distUtils.test).instanceOf(Function);
   });
 
   test("runtime .dts files use .mjs extension", async () => {
     const runtimeIndexMts = await readFile(
-      new URL("runtime/index.d.mts", distDir),
+      resolve(distDir, "runtime/index.d.mts"),
       "utf8",
     );
     expect(runtimeIndexMts).contain("./test.mjs");
   });
 
   test("cli shebang is executable", async () => {
-    const cliPath = new URL("cli.mjs", distDir);
+    const cliPath = resolve(distDir, "cli.mjs");
     const stats = await stat(cliPath);
     expect(stats.mode & 0o111).toBe(0o111); // Check if executable
   });
