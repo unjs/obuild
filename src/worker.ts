@@ -1,70 +1,62 @@
 import { parentPort, workerData } from "node:worker_threads";
-import { consola } from "consola";
-import { resolveContext, resolveEntries, runBuild } from "./build.ts";
 import { loadConfig } from "c12";
-import type { BuildConfig } from "./types.ts";
-import {} from "consola/utils";
+import { resolveContext, resolveEntries, runBuild } from "./build.ts";
 
-export interface WorkerOptions {
+import type { BuildConfig } from "./types.ts";
+
+export interface BuildWorkerOptions {
   cwd: string;
   entryIndexes: number[];
   rawEntries?: string[];
 }
 
-export type WorkerMessage =
-  | {
-      type: "success";
-    }
-  | {
-      type: "error";
-      error: string;
-    };
+export type BuildWorkerMessage = {
+  type: "start" | "complete" | "error";
+  error?: unknown;
+};
 
-async function runWorkerBuild(options: WorkerOptions) {
-  if (!parentPort) {
-    throw new Error("This script must be run as a worker thread.");
-  }
+if (!parentPort) {
+  throw new Error("This script must be run as a worker thread.");
+}
 
+try {
+  sendMessage({ type: "start" });
+
+  await startBuild(workerData);
+
+  sendMessage({ type: "complete" });
+} catch (error: unknown) {
+  sendMessage({
+    type: "error",
+    error,
+  });
+} finally {
+  parentPort.close();
+}
+
+async function startBuild(options: BuildWorkerOptions) {
   const { entryIndexes, cwd, rawEntries = [] } = options;
+  const { config = {} } = await loadConfig<BuildConfig>({
+    name: "obuild",
+    configFile: "build.config",
+    cwd,
+  });
+  const context = await resolveContext(config);
+  const entries = resolveEntries(
+    context.pkgDir,
+    rawEntries.length > 0 ? rawEntries : config.entries,
+  );
 
-  try {
-    const { config = {} } = await loadConfig<BuildConfig>({
-      name: "obuild",
-      configFile: "build.config",
-      cwd,
-    });
-    const context = await resolveContext(config);
-    const entries = resolveEntries(
-      context.pkgDir,
-      rawEntries.length > 0 ? rawEntries : config.entries,
-    );
-    const workerEntries = entryIndexes.map((index) => entries[index]);
-
-    await runBuild(
-      { ...config, entries: workerEntries, preserveOutDirs: true },
-      context,
-    );
-
-    parentPort.postMessage({ type: "success" });
-  } catch (error: unknown) {
-    parentPort.postMessage({
-      type: "error",
-      error: errorToString(error),
-    });
-
-    consola.error(error);
-  } finally {
-    parentPort.close();
-  }
+  await runBuild(
+    {
+      ...config,
+      entries: entryIndexes.map((index) => entries[index]),
+      preserveOutDirs: true,
+    },
+    context,
+  );
 }
 
-function errorToString(error: unknown): string {
-  return typeof error === "object" &&
-    error !== null &&
-    "message" in error &&
-    typeof error.message === "string"
-    ? error.message
-    : String(error);
+function sendMessage(message: BuildWorkerMessage) {
+  parentPort?.postMessage(message);
 }
-
-await runWorkerBuild(workerData);
