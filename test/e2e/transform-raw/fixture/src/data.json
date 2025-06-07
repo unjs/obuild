@@ -1,0 +1,29 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Alice",
+      "email": "alice@example.com",
+      "age": 28,
+      "isActive": true
+    },
+    {
+      "id": 2,
+      "name": "Bob",
+      "email": "bob@example.com",
+      "age": 34,
+      "isActive": false
+    },
+    {
+      "id": 3,
+      "name": "Charlie",
+      "email": "charlie@example.com",
+      "age": 22,
+      "isActive": true
+    }
+  ],
+  "meta": {
+    "count": 3,
+    "generatedAt": "2024-06-09T12:00:00Z"
+  }
+}

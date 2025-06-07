@@ -80,10 +80,12 @@ export default defineBuildConfig({
       type: "transform",
       input: "./src/runtime",
       outDir: "./dist/runtime",
-      // minify: false,
       // stub: false,
       // oxc: {},
-      // resolve: {}
+      // vue: {},
+      // postcss: {},
+      // transformers: ["oxc", "vue", "sass", "postcss"]
+      // declaration: {}
     },
   ],
   hooks: {
@@ -93,6 +95,40 @@ export default defineBuildConfig({
     // rolldownConfig: (config, ctx) => {},
     // rolldownOutput: (output, res, ctx) => {},
   },
+});
+```
+
+## Experimental `tsgo` support
+
+> [!NOTE]
+>
+> This is an experimental feature.
+>
+> It is not enabled by default and may change in the future.
+
+To enable TypeScript declaration generation with [tsgo](http://github.com/microsoft/typescript-go) for your entries, you can use the `dts.tsgo` option in your config.
+
+```js
+import { defineBuildConfig } from "obuild/config";
+
+export default defineBuildConfig({
+  entries: [
+    {
+      type: "bundle",
+      input: ["./src/index.ts", "./src/cli.ts"],
+      dts: {
+        tsgo: "./src", // Set this to the common root of your entries
+      },
+    },
+    {
+      type: "transform",
+      input: "./src/runtime",
+      outDir: "./dist/runtime",
+      dts: {
+        tsgo: true, // Set this to true to enable `tsgo` for this entry
+      },
+    },
+  ],
 });
 ```
 

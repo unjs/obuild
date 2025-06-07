@@ -8,7 +8,8 @@
   "type": "module",
   "exports": {
     ".": "./dist/index.mjs",
-    "./config": "./dist/config.mjs"
+    "./config": "./dist/config.mjs",
+    "./transformers": "./dist/transformers/index.mjs"
   },
   "types": "./dist/index.d.mts",
   "bin": "./dist/cli.mjs",
@@ -25,32 +26,78 @@
     "prepack": "pnpm build",
     "release": "pnpm test && changelogen --release && npm publish && git push --follow-tags",
     "test": "pnpm lint && pnpm test:types && pnpm vitest run --coverage",
-    "test:types": "tsc --noEmit --skipLibCheck"
+    "test:types": "tsc --noEmit --skipLibCheck -p tsconfig.src.json"
   },
   "dependencies": {
+    "autoprefixer": "^10.4.21",
     "c12": "^3.0.4",
     "consola": "^3.4.2",
+    "cssnano": "^7.0.7",
     "defu": "^6.1.4",
     "exsolve": "^1.0.5",
     "magic-string": "^0.30.17",
+    "mlly": "^1.7.4",
     "oxc-minify": "^0.72.3",
     "oxc-parser": "^0.72.3",
     "oxc-transform": "^0.72.3",
+    "pathe": "^2.0.3",
+    "pkg-types": "^2.1.0",
+    "postcss": "^8.5.4",
+    "postcss-nested": "^7.0.2",
     "pretty-bytes": "^7.0.0",
     "rolldown": "1.0.0-beta.12",
     "rolldown-plugin-dts": "^0.13.8",
+    "source-map-js": "^1.2.1",
     "tinyglobby": "^0.2.14"
   },
   "devDependencies": {
     "@types/node": "^22.15.30",
+    "@typescript/native-preview": "7.0.0-dev.20250605.1",
     "@vitest/coverage-v8": "^3.2.2",
+    "@volar/typescript": "^2.4.12",
+    "@vue/language-core": "^2.2.10",
+    "@vue/language-core2.0": "npm:@vue/language-core@2.0.29",
     "automd": "^0.4.0",
     "changelogen": "^0.6.1",
     "eslint": "^9.28.0",
     "eslint-config-unjs": "^0.4.2",
+    "get-tsconfig": "^4.10.1",
+    "modern-normalize": "^3.0.1",
     "prettier": "^3.5.3",
+    "sass": "^1.89.1",
     "typescript": "^5.8.3",
-    "vitest": "^3.2.2"
+    "vitest": "^3.2.2",
+    "vue": "^3.5.16",
+    "vue-sfc-transformer": "^0.1.16",
+    "vue-tsc": "^2.2.10"
+  },
+  "peerDependencies": {
+    "@typescript/native-preview": ">=7.0.0-dev.20250605.1",
+    "sass": "^1.85.0",
+    "typescript": ">=5.7.3",
+    "vue": "^3.5.13",
+    "vue-sfc-transformer": "^0.1.1",
+    "vue-tsc": "^2.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@typescript/native-preview": {
+      "optional": true
+    },
+    "sass": {
+      "optional": true
+    },
+    "typescript": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    },
+    "vue-sfc-transformer": {
+      "optional": true
+    },
+    "vue-tsc": {
+      "optional": true
+    }
   },
   "packageManager": "pnpm@10.11.1"
 }

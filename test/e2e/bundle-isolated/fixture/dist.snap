@@ -1,0 +1,52 @@
+[
+  [
+    "cli.d.mts",
+    "export { };",
+  ],
+  [
+    "cli.mjs",
+    "#!/usr/bin/env node
+//#region src/cli.ts
+console.log("hello world");
+
+//#endregion",
+  ],
+  [
+    "index.d.mts",
+    "//#region src/index.d.ts
+declare function test(): string;
+declare const _default: string;
+//#endregion
+export { _default as default, test };",
+  ],
+  [
+    "index.mjs",
+    "//#region src/index.ts
+function test() {
+	return "test bundled";
+}
+var src_default = "default export";
+
+//#endregion
+export { src_default as default, test };",
+  ],
+  [
+    "utils.d.mts",
+    "//#region src/utils.d.ts
+declare function test(): string;
+declare const _default: string;
+//#endregion
+export { _default as default, test };",
+  ],
+  [
+    "utils.mjs",
+    "//#region src/utils.ts
+function test() {
+	return "utils bundled";
+}
+var utils_default = "default utils export";
+
+//#endregion
+export { utils_default as default, test };",
+  ],
+]

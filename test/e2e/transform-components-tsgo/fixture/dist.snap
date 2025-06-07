@@ -1,0 +1,372 @@
+[
+  [
+    "components/blank.vue",
+    "<template>
+  <div>Blank</div>
+</template>
+
+<style scoped>
+#main .foo{color:--var-red}
+</style>
+",
+  ],
+  [
+    "components/blank.vue.d.ts",
+    "declare const _default: import("vue").DefineComponent<{}, {}, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {}, string, import("vue").PublicProps, Readonly<{}> & Readonly<{}>, {}, {}, {}, {}, string, import("vue").ComponentProvideOptions, true, {}, any>;
+export default _default;
+",
+  ],
+  [
+    "components/define-model.vue",
+    "<script setup>
+const model = defineModel({ type: String, ...{ required: true } });
+const twoType = defineModel("twoType", { type: [String, Number], ...{ required: true } });
+const runtimeOnly = defineModel("runtimeOnly", {
+  type: String,
+  required: true
+});
+const nameOnly = defineModel("nameOnly");
+const empty = defineModel();
+const { disabled } = defineProps({
+  disabled: { type: Boolean, required: false }
+});
+const emit = defineEmits(["submit"]);
+</script>
+
+<template>
+  <div>
+    <input v-model="model" :disabled />
+    <button @click="emit('submit', model)">Submit</button>
+  </div>
+</template>
+",
+  ],
+  [
+    "components/define-model.vue.d.ts",
+    "declare const runtimeOnly: import("vue").ModelRef<string, string, string, string>;
+type __VLS_Props = {
+    disabled?: boolean;
+};
+type __VLS_PublicProps = __VLS_Props & {
+    modelValue: string;
+    "twoType": string | number;
+    "runtimeOnly": typeof runtimeOnly['value'];
+    "nameOnly"?: any;
+    modelValue?: any;
+};
+declare const _default: import("vue").DefineComponent<__VLS_PublicProps, {}, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {
+    submit: (value: string) => any;
+    "update:modelValue": (value: string) => any;
+    "update:twoType": (value: string | number) => any;
+    "update:runtimeOnly": (value: string) => any;
+    "update:nameOnly": (value: any) => any;
+}, string, import("vue").PublicProps, Readonly<__VLS_PublicProps> & Readonly<{
+    onSubmit?: ((value: string) => any) | undefined;
+    "onUpdate:modelValue"?: ((value: string) => any) | undefined;
+    "onUpdate:twoType"?: ((value: string | number) => any) | undefined;
+    "onUpdate:runtimeOnly"?: ((value: string) => any) | undefined;
+    "onUpdate:nameOnly"?: ((value: any) => any) | undefined;
+}>, {}, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;
+export default _default;
+",
+  ],
+  [
+    "components/emit-and-with-default.vue",
+    "<script setup>
+const props = defineProps({
+  buttonText: { type: String, required: false, default: "Click" }
+});
+const emit = defineEmits(["clickBtn"]);
+</script>
+
+<template>
+  <div>
+    <button @click="emit('clickBtn')">{{ buttonText }}</button>
+  </div>
+</template>
+",
+  ],
+  [
+    "components/emit-and-with-default.vue.d.ts",
+    "type __VLS_Props = {
+    buttonText?: string;
+};
+declare const _default: import("vue").DefineComponent<__VLS_Props, {}, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {} & {
+    clickBtn: () => any;
+}, string, import("vue").PublicProps, Readonly<__VLS_Props> & Readonly<{
+    onClickBtn?: (() => any) | undefined;
+}>, {
+    buttonText: string;
+}, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;
+export default _default;
+",
+  ],
+  [
+    "components/index.d.mts",
+    "// JSX
+export * as jsx from "./jsx.mjs";
+export * as tsx from "./tsx.mjs";
+// Vue
+export * as blank from "./blank.vue";
+export * as scriptSetupTS from "./script-setup-ts.vue";
+export * as scriptMultiBlock from "./script-multi-block.vue";
+export * as ts from "./ts.vue";
+",
+  ],
+  [
+    "components/index.mjs",
+    "// JSX
+export * as jsx from "./jsx.mjs";
+export * as tsx from "./tsx.mjs";
+// Vue
+export * as blank from "./blank.vue";
+export * as scriptSetupTS from "./script-setup-ts.vue";
+export * as scriptMultiBlock from "./script-multi-block.vue";
+export * as ts from "./ts.vue";
+",
+  ],
+  [
+    "components/js.vue",
+    "<template>
+  <div>{{ test }}</div>
+</template>
+
+<script>
+import test from "..";
+const str = "test";
+export default {
+  data: () => ({
+    test: test(),
+    str
+  })
+};
+</script>
+
+<style scoped>
+.test {
+  color: green;
+  background-color: red;
+}
+</style>
+",
+  ],
+  [
+    "components/js.vue.d.ts",
+    "declare const _default: import("vue").DefineComponent<{}, {}, {
+    test: any;
+    str: string;
+}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {}, string, import("vue").PublicProps, Readonly<{}> & Readonly<{}>, {}, {}, {}, {}, string, import("vue").ComponentProvideOptions, true, {}, any>;
+export default _default;
+",
+  ],
+  [
+    "components/jsx.d.mts",
+    "export declare const Test: () => any;
+",
+  ],
+  [
+    "components/jsx.mjs",
+    "import { jsx as _jsx } from "react/jsx-runtime";
+export const Test = () => /* @__PURE__ */ _jsx("div", { children: "42" });
+",
+  ],
+  [
+    "components/script-multi-block.vue",
+    "<template>
+  <div>{{ msg }}</div>
+</template>
+
+<script>
+
+</script>
+
+<script setup>
+defineProps({
+  msg: { type: String, required: true }
+});
+</script>
+",
+  ],
+  [
+    "components/script-multi-block.vue.d.ts",
+    "interface MyComponentProps {
+    msg: string;
+}
+declare const _default: import("vue").DefineComponent<MyComponentProps, {}, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {}, string, import("vue").PublicProps, Readonly<MyComponentProps> & Readonly<{}>, {}, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;
+export default _default;
+",
+  ],
+  [
+    "components/script-setup-ts.vue",
+    "<template>
+  <div>{{ str }}</div>
+</template>
+
+<script setup>
+import { ref } from "vue";
+import { Color } from "#prop-types";
+const props = defineProps({
+  msg: { type: String, required: true },
+  color: { type: Object, required: true }
+});
+const str = ref("hello");
+</script>
+",
+  ],
+  [
+    "components/script-setup-ts.vue.d.ts",
+    "import { Color } from "#prop-types";
+type __VLS_Props = {
+    msg: string;
+    color: Color;
+};
+declare const _default: import("vue").DefineComponent<__VLS_Props, {}, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {}, string, import("vue").PublicProps, Readonly<__VLS_Props> & Readonly<{}>, {}, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;
+export default _default;
+",
+  ],
+  [
+    "components/ts.vue",
+    "<template>
+  <div>{{ test }}</div>
+</template>
+
+<script>
+import test from "..";
+const str = "test";
+export default {
+  data: () => ({
+    test: test(),
+    str
+  })
+};
+</script>
+",
+  ],
+  [
+    "components/ts.vue.d.ts",
+    "declare const _default: import("vue").DefineComponent<{}, {}, {
+    test: any;
+    str: "test";
+}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {}, string, import("vue").PublicProps, Readonly<{}> & Readonly<{}>, {}, {}, {}, {}, string, import("vue").ComponentProvideOptions, true, {}, any>;
+export default _default;
+",
+  ],
+  [
+    "components/tsx.d.mts",
+    "export declare const Test: () => any;
+",
+  ],
+  [
+    "components/tsx.mjs",
+    "import { jsx as _jsx } from "react/jsx-runtime";
+export const Test = () => /* @__PURE__ */ _jsx("div", { children: "42" });
+",
+  ],
+  [
+    "components/vue-component.d.mts",
+    "declare const FooBarComponent: import("vue").DefineComponent<import("vue").ExtractPropTypes<{
+    fooString: {
+        type: StringConstructor;
+        default: () => string;
+    };
+    barNumber: {
+        type: NumberConstructor;
+        default: () => number;
+    };
+    bazBoolean: {
+        type: BooleanConstructor;
+        default: () => boolean;
+    };
+    quxArray: {
+        type: ArrayConstructor;
+        default: () => never[];
+    };
+    quuxObject: {
+        type: ObjectConstructor;
+        default: () => {};
+    };
+}>, {}, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {
+    "foo-bar-event"(_payload: unknown): true;
+}, string, import("vue").PublicProps, Readonly<import("vue").ExtractPropTypes<{
+    fooString: {
+        type: StringConstructor;
+        default: () => string;
+    };
+    barNumber: {
+        type: NumberConstructor;
+        default: () => number;
+    };
+    bazBoolean: {
+        type: BooleanConstructor;
+        default: () => boolean;
+    };
+    quxArray: {
+        type: ArrayConstructor;
+        default: () => never[];
+    };
+    quuxObject: {
+        type: ObjectConstructor;
+        default: () => {};
+    };
+}>> & Readonly<{
+    "onFoo-bar-event"?: ((_payload: unknown) => any) | undefined;
+}>, {
+    fooString: string;
+    barNumber: number;
+    bazBoolean: boolean;
+    quxArray: unknown[];
+    quuxObject: Record<string, any>;
+}, {}, {}, {}, string, import("vue").ComponentProvideOptions, true, {}, any>;
+export default FooBarComponent;
+",
+  ],
+  [
+    "components/vue-component.mjs",
+    "import { defineComponent } from "vue";
+const FooBarComponent = defineComponent({
+	name: "FooBarComponent",
+	inheritAttrs: false,
+	props: {
+		fooString: {
+			type: String,
+			default: () => "foo"
+		},
+		barNumber: {
+			type: Number,
+			default: () => 42
+		},
+		bazBoolean: {
+			type: Boolean,
+			default: () => true
+		},
+		quxArray: {
+			type: Array,
+			default: () => []
+		},
+		quuxObject: {
+			type: Object,
+			default: () => ({})
+		}
+	},
+	emits: { "foo-bar-event"(_payload) {
+		return true;
+	} }
+});
+export default FooBarComponent;
+",
+  ],
+  [
+    "prop-types/index.d.mts",
+    "export interface Color {
+    red: number;
+    green: number;
+    blue: number;
+}
+",
+  ],
+  [
+    "prop-types/index.mjs",
+    "export {};
+",
+  ],
+]
