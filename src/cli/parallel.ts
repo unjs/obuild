@@ -1,126 +1,85 @@
 import os from "node:os";
 import consola from "consola";
+import { Worker } from "node:worker_threads";
+
+import type { BuildWorkerMessage, BuildWorkerOptions } from "../worker.ts";
+import type { BuildConfig, BuildEntry } from "../types.ts";
+
 import {
   prepareOutDirs,
   printAnalytics,
   resolveContext,
   runBuild,
 } from "../build.ts";
-import { fileURLToPath } from "node:url";
-import { Worker } from "node:worker_threads";
-import type { WorkerMessage, WorkerOptions } from "../worker.ts";
-import type { BuildConfig, BuildEntry } from "../types.ts";
 
 export async function parallelBuild(
   workerUrl: URL,
   entries: BuildEntry[],
   config: BuildConfig,
-  main?: boolean,
-  positionals?: string[],
+  mainThread?: boolean,
+  positionalEntries?: string[],
 ): Promise<void> {
-  const cores = os.cpus().length;
-  const workerCount = Math.min(os.cpus().length, entries.length);
   const start = Date.now();
-  const ctx = await resolveContext(config);
+  const cores = os.cpus().length;
+  const threads = Math.min(os.cpus().length, entries.length);
+
+  const context = await resolveContext(config);
   const outDirs = await prepareOutDirs(entries, false);
 
   consola.log(`🧮 ${cores} CPU cores detected`);
   consola.log(
-    `📦 Building \`${ctx.pkg.name || "<no name>"}\` (\`${ctx.pkgDir}\`) with ${workerCount} workers`,
+    `📦 Building \`${context.pkg.name || "<no name>"}\` (\`${context.pkgDir}\`) using ${threads} threads`,
   );
 
   const threadPromises: Promise<void>[] = [];
-  const workerEntryIndexes: number[] = [];
+  const assignedEntryIndexes: number[] = [];
 
   for (
-    let workerIndex = main ? 1 : 0;
-    workerIndex < workerCount;
-    workerIndex++
+    let threadIndex = mainThread ? 1 : 0;
+    threadIndex < threads;
+    threadIndex++
   ) {
     // Assign entries to workers based on their index
     const entryIndexes = entries
       .map((entry, index) => ({ entry, index }))
-      .filter(({ index }) => index % workerCount === workerIndex)
+      .filter(({ index }) => index % threads === threadIndex)
       .map(({ index }) => index);
 
-    workerEntryIndexes.push(...entryIndexes);
+    assignedEntryIndexes.push(...entryIndexes);
 
     threadPromises.push(
-      new Promise<void>((resolve, reject) => {
-        const worker = new Worker(fileURLToPath(workerUrl), {
-          env: {
-            ...process.env,
-            FORCE_COLOR: "1",
-          },
-          workerData: {
-            cwd: ctx.pkgDir,
-            entryIndexes,
-            rawEntries: positionals,
-          } satisfies WorkerOptions,
-          stdout: true,
-          stderr: true,
-        });
-
-        let stdout = "";
-        let stderr = "";
-
-        worker.stdout.on("data", (chunk: Buffer) => {
-          stdout += chunk.toString();
-        });
-
-        worker.stderr.on("data", (chunk: Buffer) => {
-          stderr += chunk.toString();
-        });
-
-        worker.on("message", (message: WorkerMessage) => {
-          process.stdout.write(stdout);
-          process.stderr.write(stderr);
-
-          if (message.type === "error") {
-            reject(message.error);
-          }
-
-          consola.log(
-            `\n👷 Worker #${workerIndex + 1} finished in ${Date.now() - start}ms`,
-          );
-
-          resolve();
-        });
-
-        worker.on("error", (error) => {
-          consola.error(
-            `Worker #${workerIndex + 1} encountered an uncaught error:`,
-            error,
-          );
-
-          reject(error);
-        });
-
-        worker.on("exit", (code) => {
-          if (code !== 0) {
-            const message = `Worker #${workerIndex + 1} exited with code ${code}`;
-            consola.error(message);
-            reject(new Error(message));
-          }
-        });
-      }),
+      spawnBuildWorker(
+        workerUrl,
+        {
+          cwd: context.pkgDir,
+          entryIndexes,
+          rawEntries: positionalEntries,
+        },
+        `#${mainThread ? threadIndex : threadIndex + 1}`,
+      ),
     );
   }
 
-  const mainThreadEntries = entries.filter(
-    (_, index) => !workerEntryIndexes.includes(index),
-  );
+  if (assignedEntryIndexes.length < entries.length) {
+    const mainThreadEntries = entries.filter(
+      (_, index) => !assignedEntryIndexes.includes(index),
+    );
 
-  if (mainThreadEntries.length > 0) {
+    const mainThreadConfig = {
+      ...config,
+      entries: mainThreadEntries,
+      preserveOutDirs: true,
+    };
+
     threadPromises.push(
       new Promise<void>((resolve, reject) => {
-        runBuild(
-          { ...config, entries: mainThreadEntries, preserveOutDirs: true },
-          ctx,
-        )
-          .then(() => {
-            consola.log(`\n👷 Main thread finished in ${Date.now() - start}ms`);
+        const mainThreadStart = Date.now();
 
+        runBuild(mainThreadConfig, context)
+          .then(() => {
+            consola.log(
+              `\n👷 Main thread finished in ${Date.now() - mainThreadStart}ms`,
+            );
             resolve();
           })
           .catch((error: unknown) => {
@@ -136,4 +95,82 @@ export async function parallelBuild(
   printAnalytics(outDirs);
 
   consola.log(`\n✅ obuild finished in ${Date.now() - start}ms`);
+}
+
+function spawnBuildWorker(
+  workerUrl: URL,
+  workerData: BuildWorkerOptions,
+  workerName: string,
+): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    const start = Date.now();
+    const worker = new Worker(workerUrl, {
+      env: {
+        ...process.env,
+        FORCE_COLOR: "1",
+      },
+      workerData,
+      stdout: true,
+      stderr: true,
+    });
+
+    let stdout = "";
+    let stderr = "";
+    let buildStart = start;
+
+    worker.stdout.on("data", (chunk: Buffer) => {
+      stdout += chunk.toString();
+    });
+
+    worker.stderr.on("data", (chunk: Buffer) => {
+      stderr += chunk.toString();
+    });
+
+    function writeWorkerOutput() {
+      process.stdout.write(stdout);
+      process.stderr.write(stderr);
+    }
+
+    function errorHandler(error: unknown): void {
+      writeWorkerOutput();
+      consola.error(`Worker ${workerName} encountered an error:`, error);
+      reject(error);
+    }
+
+    worker.once("online", () => {
+      consola.debug(
+        `\n👷 Worker ${workerName} spawned in ${Date.now() - start}ms`,
+      );
+    });
+    worker.on("message", (message: BuildWorkerMessage) => {
+      switch (message.type) {
+        case "start": {
+          consola.debug(
+            `\n👷 Worker ${workerName} started in ${Date.now() - start}ms`,
+          );
+          buildStart = Date.now();
+          return;
+        }
+
+        case "error": {
+          errorHandler(message.error);
+          return;
+        }
+      }
+    });
+    worker.on("error", errorHandler);
+    worker.on("exit", (code) => {
+      if (code !== 0) {
+        return errorHandler(new Error(`Exited with code ${code}`));
+      }
+
+      writeWorkerOutput();
+
+      consola.log(
+        `\n👷 Worker ${workerName} finished in ${Date.now() - buildStart}ms`,
+      );
+
+      resolve();
+    });
+  });
 }

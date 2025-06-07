@@ -14,17 +14,17 @@ import { fmtPath, analyzeDir, normalizePath } from "./utils.ts";
 import prettyBytes from "pretty-bytes";
 
 /**
- * Build dist/ from src/
+ * Builds the project based on the provided configuration.
  */
 export async function build(config: BuildConfig): Promise<void> {
-  const ctx: BuildContext = await resolveContext(config);
+  const context: BuildContext = await resolveContext(config);
   const start = Date.now();
 
   consola.log(
-    `📦 Building \`${ctx.pkg.name || "<no name>"}\` (\`${ctx.pkgDir}\`)`,
+    `📦 Building \`${context.pkg.name || "<no name>"}\` (\`${context.pkgDir}\`)`,
   );
 
-  const outDirs = await runBuild(config, ctx);
+  const outDirs = await runBuild(config, context);
 
   printAnalytics(outDirs);
 
@@ -33,30 +33,30 @@ export async function build(config: BuildConfig): Promise<void> {
 
 export async function runBuild(
   config: BuildConfig & { preserveOutDirs?: boolean },
-  ctx: BuildContext,
+  context: BuildContext,
 ): Promise<string[]> {
   const hooks = config.hooks || {};
 
-  await hooks.start?.(ctx);
+  await hooks.start?.(context);
 
-  const entries = resolveEntries(ctx.pkgDir, config.entries);
+  const entries = resolveEntries(context.pkgDir, config.entries);
 
-  await hooks.entries?.(entries, ctx);
+  await hooks.entries?.(entries, context);
 
   const outDirs = await prepareOutDirs(entries, config.preserveOutDirs);
 
   for (const entry of entries) {
     if (entry.type === "bundle") {
       const { rolldownBuild } = await import("./builders/bundle.ts");
-      await rolldownBuild(ctx, entry as BundleEntry, hooks);
+      await rolldownBuild(context, entry as BundleEntry, hooks);
       continue;
     }
 
     const { transformDir } = await import("./builders/transform.ts");
-    await transformDir(ctx, entry as TransformEntry);
+    await transformDir(context, entry as TransformEntry);
   }
 
-  await hooks.end?.(ctx);
+  await hooks.end?.(context);
 
   return outDirs;
 }
