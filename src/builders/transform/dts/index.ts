@@ -4,7 +4,7 @@ import { getTscCliDeclarations } from "./tsc-cli.ts";
 import { getVueDeclarations } from "./vue-tsc.ts";
 
 import type { TSConfig } from "pkg-types";
-import type { OutputFile } from "../../../transformers/types.ts";
+import type { OutputFile } from "../types.ts";
 import type { BuildContext, TransformEntry } from "../../../types.ts";
 import type { DeclarationOutput, DeclarationOptions } from "./common.ts";
 

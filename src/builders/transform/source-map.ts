@@ -2,7 +2,7 @@ import path from "pathe";
 import { normalizePath } from "../../utils.ts";
 
 import type { BuildContext, TransformEntry } from "../../types.ts";
-import type { OutputFile, SourceMapFile } from "../../transformers/types.ts";
+import type { OutputFile, SourceMapFile } from "./types.ts";
 
 /**
  * Rewrite source map sources and file paths to relative paths and serialize them.
@@ -38,7 +38,7 @@ export function serializeSourceMapFiles(
       );
     }
 
-    sourceMapFile.contents = JSON.stringify(sourceMapFile.map);
+    sourceMapFile.contents = JSON.stringify(sourceMapFile.map, null, 2);
   }
 }
 

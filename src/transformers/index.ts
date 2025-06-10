@@ -1,5 +1,4 @@
 import { consola } from "consola";
-import { oxcTransformer } from "./oxc.ts";
 import { vueTransformer } from "./vue.ts";
 
 import type {
@@ -10,22 +9,20 @@ import type {
   TransformerName,
   TransformFile,
   CreateTransformerOptions,
-} from "./types.ts";
+} from "../builders/transform/types.ts";
 import { postcssTransformer } from "./postcss.ts";
 import { sassTransformer } from "./sass.ts";
 
-export type * from "./types.ts";
+export type * from "../builders/transform/types.ts";
 export { mkdistLoader, type MkdistLoaderOptions } from "./mkdist.ts";
 
 const transformers: Record<TransformerName, Transformer> = {
-  oxc: oxcTransformer,
   vue: vueTransformer,
   sass: sassTransformer,
   postcss: postcssTransformer,
 };
 
 export const defaultTransformers: TransformerName[] = [
-  "oxc",
   "vue",
   "sass",
   "postcss",
@@ -64,6 +61,8 @@ export function createTransformer(options: CreateTransformerOptions): {
   transformFile: TransformFile;
 } {
   const {
+    pkg,
+    pkgDir,
     transformers = defaultTransformers,
     tsConfig,
     ...transformerOptions
@@ -75,13 +74,15 @@ export function createTransformer(options: CreateTransformerOptions): {
     input: InputFile,
   ): Promise<OutputFile[]> {
     const context: TransformerContext = {
+      pkg,
+      pkgDir,
       transformFile,
       tsConfig,
       options: transformerOptions,
     };
 
     for (const transformer of resolvedTransformers) {
-      const outputs = await transformer(input, context);
+      const outputs = await transformer.transform(input, context);
 
       if (outputs?.length) {
         return outputs;

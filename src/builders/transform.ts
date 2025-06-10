@@ -17,7 +17,7 @@ import {
   serializeSourceMapFiles,
 } from "./transform/source-map.ts";
 
-import type { OutputFile } from "../transformers/types.ts";
+import type { OutputFile } from "./transform/types.ts";
 import type { BuildContext, TransformEntry } from "../types.ts";
 
 /**
@@ -40,6 +40,7 @@ export async function transformDir(
 
   const tsConfig = resolveTSConfig(entry, context);
   const transformer = createTransformer({
+    ...context,
     ...entry,
     tsConfig,
     dts: entry.dts !== false,

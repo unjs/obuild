@@ -13,14 +13,14 @@ import type {
   Transformer,
   TransformerName,
   TransformerOptions,
-} from "./transformers/types.ts";
+} from "./builders/transform/types.ts";
 
 export interface BuildContext {
   pkgDir: string;
   pkg: PackageJson;
 }
 
-export type _BuildEntry = {
+export interface _BuildEntry {
   /**
    * Output directory relative to project root.
    *
@@ -32,9 +32,9 @@ export type _BuildEntry = {
    * Avoid actual build but instead link to the source files.
    */
   stub?: boolean;
-};
+}
 
-export type BundleEntry = _BuildEntry & {
+export interface BundleEntry extends _BuildEntry {
   type: "bundle";
 
   /**
@@ -66,9 +66,9 @@ export type BundleEntry = _BuildEntry & {
    * Set to `false` to disable.
    */
   dts?: boolean | BundleDtsOptions;
-};
+}
 
-export type TransformEntry = _BuildEntry & {
+export interface TransformEntry extends _BuildEntry, TransformerOptions {
   type: "transform";
 
   /**
@@ -89,9 +89,11 @@ export type TransformEntry = _BuildEntry & {
   mapDir?: string;
 
   /**
+   * @todo - Add back?
+   *
    * Options for the `oxc` transformer.
    */
-  oxc?: TransformerOptions["oxc"];
+  // oxc?: TransformerOptions["oxc"];
 
   /**
    * Options for the `vue` transformer.
@@ -109,7 +111,7 @@ export type TransformEntry = _BuildEntry & {
    * Set to `false` to disable declaration generation, or provide options to customize it.
    */
   dts?: boolean | TransformDtsOptions;
-};
+}
 
 export type BuildEntry = BundleEntry | TransformEntry;
 

@@ -4,7 +4,7 @@ import type {
   OutputFile,
   Transformer,
   TransformerContext,
-} from "./types.ts";
+} from "../builders/transform/types.ts";
 
 type MaybePromise<T> = T | Promise<T>;
 
@@ -91,19 +91,22 @@ export function mkdistLoader(
     return output;
   };
 
-  return async (input, context: TransformerContext) => {
-    const mkdistContext: MkdistLoaderContext = {
-      loadFile: async (inputFile: InputFile): Promise<MkdistOutputFile[]> => {
-        const dtsOutput = (await jsLoader(inputFile)) || [];
-        const output = await context.transformFile(inputFile);
+  return {
+    name: "mkdist-loader",
+    transform: async (input, context: TransformerContext) => {
+      const mkdistContext: MkdistLoaderContext = {
+        loadFile: async (inputFile: InputFile): Promise<MkdistOutputFile[]> => {
+          const dtsOutput = (await jsLoader(inputFile)) || [];
+          const output = await context.transformFile(inputFile);
 
-        return [...dtsOutput, ...output];
-      },
-      options: loaderOptions,
-    };
+          return [...dtsOutput, ...output];
+        },
+        options: loaderOptions,
+      };
 
-    const output = await loader(input, mkdistContext);
+      const output = await loader(input, mkdistContext);
 
-    return output?.map((file) => fromMkdistOutputFile(file)) || [];
+      return output?.map((file) => fromMkdistOutputFile(file)) || [];
+    },
   };
 }

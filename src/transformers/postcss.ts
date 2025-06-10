@@ -18,7 +18,7 @@ import type {
   TransformerContext,
   Transformer,
   TransformResult,
-} from "./types.ts";
+} from "../builders/transform/types.ts";
 
 /**
  * PostCSS transformer options.
@@ -35,47 +35,47 @@ export interface PostcssTransformerOptions {
       };
 }
 
-export const postcssTransformer: Transformer = async (
-  input: InputFile,
-  ctx: TransformerContext,
-) => {
-  const options = ctx.options;
+export const postcssTransformer: Transformer = {
+  name: "postcss",
+  transform: async (input: InputFile, ctx: TransformerContext) => {
+    const options = ctx.options;
 
-  if (options.postcss === false || input.extension !== ".css") {
-    return;
-  }
+    if (options.postcss === false || input.extension !== ".css") {
+      return;
+    }
 
-  const output: TransformResult = [];
-  const plugins: PostcssPlugin[] = [];
-  const contents = await input.getContents();
+    const output: TransformResult = [];
+    const plugins: PostcssPlugin[] = [];
+    const contents = await input.getContents();
 
-  if (options.postcss?.nested !== false) {
-    plugins.push(postcssNested(options.postcss?.nested));
-  }
+    if (options.postcss?.nested !== false) {
+      plugins.push(postcssNested(options.postcss?.nested));
+    }
 
-  if (options.postcss?.autoprefixer !== false) {
-    plugins.push(autoprefixer(options.postcss?.autoprefixer));
-  }
+    if (options.postcss?.autoprefixer !== false) {
+      plugins.push(autoprefixer(options.postcss?.autoprefixer));
+    }
 
-  if (options.postcss?.cssnano !== false) {
-    plugins.push(cssnano(options.postcss?.cssnano));
-  }
+    if (options.postcss?.cssnano !== false) {
+      plugins.push(cssnano(options.postcss?.cssnano));
+    }
 
-  if (Array.isArray(options.postcss?.plugins)) {
-    plugins.push(...options.postcss.plugins);
-  }
+    if (Array.isArray(options.postcss?.plugins)) {
+      plugins.push(...options.postcss.plugins);
+    }
 
-  const transformed = await postcss(plugins).process(contents, {
-    ...options.postcss?.processOptions,
-    from: input.srcPath,
-  });
+    const transformed = await postcss(plugins).process(contents, {
+      ...options.postcss?.processOptions,
+      from: input.srcPath,
+    });
 
-  output.push({
-    contents: transformed.content,
-    path: input.path,
-    extension: ".css",
-    type: "asset",
-  });
+    output.push({
+      contents: transformed.content,
+      path: input.path,
+      extension: ".css",
+      type: "asset",
+    });
 
-  return output;
+    return output;
+  },
 };
