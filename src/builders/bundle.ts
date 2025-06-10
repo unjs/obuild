@@ -1,6 +1,6 @@
 import { builtinModules } from "node:module";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, relative, join, basename, extname, resolve } from "node:path";
+import { dirname, relative, join, basename, extname, resolve } from "pathe";
 import { consola } from "consola";
 import { colors as c } from "consola/utils";
 import { rolldown } from "rolldown";
@@ -8,7 +8,7 @@ import { dts } from "rolldown-plugin-dts";
 import oxcParser from "oxc-parser";
 import { resolveModulePath } from "exsolve";
 import prettyBytes from "pretty-bytes";
-import { distSize, fmtPath, sideEffectSize } from "../utils.ts";
+import { distSize, fmtPath, normalizePath, sideEffectSize } from "../utils.ts";
 import { makeExecutable, shebangPlugin } from "./plugins/shebang.ts";
 import { defu } from "defu";
 
@@ -82,7 +82,19 @@ export async function rolldownBuild(
   } satisfies InputOptions);
 
   if (entry.dts !== false) {
-    rolldownConfig.plugins.push(...dts({ ...(entry.dts as DtsOptions) }));
+    const tsgo = typeof entry.dts === "object" ? entry.dts.tsgo : false;
+    const dtsOptions: DtsOptions = {
+      ...(entry.dts as DtsOptions),
+      ...(tsgo
+        ? {
+            tsgo:
+              // @todo - Does not work in monorepos https://github.com/sxzz/rolldown-plugin-dts/issues/47
+              typeof tsgo === "string" ? normalizePath(tsgo, ctx.pkgDir) : true,
+          }
+        : {}),
+    };
+
+    rolldownConfig.plugins.push(...dts(dtsOptions));
   }
 
   await hooks.rolldownConfig?.(rolldownConfig, ctx);
@@ -186,7 +198,7 @@ export function normalizeBundleInputs(
   for (let src of Array.isArray(input) ? input : [input]) {
     src = resolveModulePath(src, {
       from: ctx.pkgDir,
-      extensions: [".ts", ".js", ".mjs", ".cjs", ".json"],
+      extensions: [".tsx", ".ts", ".js", ".jsx", ".mjs", ".cjs", ".json"],
     });
     let relativeSrc = relative(join(ctx.pkgDir, "src"), src);
     if (relativeSrc.startsWith("..")) {

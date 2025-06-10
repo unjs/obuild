@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "noEmit": true,
+    "isolatedDeclarations": false,
+    "allowImportingTsExtensions": true,
+    "jsx": "preserve",
+    "paths": {
+      "#prop-types": ["./src/prop-types"],
+      "#prop-types/*": ["./src/prop-types/*"]
+    }
+  },
+  "include": ["src"]
+}

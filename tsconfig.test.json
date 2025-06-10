@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "isolatedDeclarations": false,
+    "jsx": "preserve",
+    "jsxImportSource": "vue"
+  },
+  "extends": "./tsconfig.json",
+  "include": ["src", "test"]
+}

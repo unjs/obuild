@@ -6,4 +6,5 @@ dist
 .eslintcache
 *.log*
 *.env*
-tsconfig.tsbuildinfo
+*.tsbuildinfo
+.obuild

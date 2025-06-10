@@ -5,15 +5,14 @@ import type {
   BundleEntry,
 } from "./types.ts";
 
-import { fileURLToPath } from "node:url";
-import { isAbsolute, join, resolve } from "node:path";
 import { rm } from "node:fs/promises";
 import { consola } from "consola";
 import { colors as c } from "consola/utils";
 import { rolldownBuild } from "./builders/bundle.ts";
 import { transformDir } from "./builders/transform.ts";
-import { fmtPath, analyzeDir } from "./utils.ts";
+import { fmtPath, analyzeDir, normalizePath } from "./utils.ts";
 import prettyBytes from "pretty-bytes";
+import { readPackageJSON } from "pkg-types";
 
 /**
  * Build dist/ from src/
@@ -22,8 +21,11 @@ export async function build(config: BuildConfig): Promise<void> {
   const start = Date.now();
 
   const pkgDir = normalizePath(config.cwd);
-  const pkg = await readJSON(join(pkgDir, "package.json")).catch(() => ({}));
-  const ctx: BuildContext = { pkg, pkgDir };
+  const pkg = await readPackageJSON(pkgDir);
+  const ctx: BuildContext = {
+    pkg,
+    pkgDir,
+  };
 
   consola.log(
     `📦 Building \`${ctx.pkg.name || "<no name>"}\` (\`${ctx.pkgDir}\`)`,
@@ -90,20 +92,4 @@ export async function build(config: BuildConfig): Promise<void> {
   );
 
   consola.log(`\n✅ obuild finished in ${Date.now() - start}ms`);
-}
-
-// --- utils ---
-
-function normalizePath(path: string | URL | undefined, resolveFrom?: string) {
-  return typeof path === "string" && isAbsolute(path)
-    ? path
-    : path instanceof URL
-      ? fileURLToPath(path)
-      : resolve(resolveFrom || ".", path || ".");
-}
-
-function readJSON(specifier: string) {
-  return import(specifier, {
-    with: { type: "json" },
-  }).then((r) => r.default);
 }

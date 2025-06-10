@@ -6,14 +6,18 @@ import type {
   RolldownPluginOption,
 } from "rolldown";
 
-import type { Options as DtsOptions } from "rolldown-plugin-dts";
-import type { TransformOptions } from "oxc-transform";
-import type { MinifyOptions as OXCMinifyOptions } from "oxc-minify";
-import type { ResolveOptions } from "exsolve";
+import type { PackageJson } from "pkg-types";
+import type { Options as BundleDtsOptions } from "rolldown-plugin-dts";
+import type { TransformDtsOptions } from "./builders/transform/dts/index.ts";
+import type {
+  Transformer,
+  TransformerName,
+  TransformerOptions,
+} from "./transformers/types.ts";
 
 export interface BuildContext {
   pkgDir: string;
-  pkg: { name: string } & Record<string, unknown>;
+  pkg: PackageJson;
 }
 
 export type _BuildEntry = {
@@ -61,7 +65,7 @@ export type BundleEntry = _BuildEntry & {
    *
    * Set to `false` to disable.
    */
-  dts?: boolean | DtsOptions;
+  dts?: boolean | BundleDtsOptions;
 };
 
 export type TransformEntry = _BuildEntry & {
@@ -73,25 +77,38 @@ export type TransformEntry = _BuildEntry & {
   input: string;
 
   /**
-   * Minify the output using oxc-minify.
-   *
-   * Defaults to `false` if not provided.
+   * List of transformers to invoke.
    */
-  minify?: boolean | OXCMinifyOptions;
+  transformers?: Array<TransformerName | Transformer>;
 
   /**
-   * Options passed to oxc-transform.
+   * Source map directory relative to project root.
    *
-   * See [oxc-transform](https://www.npmjs.com/package/oxc-transform) for more details.
+   * Defaults to `outDir` if not provided.
    */
-  oxc?: TransformOptions;
+  mapDir?: string;
 
   /**
-   * Options passed to exsolve for module resolution.
-   *
-   * See [exsolve](https://github.com/unjs/exsolve) for more details.
+   * Options for the `oxc` transformer.
    */
-  resolve?: Omit<ResolveOptions, "from">;
+  oxc?: TransformerOptions["oxc"];
+
+  /**
+   * Options for the `vue` transformer.
+   */
+  vue?: TransformerOptions["vue"];
+
+  /**
+   * Options for the `postcss` transformer.
+   */
+  postcss?: TransformerOptions["postcss"];
+
+  /**
+   * Declaration generation options.
+   *
+   * Set to `false` to disable declaration generation, or provide options to customize it.
+   */
+  dts?: boolean | TransformDtsOptions;
 };
 
 export type BuildEntry = BundleEntry | TransformEntry;

@@ -1,0 +1,71 @@
+[
+  [
+    "a-types.d.ts",
+    "import type { UserID } from "./b-types.js";
+import type { Status } from "./c-types.ts";
+export interface User {
+    id: UserID;
+    name: string;
+    email: string;
+    status: Status;
+    profile?: Profile;
+}
+export interface Profile {
+    bio: string;
+    age: number;
+    interests: string[];
+}
+",
+  ],
+  [
+    "b-types.d.ts",
+    "export type UserID = string | number;
+",
+  ],
+  [
+    "c-types.d.ts",
+    "export type Status = "active" | "inactive" | "pending";
+",
+  ],
+  [
+    "dir/index.d.ts",
+    "export declare enum Role {
+    Admin = "ADMIN",
+    User = "USER",
+    Guest = "GUEST"
+}
+declare const _default: {};
+export default _default;
+",
+  ],
+  [
+    "module.d.ts",
+    "import type { User } from "./a-types";
+import type { UserID } from "./b-types.js";
+import type { Status } from "./c-types.ts";
+import { Role } from "./dir";
+export type A = typeof import("./a-types");
+export type B = typeof import("./b-types.js");
+export type C = typeof import("./c-types.ts");
+export type Dir = typeof import("./dir");
+export declare class UserManager {
+    private users;
+    addUser(user: User): void;
+    getUser(id: UserID): User | undefined;
+    getAllUsers(): User[];
+}
+export declare function createUser(name: string, email: string, status?: Status): User;
+export declare function isActive(user: User): boolean;
+export declare const DEFAULT_STATUS: Status;
+export declare const ROLES: Role[];
+export type ApiResponse<T> = {
+    data: T;
+    error?: string;
+};
+export declare namespace Utils {
+    function capitalize(str: string): string;
+    function isEmail(email: string): boolean;
+}
+",
+  ],
+]
