@@ -1,10 +1,7 @@
 import { describe, test, expect } from "vitest";
 
 import { vueTransformer } from "../../../src/transformers/vue.ts";
-import type {
-  InputFile,
-  TransformerOptions,
-} from "../../../src/transformers/types.ts";
+import type { InputFile, TransformerOptions } from "../../../src/index.ts";
 
 describe("Vue transformer", () => {
   const vueTransform = async (
@@ -12,7 +9,7 @@ describe("Vue transformer", () => {
     options: TransformerOptions,
   ) => {
     const transforms: InputFile[] = [];
-    const outputFiles = await vueTransformer(
+    const outputFiles = await vueTransformer.transform(
       {
         path: "test.vue",
         extension: ".vue",
@@ -21,6 +18,8 @@ describe("Vue transformer", () => {
         },
       },
       {
+        pkg: { name: "test", version: "1.0.0" },
+        pkgDir: ".",
         transformFile: (inputFile) => {
           transforms.push(inputFile);
 
