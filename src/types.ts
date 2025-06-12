@@ -62,6 +62,13 @@ export type BundleEntry = _BuildEntry & {
    * Set to `false` to disable.
    */
   dts?: boolean | DtsOptions;
+
+  /**
+   * Generate a CommonJS bundle.
+   *
+   * Defaults to `false` if not provided.
+   */
+  cjs?: boolean;
 };
 
 export type TransformEntry = _BuildEntry & {

@@ -1,9 +1,10 @@
 import { readdirSync, statSync } from "node:fs";
-import { join, resolve } from "pathe";
+import { gzipSync } from "node:zlib";
 
+import { join, resolve } from "pathe";
 import { type Plugin, rolldown } from "rolldown";
 import { minify } from "oxc-minify";
-import { gzipSync } from "node:zlib";
+import type { PackageJson } from "pkg-types";
 
 export function fmtPath(path: string): string {
   return resolve(path).replace(process.cwd(), ".");
@@ -111,4 +112,83 @@ export async function sideEffectSize(
   }
 
   return Buffer.byteLength(output[0].code.trim());
+}
+
+export function listRecursively(path: string): string[] {
+  const filenames = new Set<string>();
+  const walk = (path: string): void => {
+    const files = readdirSync(path);
+    for (const file of files) {
+      const fullPath = resolve(path, file);
+      if (statSync(fullPath).isDirectory()) {
+        filenames.add(fullPath + "/");
+        walk(fullPath);
+      } else {
+        filenames.add(fullPath);
+      }
+    }
+  };
+  walk(path);
+  return [...filenames];
+}
+
+export function inferExportType(
+  condition: string,
+  previousConditions: string[] = [],
+  filename = "",
+): "esm" | "cjs" {
+  if (filename) {
+    if (filename.endsWith(".d.ts")) {
+      return "esm";
+    }
+    if (filename.endsWith(".mjs")) {
+      return "esm";
+    }
+    if (filename.endsWith(".cjs")) {
+      return "cjs";
+    }
+  }
+  switch (condition) {
+    case "import": {
+      return "esm";
+    }
+    case "require": {
+      return "cjs";
+    }
+    default: {
+      if (previousConditions.length === 0) {
+        // TODO: Check against type:module for default
+        return "esm";
+      }
+      const [newCondition, ...rest] = previousConditions;
+      return inferExportType(newCondition, rest, filename);
+    }
+  }
+}
+
+export type OutputDescriptor = { file: string; type?: "esm" | "cjs" };
+
+export function extractExportFilenames(
+  exports: PackageJson["exports"],
+  conditions: string[] = [],
+): OutputDescriptor[] {
+  if (!exports) {
+    return [];
+  }
+  if (typeof exports === "string") {
+    return [{ file: exports, type: "esm" }];
+  }
+  return (
+    Object.entries(exports)
+      // Filter out .json subpaths such as package.json
+      .filter(([subpath]) => !subpath.endsWith(".json"))
+      .flatMap(([condition, exports]) =>
+        typeof exports === "string"
+          ? {
+            file: exports,
+            type: inferExportType(condition, conditions, exports),
+          }
+          : extractExportFilenames(exports, [...conditions, condition]),
+      )
+  );
 }

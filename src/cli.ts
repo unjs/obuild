@@ -2,10 +2,15 @@
 
 import { parseArgs } from "node:util";
 import { consola } from "consola";
-import { build } from "./build.ts";
 import { loadConfig } from "c12";
+import type { PackageJson } from "pkg-types";
+import { join } from "pathe";
+import { createJiti } from "jiti";
 
+import { build } from "./build.ts";
 import type { BuildConfig, BuildEntry } from "./types.ts";
+import { inferEntries } from "./auto.ts";
+import { listRecursively } from "./utils.ts";
 
 // https://nodejs.org/api/util.html#utilparseargsconfig
 const args = parseArgs({
@@ -51,8 +56,25 @@ if (args.values.stub) {
 }
 
 if (rawEntries.length === 0) {
-  consola.error("No build entries specified.");
-  process.exit(1);
+  // If no entries are specified, infer them from the package.json
+  const jiti = createJiti(process.cwd());
+  const pkg: PackageJson =
+    ((await jiti.import("./package.json", {
+      try: true,
+      default: true,
+    })) as PackageJson) || ({} as PackageJson);
+  const sourceFiles = listRecursively(join(process.cwd(), "src"));
+  const res = inferEntries(pkg, sourceFiles, process.cwd())
+  console.log(res);
+  entries.push({
+    type: 'bundle',
+    input: res.entries.map((entry) => entry.input as string),
+    dts: res.dts,
+  })
+  if (entries.length === 0) {
+    consola.error("No build entries specified.");
+    process.exit(1);
+  }
 }
 
 await build({
