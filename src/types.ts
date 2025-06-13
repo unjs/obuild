@@ -10,10 +10,11 @@ import type { Options as DtsOptions } from "rolldown-plugin-dts";
 import type { TransformOptions } from "oxc-transform";
 import type { MinifyOptions as OXCMinifyOptions } from "oxc-minify";
 import type { ResolveOptions } from "exsolve";
+import type { PackageJson } from "pkg-types";
 
 export interface BuildContext {
   pkgDir: string;
-  pkg: { name: string } & Record<string, unknown>;
+  pkg: PackageJson;
 }
 
 export type _BuildEntry = {

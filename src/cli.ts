@@ -65,7 +65,6 @@ if (rawEntries.length === 0) {
     })) as PackageJson) || ({} as PackageJson);
   const sourceFiles = listRecursively(join(process.cwd(), "src"));
   const res = inferEntries(pkg, sourceFiles, process.cwd())
-  console.log(res);
   entries.push({
     type: 'bundle',
     input: res.entries.map((entry) => entry.input as string),
