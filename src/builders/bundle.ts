@@ -81,6 +81,10 @@ export async function rolldownBuild(
     ],
   } satisfies InputOptions);
 
+  if (entry.dts !== false) {
+    rolldownConfig.plugins.push(...dts({ ...(entry.dts as DtsOptions) }));
+  }
+
   await hooks.rolldownConfig?.(rolldownConfig, ctx);
 
   const res = await rolldown(rolldownConfig);
@@ -97,55 +101,6 @@ export async function rolldownBuild(
   await hooks.rolldownOutput?.(outConfig, res, ctx);
 
   const { output } = await res.write(outConfig);
-
-  if (entry.dts !== false) {
-    // Bundle d.ts and d.mts files
-    rolldownConfig.plugins.push(...dts({ ...(entry.dts as DtsOptions), emitDtsOnly: true }));
-    await res.write({
-      ...outConfig,
-      entryFileNames: "[name].js",
-      chunkFileNames: "_chunks/[name]-[hash].js",
-    });
-    await res.write({
-      ...outConfig,
-      entryFileNames: "[name].mjs",
-      chunkFileNames: "_chunks/[name]-[hash].mjs",
-    });
-  }
-
-  let cjsOutput
-  if (entry.cjs) {
-    // Bundle cjs files
-    const cjsRolldownConfig = {
-      ...rolldownConfig,
-      plugins: [shebangPlugin()] as Plugin[],
-    }
-
-    const res = await rolldown(cjsRolldownConfig);
-
-    const outConfig: OutputOptions = {
-      dir: outDir,
-      entryFileNames: "[name].cjs",
-      chunkFileNames: "_chunks/[name]-[hash].cjs",
-      minify: entry.minify,
-      format: 'cjs',
-    };
-
-    await hooks.rolldownOutput?.(outConfig, res, ctx);
-
-    cjsOutput = (await res.write(outConfig)).output
-
-    if (entry.dts !== false) {
-      // Bundle d.cts files
-      cjsRolldownConfig.plugins.push(...dts({ ...(entry.dts as DtsOptions), emitDtsOnly: true }));
-      await res.write({
-        ...outConfig,
-        format: 'esm',
-        entryFileNames: "[name].cjs",
-        chunkFileNames: "_chunks/[name]-[hash].cjs",
-      });
-    }
-  }
 
   await res.close();
 
@@ -195,21 +150,6 @@ export async function rolldownBuild(
       ...(await distSize(outDir, chunk.fileName)),
       sideEffectSize: await sideEffectSize(outDir, chunk.fileName),
     });
-  }
-
-  if (cjsOutput) {
-    for (const chunk of cjsOutput) {
-      if (chunk.type !== "chunk" || !chunk.isEntry) continue;
-      if (chunk.fileName.endsWith("ts")) continue;
-
-      outputEntries.push({
-        name: chunk.fileName,
-        exports: chunk.exports,
-        deps: resolveDeps(chunk),
-        ...(await distSize(outDir, chunk.fileName)),
-        sideEffectSize: await sideEffectSize(outDir, chunk.fileName),
-      });
-    }
   }
 
   consola.log(
