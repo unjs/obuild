@@ -3,12 +3,12 @@
 import { parseArgs } from "node:util";
 import { consola } from "consola";
 import { loadConfig } from "c12";
-import type { PackageJson } from "pkg-types";
-import { join } from "pathe";
-import { createJiti } from "jiti";
+import { readPackageJSON } from 'pkg-types'
+import { join, resolve } from "pathe";
+import { colors } from "consola/utils";
 
-import { build } from "./build.ts";
 import type { BuildConfig, BuildEntry } from "./types.ts";
+import { build } from "./build.ts";
 import { inferEntries } from "./auto.ts";
 import { listRecursively } from "./utils.ts";
 
@@ -57,13 +57,9 @@ if (args.values.stub) {
 
 if (rawEntries.length === 0) {
   // If no entries are specified, infer them from the package.json
-  const jiti = createJiti(process.cwd());
-  const pkg: PackageJson =
-    ((await jiti.import("./package.json", {
-      try: true,
-      default: true,
-    })) as PackageJson) || ({} as PackageJson);
-  const sourceFiles = listRecursively(join(process.cwd(), "src"));
+  const pkgDir = resolve(process.cwd())
+  const pkg = await readPackageJSON(pkgDir)
+  const sourceFiles = listRecursively(join(pkgDir, "src"));
   const res = inferEntries(pkg, sourceFiles, process.cwd())
   entries.push({
     type: 'bundle',
@@ -74,6 +70,26 @@ if (rawEntries.length === 0) {
     consola.error("No build entries specified.");
     process.exit(1);
   }
+  consola.log(
+    "🔍️Automatically detected entries ",
+    colors.cyan(
+      res.entries
+        .map((e) =>
+          colors.bold(
+            (e.input as string)
+              .replace(resolve(process.cwd()) + "/", "")
+              .replace(/\/$/, "/*"),
+          ),
+        )
+        .join(", "),
+    ),
+    colors.gray(
+      ["esm", res.dts && "dts"]
+        .filter(Boolean)
+        .map((tag) => `[${tag}]`)
+        .join(" "),
+    ),
+  );
 }
 
 await build({

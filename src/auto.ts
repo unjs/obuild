@@ -6,7 +6,6 @@ import { extractExportFilenames } from "./utils.ts";
 
 type InferEntriesResult = {
   entries: BuildEntry[];
-  cjs?: boolean;
   dts?: boolean;
   warnings: string[];
 };
@@ -52,21 +51,18 @@ export function inferEntries(
     const isJS = output.file.endsWith(".js");
     if ((isESMPkg && isJS) || output.file.endsWith(".mjs")) {
       output.type = "esm";
-    } else if ((!isESMPkg && isJS) || output.file.endsWith(".cjs")) {
-      output.type = "cjs";
     }
   }
 
-  let cjs = false;
   let dts = false;
 
   // Infer entries from package files
   const entries: BuildEntry[] = [];
   for (const output of outputs) {
-    // Supported output file extensions are `.d.ts`, `.cjs` and `.mjs`
+    // Supported output file extensions are `.d.ts`, and `.mjs`
     // But we support any file extension here in case user has extended rolldown options
     const outputSlug = output.file.replace(
-      /(\*[^/\\]*|\.d\.(m|c)?ts|\.\w+)$/,
+      /(\*[^/\\]*|\.d\.(m)?ts|\.\w+)$/,
       "",
     );
     const isDir = outputSlug.endsWith("/");
@@ -87,7 +83,7 @@ export function inferEntries(
       );
       return sourceFiles
         .find((i) => SOURCE_RE.test(i))
-        ?.replace(/(\.d\.(m|c)?ts|\.\w+)$/, "");
+        ?.replace(/(\.d\.(m)?ts|\.\w+)$/, "");
     }, undefined as any);
 
     if (!input) {
@@ -97,15 +93,11 @@ export function inferEntries(
       continue;
     }
 
-    if (output.type === "cjs") {
-      cjs = true;
-    }
-
     const entry =
       entries.find((i) => i.input === input) ||
       entries[entries.push({ input, type: 'bundle' }) - 1];
 
-    if (/\.d\.(m|c)?ts$/.test(output.file)) {
+    if (/\.d\.(m)?ts$/.test(output.file)) {
       dts = true;
     }
 
@@ -114,7 +106,7 @@ export function inferEntries(
     }
   }
 
-  return { entries, cjs, dts, warnings };
+  return { entries, dts, warnings };
 }
 
 export const getEntrypointPaths = (path: string): string[] => {

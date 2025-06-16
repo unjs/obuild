@@ -6,7 +6,7 @@ import type {
 } from "./types.ts";
 
 import { fileURLToPath } from "node:url";
-import { isAbsolute, join, resolve } from "pathe";
+import { isAbsolute, resolve } from "pathe";
 import { rm } from "node:fs/promises";
 import { consola } from "consola";
 import { colors as c } from "consola/utils";
@@ -14,7 +14,7 @@ import { rolldownBuild } from "./builders/bundle.ts";
 import { transformDir } from "./builders/transform.ts";
 import { fmtPath, analyzeDir } from "./utils.ts";
 import prettyBytes from "pretty-bytes";
-import { createJiti } from "jiti";
+import { readPackageJSON } from "pkg-types";
 import type { PackageJson } from "pkg-types";
 
 /**
@@ -24,12 +24,7 @@ export async function build(config: BuildConfig): Promise<void> {
   const start = Date.now();
 
   const pkgDir = normalizePath(config.cwd);
-  const jiti = createJiti(pkgDir);
-  const pkg: PackageJson =
-    ((await jiti.import("./package.json", {
-      try: true,
-      default: true,
-    })) as PackageJson) || ({} as PackageJson);
+  const pkg = (await readPackageJSON(pkgDir)) || {} as PackageJson;
   const ctx: BuildContext = { pkg, pkgDir };
 
   consola.log(

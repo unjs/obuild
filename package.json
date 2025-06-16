@@ -32,7 +32,6 @@
     "consola": "^3.4.2",
     "defu": "^6.1.4",
     "exsolve": "^1.0.5",
-    "jiti": "^2.4.2",
     "magic-string": "^0.30.17",
     "oxc-minify": "^0.72.2",
     "oxc-parser": "^0.72.2",
