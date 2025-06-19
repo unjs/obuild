@@ -1,6 +1,6 @@
 import { builtinModules } from "node:module";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, relative, join, basename, extname, resolve } from "node:path";
+import { dirname, relative, join, basename, extname, resolve } from "pathe";
 import { consola } from "consola";
 import { colors as c } from "consola/utils";
 import { rolldown } from "rolldown";
@@ -186,7 +186,7 @@ export function normalizeBundleInputs(
   for (let src of Array.isArray(input) ? input : [input]) {
     src = resolveModulePath(src, {
       from: ctx.pkgDir,
-      extensions: [".ts", ".js", ".mjs", ".cjs", ".json"],
+      extensions: [".tsx", ".ts", ".js", ".jsx", ".mjs", ".cjs", ".json"],
     });
     let relativeSrc = relative(join(ctx.pkgDir, "src"), src);
     if (relativeSrc.startsWith("..")) {

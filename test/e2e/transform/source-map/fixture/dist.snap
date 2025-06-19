@@ -1,0 +1,119 @@
+[
+  [
+    "index.d.mts",
+    "export { test } from "./test.mjs";
+// Module resolution test imports, using no extensions
+export { tsModule } from "./modules/ts-module.mjs";
+// @ts-expect-error - JS test file
+export { jsModule } from "./modules/js-module.js";
+declare const _default: string;
+export default _default;
+",
+  ],
+  [
+    "index.mjs",
+    "export { test } from "./test.mjs";
+// Module resolution test imports, using no extensions
+export { tsModule } from "./modules/ts-module.mjs";
+// @ts-expect-error - JS test file
+export { jsModule } from "./modules/js-module.js";
+export default "default export";
+",
+  ],
+  [
+    "index.mjs.map",
+    "{
+  "version": 3,
+  "file": "index.mjs",
+  "mappings": "AAAA,SAAS,YAAW;;AAGpB,SAAS,gBAAe;;AAGxB,SAAS,gBAAe;AAExB,eAAe",
+  "names": [],
+  "ignoreList": [],
+  "sources": [
+    "../src/index.ts"
+  ],
+  "sourcesContent": [
+    "export { test } from \"./test.ts\"; // Explicitly import the test file with .ts extension\n\n// Module resolution test imports, using no extensions\nexport { tsModule } from \"./modules/ts-module.ts\";\n\n// @ts-expect-error - JS test file\nexport { jsModule } from \"./modules/js-module\";\n\nexport default \"default export\";\n"
+  ]
+}",
+  ],
+  [
+    "modules/js-module.d.ts",
+    "export declare function jsModule(): string;
+",
+  ],
+  [
+    "modules/js-module.js",
+    "export function jsModule() {
+  return "js-module";
+}
+",
+  ],
+  [
+    "modules/mjs-module.d.mts",
+    "export declare function mjsModule(): string;
+",
+  ],
+  [
+    "modules/mjs-module.mjs",
+    "export function mjsModule() {
+  return "mjs-module";
+}
+",
+  ],
+  [
+    "modules/ts-module.d.mts",
+    "export declare function tsModule(): string;
+",
+  ],
+  [
+    "modules/ts-module.mjs",
+    "export function tsModule() {
+	return "ts-module";
+}
+",
+  ],
+  [
+    "modules/ts-module.mjs.map",
+    "{
+  "version": 3,
+  "file": "ts-module.mjs",
+  "mappings": "AAAA,OAAO,SAAS,WAAW;AACzB,QAAO;AACT",
+  "names": [],
+  "ignoreList": [],
+  "sources": [
+    "../../src/modules/ts-module.ts"
+  ],
+  "sourcesContent": [
+    "export function tsModule() {\n  return \"ts-module\";\n}\n"
+  ]
+}",
+  ],
+  [
+    "test.d.mts",
+    "export declare function test(): string;
+",
+  ],
+  [
+    "test.mjs",
+    "export function test() {
+	return "test";
+}
+",
+  ],
+  [
+    "test.mjs.map",
+    "{
+  "version": 3,
+  "file": "test.mjs",
+  "mappings": "AAAA,OAAO,SAAS,OAAO;AACrB,QAAO;AACT",
+  "names": [],
+  "ignoreList": [],
+  "sources": [
+    "../src/test.ts"
+  ],
+  "sourcesContent": [
+    "export function test() {\n  return \"test\";\n}\n"
+  ]
+}",
+  ],
+]

@@ -7,3 +7,5 @@ export type {
   BundleEntry,
   TransformEntry,
 } from "./types.ts";
+
+export type * from "./builders/transform/plugins/index.ts";
