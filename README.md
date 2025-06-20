@@ -12,7 +12,7 @@ The **obuild** project aims to be the next-generation successor to the current [
 
 Some differences are not easy to adopt. Developing as a standalone project allows for faster progress and dogfooding in real projects.
 
-## Proof of concept
+## Proof of Concept
 
 > [!IMPORTANT]
 >
@@ -22,7 +22,7 @@ Some differences are not easy to adopt. Developing as a standalone project allow
 >
 > Feedback and contributions are very welcome! If you'd like to make changes with more than a few lines of code, please open an issue first to discuss.
 
-## Currently used by
+## Currently Used by
 
 - [📦 obuild](https://github.com/unjs/obuild/)
 - [🌳 rou3](https://github.com/h3js/rou3/)
