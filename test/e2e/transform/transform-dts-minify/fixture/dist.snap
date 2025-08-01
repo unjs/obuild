@@ -1,0 +1,53 @@
+[
+  [
+    "index.d.mts",
+    "export { test } from "./test.mjs";
+// Module resolution test imports, using no extensions
+export { tsModule } from "./modules/ts-module.mjs";
+// @ts-expect-error - JS test file
+export { jsModule } from "./modules/js-module.js";
+declare const _default: string;
+export default _default;
+",
+  ],
+  [
+    "index.mjs",
+    "export{test}from"./test.mjs";export{tsModule}from"./modules/ts-module.mjs";export{jsModule}from"./modules/js-module.js";export default `default export`;",
+  ],
+  [
+    "modules/js-module.d.ts",
+    "export declare function jsModule(): string;
+",
+  ],
+  [
+    "modules/js-module.js",
+    "export function jsModule(){return`js-module`}",
+  ],
+  [
+    "modules/mjs-module.d.mts",
+    "export declare function mjsModule(): string;
+",
+  ],
+  [
+    "modules/mjs-module.mjs",
+    "export function mjsModule(){return`mjs-module`}",
+  ],
+  [
+    "modules/ts-module.d.mts",
+    "export declare function tsModule(): string;
+",
+  ],
+  [
+    "modules/ts-module.mjs",
+    "export function tsModule(){return`ts-module`}",
+  ],
+  [
+    "test.d.mts",
+    "export declare function test(): string;
+",
+  ],
+  [
+    "test.mjs",
+    "export function test(){return`test`}",
+  ],
+]

@@ -1,12 +1,12 @@
 import { describe, test, expect, beforeAll } from "vitest";
-
-import { build } from "../src/build.ts";
-import { readdir, readFile, rm, stat } from "node:fs/promises";
+import { build } from "../../../src/build.ts";
+import { rm, stat } from "node:fs/promises";
+import { readDistFiles, readFileNames } from "../../utils.ts";
 
 const fixtureDir = new URL("fixture/", import.meta.url);
 const distDir = new URL("dist/", fixtureDir);
 
-describe("obuild", () => {
+describe("bundle", () => {
   beforeAll(async () => {
     await rm(distDir, { recursive: true, force: true });
   });
@@ -16,34 +16,28 @@ describe("obuild", () => {
       cwd: fixtureDir,
       entries: [
         { type: "bundle", input: ["src/index", "src/cli"] },
-        { type: "transform", input: "src/runtime", outDir: "dist/runtime" },
-        "src/utils.ts",
+        { type: "bundle", input: "src/utils.ts" },
       ],
     });
-  });
+  }, 20_000);
 
   test("dist files match expected", async () => {
-    const distFiles = await readdir(distDir, { recursive: true }).then((r) =>
-      r.sort(),
-    );
+    const distFiles = await readFileNames(distDir);
+
     expect(distFiles).toMatchInlineSnapshot(`
       [
         "cli.d.mts",
         "cli.mjs",
         "index.d.mts",
         "index.mjs",
-        "runtime",
-        "runtime/index.d.mts",
-        "runtime/index.mjs",
-        "runtime/js-module.js",
-        "runtime/test.d.mts",
-        "runtime/test.mjs",
-        "runtime/ts-module.d.mts",
-        "runtime/ts-module.mjs",
         "utils.d.mts",
         "utils.mjs",
       ]
     `);
+
+    await expect(await readDistFiles(distDir)).toMatchFileSnapshot(
+      "./fixture/dist.snap",
+    );
   });
 
   test("validate dist entries", async () => {
@@ -55,14 +49,6 @@ describe("obuild", () => {
 
     const distUtils = await import(new URL("utils.mjs", distDir).href);
     expect(distUtils.test).instanceOf(Function);
-  });
-
-  test("runtime .dts files use .mjs extension", async () => {
-    const runtimeIndexMts = await readFile(
-      new URL("runtime/index.d.mts", distDir),
-      "utf8",
-    );
-    expect(runtimeIndexMts).contain("./test.mjs");
   });
 
   test("cli shebang is executable", async () => {

@@ -1,6 +1,6 @@
 {
   "name": "obuild",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Zero-config ESM/TS package builder",
   "repository": "unjs/obuild",
   "license": "MIT",
@@ -28,17 +28,21 @@
     "test:types": "tsc --noEmit --skipLibCheck"
   },
   "dependencies": {
+    "@obuild/plugin-oxc-transform": "^0.0.1",
+    "@obuild/plugin-oxc-dts": "^0.0.1",
+    "@obuild/plugin-oxc-minify": "^0.0.1",
+    "autoprefixer": "^10.4.21",
     "c12": "^3.0.4",
     "consola": "^3.4.2",
     "defu": "^6.1.4",
     "exsolve": "^1.0.5",
-    "magic-string": "^0.30.17",
+    "get-tsconfig": "^4.10.1",
     "oxc-minify": "^0.72.3",
     "oxc-parser": "^0.72.3",
-    "oxc-transform": "^0.72.3",
+    "pathe": "^2.0.3",
     "pretty-bytes": "^7.0.0",
-    "rolldown": "1.0.0-beta.12",
-    "rolldown-plugin-dts": "^0.13.8",
+    "rolldown": "1.0.0-beta.17",
+    "rolldown-plugin-dts": "^0.13.11",
     "tinyglobby": "^0.2.14"
   },
   "devDependencies": {

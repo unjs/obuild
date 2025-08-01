@@ -6,10 +6,13 @@ import type {
   RolldownPluginOption,
 } from "rolldown";
 
-import type { Options as DtsOptions } from "rolldown-plugin-dts";
-import type { TransformOptions } from "oxc-transform";
-import type { MinifyOptions as OXCMinifyOptions } from "oxc-minify";
 import type { ResolveOptions } from "exsolve";
+import type { Options as DtsOptions } from "rolldown-plugin-dts";
+import type { OxcDtsPluginOptions } from "@obuild/plugin-oxc-dts";
+import type { OxcMinifyPluginOptions } from "@obuild/plugin-oxc-minify";
+import type { OxcTransformPluginOptions } from "@obuild/plugin-oxc-transform";
+import type { Plugin } from "./builders/transform/plugins/index.ts";
+import type { TsConfigJsonResolved as TSConfig } from "get-tsconfig";
 
 export interface BuildContext {
   pkgDir: string;
@@ -54,17 +57,16 @@ export type BundleEntry = _BuildEntry & {
 
   /**
    * Declaration generation options.
+   * Options are inferred from the `tsconfig.json` file if available.
    *
    * See [rolldown-plugin-dts](https://github.com/sxzz/rolldown-plugin-dts) for more details.
-   *
-   * Options are inferred from the `tsconfig.json` file if available.
    *
    * Set to `false` to disable.
    */
   dts?: boolean | DtsOptions;
 };
 
-export type TransformEntry = _BuildEntry & {
+type _TransformEntry = _BuildEntry & {
   type: "transform";
 
   /**
@@ -73,18 +75,11 @@ export type TransformEntry = _BuildEntry & {
   input: string;
 
   /**
-   * Minify the output using oxc-minify.
+   * Source map directory relative to project root.
    *
-   * Defaults to `false` if not provided.
+   * Defaults to `outDir` if not provided.
    */
-  minify?: boolean | OXCMinifyOptions;
-
-  /**
-   * Options passed to oxc-transform.
-   *
-   * See [oxc-transform](https://www.npmjs.com/package/oxc-transform) for more details.
-   */
-  oxc?: TransformOptions;
+  mapDir?: string;
 
   /**
    * Options passed to exsolve for module resolution.
@@ -92,8 +87,62 @@ export type TransformEntry = _BuildEntry & {
    * See [exsolve](https://github.com/unjs/exsolve) for more details.
    */
   resolve?: Omit<ResolveOptions, "from">;
+
+  /**
+   * TypeScript configuration for the entry.
+   * Options are inferred from the `tsconfig.json` file if available.
+   *
+   * See [tsconfig.json](https://www.typescriptlang.org/tsconfig) for more details.
+   */
+  tsConfig?: TSConfig;
 };
 
+export type DefaultTransformEntry = _TransformEntry & {
+  /**
+   * Using custom plugins is not allowed when `oxc` options are provided.
+   * You should remove the `oxc` options and pass them to the added plugins directly.
+   */
+  plugins?: "You can only use custom plugins when `oxc` option is not defined.";
+
+  oxc?: {
+    /**
+     * Options passed to oxc-transform.
+     *
+     * See [oxc-transform](https://www.npmjs.com/package/oxc-transform) for more details.
+     */
+    transform?: false | OxcTransformPluginOptions["transform"];
+
+    /**
+     * Minify the output using oxc-minify.
+     *
+     * Defaults to `false` if not provided.
+     */
+    minify?: false | OxcMinifyPluginOptions["minify"];
+
+    /**
+     * Isolated declarations options.
+     *
+     * See [oxc-transform](https://www.npmjs.com/package/oxc-transform) for more details.
+     */
+    dts?: false | OxcDtsPluginOptions["declarations"];
+  };
+};
+
+type CustomTransformEntry = _TransformEntry & {
+  /**
+   * List of pluginss to use for the transformation.
+   * The plugins will be applied in the order they are defined.
+   */
+  plugins?: Plugin[];
+
+  /**
+   * Options for the default plugins are not allowed when custom `plugins` are used.
+   * You can pass the desired options for these to the added plugins directly.
+   */
+  oxc?: "You can only set settings for `oxc` when `plugins` option is not defined.";
+};
+
+export type TransformEntry = DefaultTransformEntry | CustomTransformEntry;
 export type BuildEntry = BundleEntry | TransformEntry;
 
 export interface BuildHooks {

@@ -1,0 +1,40 @@
+[
+  [
+    "index.mjs",
+    "export { test } from "./test.mjs";
+// Module resolution test imports, using no extensions
+export { tsModule } from "./modules/ts-module.mjs";
+// @ts-expect-error - JS test file
+export { jsModule } from "./modules/js-module.js";
+export default "default export";
+",
+  ],
+  [
+    "modules/js-module.js",
+    "export function jsModule() {
+  return "js-module";
+}
+",
+  ],
+  [
+    "modules/mjs-module.mjs",
+    "export function mjsModule() {
+  return "mjs-module";
+}
+",
+  ],
+  [
+    "modules/ts-module.mjs",
+    "export function tsModule() {
+	return "ts-module";
+}
+",
+  ],
+  [
+    "test.mjs",
+    "export function test() {
+	return "test";
+}
+",
+  ],
+]
