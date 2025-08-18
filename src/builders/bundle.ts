@@ -1,6 +1,6 @@
 import { builtinModules } from "node:module";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, relative, join, basename, extname, resolve } from "node:path";
+import { dirname, relative, join, basename, extname, resolve } from "pathe";
 import { consola } from "consola";
 import { colors as c } from "consola/utils";
 import { rolldown } from "rolldown";
@@ -49,10 +49,7 @@ export async function rolldownBuild(
       const hasDefaultExport = exportNames.includes("default");
       const firstLine = srcContents.split("\n")[0];
       const hasShebangLine = firstLine.startsWith("#!");
-      const relativeSrcPath = relative(dirname(distPath), srcPath).replaceAll(
-        "\\",
-        "/",
-      );
+      const relativeSrcPath = relative(dirname(distPath), srcPath);
       await writeFile(
         distPath,
         `${hasShebangLine ? firstLine + "\n" : ""}export * from "${relativeSrcPath}";\n${hasDefaultExport ? `export { default } from "${relativeSrcPath}";\n` : ""}`,
