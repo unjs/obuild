@@ -1,5 +1,5 @@
 import { readdirSync, statSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { join, resolve } from "pathe";
 
 import { type Plugin, rolldown } from "rolldown";
 import { minify } from "oxc-minify";
