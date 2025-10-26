@@ -5,7 +5,7 @@ import { consola } from "consola";
 import { colors as c } from "consola/utils";
 import { rolldown } from "rolldown";
 import { dts } from "rolldown-plugin-dts";
-import oxcParser from "oxc-parser";
+import { parseSync } from "oxc-parser";
 import { resolveModulePath } from "exsolve";
 import prettyBytes from "pretty-bytes";
 import { distSize, fmtPath, sideEffectSize } from "../utils.ts";
@@ -40,7 +40,7 @@ export async function rolldownBuild(
         `${c.magenta("[stub bundle] ")} ${c.underline(fmtPath(distPath))}`,
       );
       const srcContents = await readFile(srcPath, "utf8");
-      const parsed = await oxcParser.parseSync(srcPath, srcContents);
+      const parsed = await parseSync(srcPath, srcContents);
       const exportNames = parsed.module.staticExports.flatMap((e) =>
         e.entries.map((e) =>
           e.exportName.kind === "Default" ? "default" : e.exportName.name,
