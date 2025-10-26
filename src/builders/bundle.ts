@@ -40,7 +40,7 @@ export async function rolldownBuild(
         `${c.magenta("[stub bundle] ")} ${c.underline(fmtPath(distPath))}`,
       );
       const srcContents = await readFile(srcPath, "utf8");
-      const parsed = await parseSync(srcPath, srcContents);
+      const parsed = parseSync(srcPath, srcContents);
       const exportNames = parsed.module.staticExports.flatMap((e) =>
         e.entries.map((e) =>
           e.exportName.kind === "Default" ? "default" : e.exportName.name,
