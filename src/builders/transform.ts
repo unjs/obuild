@@ -7,8 +7,8 @@ import { consola } from "consola";
 import { colors as c } from "consola/utils";
 import { resolveModulePath, type ResolveOptions } from "exsolve";
 import MagicString from "magic-string";
-import oxcTransform from "oxc-transform";
-import oxcParser from "oxc-parser";
+import { transform } from "oxc-transform";
+import { parseAsync } from "oxc-parser";
 import { fmtPath } from "../utils.ts";
 import { glob } from "tinyglobby";
 import { minify } from "oxc-minify";
@@ -100,7 +100,7 @@ async function transformModule(entryPath: string, entry: TransformEntry) {
     sourceType: "module",
   } as const;
 
-  const parsed = oxcParser.parseSync(entryPath, sourceText, {
+  const parsed = await parseAsync(entryPath, sourceText, {
     ...sourceOptions,
   });
 
@@ -166,7 +166,7 @@ async function transformModule(entryPath: string, entry: TransformEntry) {
 
   sourceText = magicString.toString();
 
-  const transformed = oxcTransform.transform(entryPath, sourceText, {
+  const transformed = transform(entryPath, sourceText, {
     ...entry.oxc,
     ...sourceOptions,
     cwd: dirname(entryPath),
