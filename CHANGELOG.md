@@ -1,6 +1,52 @@
 # Changelog
 
 
+## v0.3.0
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.2.1...v0.3.0)
+
+### 🚀 Enhancements
+
+- **transform:** Add resolve options for `TransformEntry` ([#32](https://github.com/unjs/obuild/pull/32))
+
+### 🩹 Fixes
+
+- Move to `pathe` ([#57](https://github.com/unjs/obuild/pull/57))
+- **stub:** Use relative paths in stubs to fix Windows resolution ([#51](https://github.com/unjs/obuild/pull/51))
+
+### 💅 Refactors
+
+- Remove extra await ([#45](https://github.com/unjs/obuild/pull/45))
+
+### 📖 Documentation
+
+- Fix `defineBuildConfig` import ([#36](https://github.com/unjs/obuild/pull/36))
+- Capitalise titles ([#44](https://github.com/unjs/obuild/pull/44))
+
+### 📦 Build
+
+- ⚠️  Update deps ([b576b72](https://github.com/unjs/obuild/commit/b576b72))
+
+### 🏡 Chore
+
+- Update eslint config ([a2e3d88](https://github.com/unjs/obuild/commit/a2e3d88))
+- Update imports ([3a1f342](https://github.com/unjs/obuild/commit/3a1f342))
+- Use native node typescript support ([#54](https://github.com/unjs/obuild/pull/54))
+
+#### ⚠️ Breaking Changes
+
+- ⚠️  Update deps ([b576b72](https://github.com/unjs/obuild/commit/b576b72))
+
+### ❤️ Contributors
+
+- Author: Sunny-117 <zhiqiangfu6@gmail.com>
+- Daniel Schmitz ([@blouflashdb](https://github.com/blouflashdb))
+- Abeer0 ([@iiio2](https://github.com/iiio2))
+- Damian Głowala ([@DamianGlowala](https://github.com/DamianGlowala))
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Typed SIGTERM ([@typed-sigterm](https://github.com/typed-sigterm))
+- Balázs Németh ([@zsilbi](https://github.com/zsilbi))
+
 ## v0.2.1
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.2.0...v0.2.1)
