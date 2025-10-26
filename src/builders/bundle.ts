@@ -49,9 +49,10 @@ export async function rolldownBuild(
       const hasDefaultExport = exportNames.includes("default");
       const firstLine = srcContents.split("\n")[0];
       const hasShebangLine = firstLine.startsWith("#!");
+      const relativeSrcPath = relative(dirname(distPath), srcPath);
       await writeFile(
         distPath,
-        `${hasShebangLine ? firstLine + "\n" : ""}export * from "${srcPath}";\n${hasDefaultExport ? `export { default } from "${srcPath}";\n` : ""}`,
+        `${hasShebangLine ? firstLine + "\n" : ""}export * from "${relativeSrcPath}";\n${hasDefaultExport ? `export { default } from "${relativeSrcPath}";\n` : ""}`,
         "utf8",
       );
       if (hasShebangLine) {
@@ -59,7 +60,7 @@ export async function rolldownBuild(
       }
       await writeFile(
         distPath.replace(/\.mjs$/, ".d.mts"),
-        `export * from "${srcPath}";\n${hasDefaultExport ? `export { default } from "${srcPath}";\n` : ""}`,
+        `export * from "${relativeSrcPath}";\n${hasDefaultExport ? `export { default } from "${relativeSrcPath}";\n` : ""}`,
         "utf8",
       );
     }
