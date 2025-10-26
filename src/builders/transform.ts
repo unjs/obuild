@@ -1,7 +1,7 @@
 import type { BuildContext, TransformEntry } from "../types.ts";
 
 import { pathToFileURL } from "node:url";
-import { dirname, extname, join, relative } from "node:path";
+import { dirname, extname, join, relative } from "pathe";
 import { mkdir, readFile, symlink, writeFile } from "node:fs/promises";
 import { consola } from "consola";
 import { colors as c } from "consola/utils";

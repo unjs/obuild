@@ -1,6 +1,6 @@
 import { builtinModules } from "node:module";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, relative, join, basename, extname, resolve } from "node:path";
+import { dirname, relative, join, basename, extname, resolve } from "pathe";
 import { consola } from "consola";
 import { colors as c } from "consola/utils";
 import { rolldown } from "rolldown";

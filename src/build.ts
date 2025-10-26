@@ -6,7 +6,7 @@ import type {
 } from "./types.ts";
 
 import { fileURLToPath } from "node:url";
-import { isAbsolute, join, resolve } from "node:path";
+import { isAbsolute, join, resolve } from "pathe";
 import { rm } from "node:fs/promises";
 import { consola } from "consola";
 import { colors as c } from "consola/utils";
