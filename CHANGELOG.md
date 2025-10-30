@@ -1,6 +1,22 @@
 # Changelog
 
 
+## v0.3.1
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.3.0...v0.3.1)
+
+### 🚀 Enhancements
+
+- Basic transform filter support ([aebfaca](https://github.com/unjs/obuild/commit/aebfaca))
+
+### 🏡 Chore
+
+- Update deps ([b3abd69](https://github.com/unjs/obuild/commit/b3abd69))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.3.0
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.2.1...v0.3.0)
