@@ -32,7 +32,7 @@ export async function transformDir(
   const promises: Promise<string>[] = [];
 
   for await (const entryName of await glob("**/*.*", { cwd: entry.input })) {
-    if (entry.filter?.(entryName)) {
+    if (entry.filter && (await entry.filter(entryName)) === false) {
       continue;
     }
     promises.push(
