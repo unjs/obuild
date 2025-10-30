@@ -1,6 +1,18 @@
 # Changelog
 
 
+## v0.3.2
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.3.1...v0.3.2)
+
+### 🩹 Fixes
+
+- Correctly apply transform `filter` hook ([eee3f4d](https://github.com/unjs/obuild/commit/eee3f4d))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.3.1
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.3.0...v0.3.1)
