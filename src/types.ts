@@ -92,6 +92,11 @@ export type TransformEntry = _BuildEntry & {
    * See [exsolve](https://github.com/unjs/exsolve) for more details.
    */
   resolve?: Omit<ResolveOptions, "from">;
+
+  /**
+   * A filter function to exclude files from being transformed.
+   */
+  filter?: (filePath: string) => boolean | Promise<boolean>;
 };
 
 export type BuildEntry = BundleEntry | TransformEntry;

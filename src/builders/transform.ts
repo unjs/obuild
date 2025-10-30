@@ -32,6 +32,9 @@ export async function transformDir(
   const promises: Promise<string>[] = [];
 
   for await (const entryName of await glob("**/*.*", { cwd: entry.input })) {
+    if (entry.filter?.(entryName)) {
+      continue;
+    }
     promises.push(
       (async () => {
         const entryPath = join(entry.input, entryName);
