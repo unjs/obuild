@@ -61,7 +61,11 @@ export async function transformDir(
               const entryDistPath = join(entry.outDir!, entryName);
               await mkdir(dirname(entryDistPath), { recursive: true });
               if (entry.stub) {
-                await symlink(entryPath, entryDistPath, "junction");
+                await symlink(entryPath, entryDistPath, "junction").catch(
+                  () => {
+                    /* exists */
+                  },
+                );
               } else {
                 const code = await readFile(entryPath, "utf8");
                 await writeFile(entryDistPath, code, "utf8");
