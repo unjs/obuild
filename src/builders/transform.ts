@@ -94,13 +94,6 @@ export async function transformDir(
  * Transform a .ts module using oxc-transform.
  */
 async function transformModule(entryPath: string, entry: TransformEntry) {
-  if (entry.stub) {
-    return {
-      code: `export * from ${JSON.stringify(entryPath)};`,
-      declaration: `export * from ${JSON.stringify(entryPath)};`,
-    };
-  }
-
   let sourceText = await readFile(entryPath, "utf8");
 
   const sourceOptions = {
@@ -111,6 +104,21 @@ async function transformModule(entryPath: string, entry: TransformEntry) {
   const parsed = await parseAsync(entryPath, sourceText, {
     ...sourceOptions,
   });
+
+  if (entry.stub) {
+    const hasDefaultExport =
+      parsed?.module?.staticExports?.find((exp) =>
+        exp.entries.some((e) => e.exportName.kind === "Default"),
+      ) !== undefined;
+    const url = pathToFileURL(entryPath).href;
+    const code = `export * from "${url}";${
+      hasDefaultExport ? `\nexport { default } from "${url}";` : ""
+    }`;
+    return {
+      code,
+      declaration: code,
+    };
+  }
 
   if (parsed.errors.length > 0) {
     throw new Error(`Errors while parsing ${entryPath}:`, {
