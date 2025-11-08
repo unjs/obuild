@@ -111,12 +111,13 @@ async function transformModule(entryPath: string, entry: TransformEntry) {
         exp.entries.some((e) => e.exportName.kind === "Default"),
       ) !== undefined;
     const url = pathToFileURL(entryPath).href;
-    const code = `export * from "${url}";${
-      hasDefaultExport ? `\nexport { default } from "${url}";` : ""
-    }`;
     return {
-      code,
-      declaration: code,
+      code: `export * from "${url}";${
+        hasDefaultExport ? `\nexport { default } from "${url}";` : ""
+      }`,
+      declaration: `export * from "${entryPath}";${
+        hasDefaultExport ? `\nexport { default } from "${entryPath}";` : ""
+      }`,
     };
   }
 
