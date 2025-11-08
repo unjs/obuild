@@ -1,6 +1,18 @@
 # Changelog
 
 
+## v0.4.1
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.0...v0.4.1)
+
+### 🏡 Chore
+
+- Fix release script ([8c2ef1e](https://github.com/unjs/obuild/commit/8c2ef1e))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.0
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.3.2...v0.4.0)
