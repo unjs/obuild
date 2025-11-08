@@ -34,10 +34,14 @@ export async function transformDir(
         switch (ext) {
           case ".ts": {
             {
-              const transformed = await transformModule(entryPath, entry);
               const entryDistPath = join(
                 entry.outDir!,
                 entryName.replace(/\.ts$/, ".mjs"),
+              );
+              const transformed = await transformModule(
+                entryPath,
+                entry,
+                entryDistPath,
               );
               await mkdir(dirname(entryDistPath), { recursive: true });
               await writeFile(entryDistPath, transformed.code, "utf8");
@@ -93,7 +97,11 @@ export async function transformDir(
 /**
  * Transform a .ts module using oxc-transform.
  */
-async function transformModule(entryPath: string, entry: TransformEntry) {
+async function transformModule(
+  entryPath: string,
+  entry: TransformEntry,
+  entryDistPath: string,
+) {
   let sourceText = await readFile(entryPath, "utf8");
 
   const sourceOptions = {
@@ -110,14 +118,13 @@ async function transformModule(entryPath: string, entry: TransformEntry) {
       parsed?.module?.staticExports?.find((exp) =>
         exp.entries.some((e) => e.exportName.kind === "Default"),
       ) !== undefined;
-    const url = pathToFileURL(entryPath).href;
+    const relativePath = relative(dirname(entryDistPath), entryPath);
+    const code = `export * from "${relativePath}";${
+      hasDefaultExport ? `\nexport { default } from "${relativePath}";` : ""
+    }`;
     return {
-      code: `export * from "${url}";${
-        hasDefaultExport ? `\nexport { default } from "${url}";` : ""
-      }`,
-      declaration: `export * from "${entryPath}";${
-        hasDefaultExport ? `\nexport { default } from "${entryPath}";` : ""
-      }`,
+      code,
+      declaration: code,
     };
   }
 
