@@ -1,6 +1,33 @@
 # Changelog
 
 
+## v0.4.0
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.3.2...v0.4.0)
+
+### 🚀 Enhancements
+
+- ⚠️  Stub transform with individual links ([#60](https://github.com/unjs/obuild/pull/60))
+
+### 🩹 Fixes
+
+- Correctly apply transform `filter` hook ([eee3f4d](https://github.com/unjs/obuild/commit/eee3f4d))
+
+### 🏡 Chore
+
+- **release:** V0.3.2 ([4ed245e](https://github.com/unjs/obuild/commit/4ed245e))
+- Update deps ([dd4b400](https://github.com/unjs/obuild/commit/dd4b400))
+- Add .prettierignore file ([#59](https://github.com/unjs/obuild/pull/59))
+
+#### ⚠️ Breaking Changes
+
+- ⚠️  Stub transform with individual links ([#60](https://github.com/unjs/obuild/pull/60))
+
+### ❤️ Contributors
+
+- Abeer0 ([@iiio2](https://github.com/iiio2))
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.3.2
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.3.1...v0.3.2)
