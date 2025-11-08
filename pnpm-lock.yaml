@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  obuild: link:.
+
 importers:
 
   .:
@@ -75,6 +78,12 @@ importers:
       vitest:
         specifier: ^4.0.8
         version: 4.0.8(@types/node@24.10.0)(jiti@2.6.1)
+
+  test/fixture:
+    dependencies:
+      obuild:
+        specifier: link:../..
+        version: link:../..
 
 packages:
 

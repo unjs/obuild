@@ -21,14 +21,6 @@ export async function transformDir(
   ctx: BuildContext,
   entry: TransformEntry,
 ): Promise<void> {
-  if (entry.stub) {
-    consola.log(
-      `${c.magenta("[stub transform]   ")} ${c.underline(fmtPath(entry.outDir!) + "/")}`,
-    );
-    await symlink(entry.input, entry.outDir!, "junction");
-    return;
-  }
-
   const promises: Promise<string>[] = [];
 
   for await (const entryName of await glob("**/*.*", { cwd: entry.input })) {
@@ -68,13 +60,15 @@ export async function transformDir(
             {
               const entryDistPath = join(entry.outDir!, entryName);
               await mkdir(dirname(entryDistPath), { recursive: true });
-              const code = await readFile(entryPath, "utf8");
-              await writeFile(entryDistPath, code, "utf8");
-
-              if (SHEBANG_RE.test(code)) {
-                await makeExecutable(entryDistPath);
+              if (entry.stub) {
+                await symlink(entryPath, entryDistPath, "junction");
+              } else {
+                const code = await readFile(entryPath, "utf8");
+                await writeFile(entryDistPath, code, "utf8");
+                if (SHEBANG_RE.test(code)) {
+                  await makeExecutable(entryDistPath);
+                }
               }
-
               return entryDistPath;
             }
           }
@@ -86,7 +80,7 @@ export async function transformDir(
   const writtenFiles = await Promise.all(promises);
 
   consola.log(
-    `\n${c.magenta("[transform] ")}${c.underline(fmtPath(entry.outDir!) + "/")}\n${writtenFiles
+    `\n${c.magenta("[transform] ")}${c.underline(fmtPath(entry.outDir!) + "/")}${entry.stub ? c.dim(" (stub)") : ""}\n${writtenFiles
       .map((f) => c.dim(fmtPath(f)))
       .join("\n\n")}`,
   );
@@ -96,6 +90,13 @@ export async function transformDir(
  * Transform a .ts module using oxc-transform.
  */
 async function transformModule(entryPath: string, entry: TransformEntry) {
+  if (entry.stub) {
+    return {
+      code: `export * from ${JSON.stringify(entryPath)};`,
+      declaration: `export * from ${JSON.stringify(entryPath)};`,
+    };
+  }
+
   let sourceText = await readFile(entryPath, "utf8");
 
   const sourceOptions = {

@@ -37,7 +37,7 @@ export async function rolldownBuild(
       const distPath = join(ctx.pkgDir, "dist", `${distName}.mjs`);
       await mkdir(dirname(distPath), { recursive: true });
       consola.log(
-        `${c.magenta("[stub bundle] ")} ${c.underline(fmtPath(distPath))}`,
+        `${c.magenta("[bundle] ")} ${c.underline(fmtPath(distPath))} ${c.dim("(stub)")}`,
       );
       const srcContents = await readFile(srcPath, "utf8");
       const parsed = parseSync(srcPath, srcContents);
