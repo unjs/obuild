@@ -5,8 +5,10 @@
     "./cli": "./dist/cli.mjs",
     "./runtime/**": "./dist/runtime/**.mjs"
   },
+  "dependencies": {
+    "obuild": "latest"
+  },
   "scripts": {
-    "build": "obuild",
-    "prepack": "pnpm build"
+    "build": "obuild"
   }
 }

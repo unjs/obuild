@@ -38,6 +38,7 @@ describe("obuild", () => {
         "runtime/js-module.js",
         "runtime/test.d.mts",
         "runtime/test.mjs",
+        "runtime/test.txt",
         "runtime/ts-module.d.mts",
         "runtime/ts-module.mjs",
         "utils.d.mts",

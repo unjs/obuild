@@ -21,14 +21,6 @@ export async function transformDir(
   ctx: BuildContext,
   entry: TransformEntry,
 ): Promise<void> {
-  if (entry.stub) {
-    consola.log(
-      `${c.magenta("[stub transform]   ")} ${c.underline(fmtPath(entry.outDir!) + "/")}`,
-    );
-    await symlink(entry.input, entry.outDir!, "junction");
-    return;
-  }
-
   const promises: Promise<string>[] = [];
 
   for await (const entryName of await glob("**/*.*", { cwd: entry.input })) {
@@ -42,10 +34,14 @@ export async function transformDir(
         switch (ext) {
           case ".ts": {
             {
-              const transformed = await transformModule(entryPath, entry);
               const entryDistPath = join(
                 entry.outDir!,
                 entryName.replace(/\.ts$/, ".mjs"),
+              );
+              const transformed = await transformModule(
+                entryPath,
+                entry,
+                entryDistPath,
               );
               await mkdir(dirname(entryDistPath), { recursive: true });
               await writeFile(entryDistPath, transformed.code, "utf8");
@@ -68,13 +64,19 @@ export async function transformDir(
             {
               const entryDistPath = join(entry.outDir!, entryName);
               await mkdir(dirname(entryDistPath), { recursive: true });
-              const code = await readFile(entryPath, "utf8");
-              await writeFile(entryDistPath, code, "utf8");
-
-              if (SHEBANG_RE.test(code)) {
-                await makeExecutable(entryDistPath);
+              if (entry.stub) {
+                await symlink(entryPath, entryDistPath, "junction").catch(
+                  () => {
+                    /* exists */
+                  },
+                );
+              } else {
+                const code = await readFile(entryPath, "utf8");
+                await writeFile(entryDistPath, code, "utf8");
+                if (SHEBANG_RE.test(code)) {
+                  await makeExecutable(entryDistPath);
+                }
               }
-
               return entryDistPath;
             }
           }
@@ -86,7 +88,7 @@ export async function transformDir(
   const writtenFiles = await Promise.all(promises);
 
   consola.log(
-    `\n${c.magenta("[transform] ")}${c.underline(fmtPath(entry.outDir!) + "/")}\n${writtenFiles
+    `\n${c.magenta("[transform] ")}${c.underline(fmtPath(entry.outDir!) + "/")}${entry.stub ? c.dim(" (stub)") : ""}\n${writtenFiles
       .map((f) => c.dim(fmtPath(f)))
       .join("\n\n")}`,
   );
@@ -95,7 +97,11 @@ export async function transformDir(
 /**
  * Transform a .ts module using oxc-transform.
  */
-async function transformModule(entryPath: string, entry: TransformEntry) {
+async function transformModule(
+  entryPath: string,
+  entry: TransformEntry,
+  entryDistPath: string,
+) {
   let sourceText = await readFile(entryPath, "utf8");
 
   const sourceOptions = {
@@ -106,6 +112,21 @@ async function transformModule(entryPath: string, entry: TransformEntry) {
   const parsed = await parseAsync(entryPath, sourceText, {
     ...sourceOptions,
   });
+
+  if (entry.stub) {
+    const hasDefaultExport =
+      parsed?.module?.staticExports?.find((exp) =>
+        exp.entries.some((e) => e.exportName.kind === "Default"),
+      ) !== undefined;
+    const relativePath = relative(dirname(entryDistPath), entryPath);
+    const code = `export * from "${relativePath}";${
+      hasDefaultExport ? `\nexport { default } from "${relativePath}";` : ""
+    }`;
+    return {
+      code,
+      declaration: code,
+    };
+  }
 
   if (parsed.errors.length > 0) {
     throw new Error(`Errors while parsing ${entryPath}:`, {
