@@ -1,6 +1,18 @@
 # Changelog
 
 
+## v0.4.2
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.1...v0.4.2)
+
+### 🏡 Chore
+
+- Update oxc to 0.98 ([14a7ab3](https://github.com/unjs/obuild/commit/14a7ab3))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.1
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.0...v0.4.1)
