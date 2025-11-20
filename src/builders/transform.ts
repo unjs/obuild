@@ -7,11 +7,11 @@ import { consola } from "consola";
 import { colors as c } from "consola/utils";
 import { resolveModulePath, type ResolveOptions } from "exsolve";
 import MagicString from "magic-string";
-import { transform } from "oxc-transform";
-import { parseAsync } from "oxc-parser";
+import { transformSync } from "oxc-transform";
+import { parseSync } from "oxc-parser";
 import { fmtPath } from "../utils.ts";
 import { glob } from "tinyglobby";
-import { minify } from "oxc-minify";
+import { minifySync } from "oxc-minify";
 import { makeExecutable, SHEBANG_RE } from "./plugins/shebang.ts";
 
 /**
@@ -109,7 +109,7 @@ async function transformModule(
     sourceType: "module",
   } as const;
 
-  const parsed = await parseAsync(entryPath, sourceText, {
+  const parsed = parseSync(entryPath, sourceText, {
     ...sourceOptions,
   });
 
@@ -190,7 +190,7 @@ async function transformModule(
 
   sourceText = magicString.toString();
 
-  const transformed = transform(entryPath, sourceText, {
+  const transformed = transformSync(entryPath, sourceText, {
     ...entry.oxc,
     ...sourceOptions,
     cwd: dirname(entryPath),
@@ -220,7 +220,7 @@ async function transformModule(
   }
 
   if (entry.minify) {
-    const res = minify(
+    const res = minifySync(
       entryPath,
       transformed.code,
       entry.minify === true ? {} : entry.minify,

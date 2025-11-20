@@ -2,7 +2,7 @@ import { readdirSync, statSync } from "node:fs";
 import { join, resolve } from "pathe";
 
 import { type Plugin, rolldown } from "rolldown";
-import { minify } from "oxc-minify";
+import { minifySync } from "oxc-minify";
 import { gzipSync } from "node:zlib";
 
 export function fmtPath(path: string): string {
@@ -59,7 +59,7 @@ export async function distSize(
   });
 
   const code = output[0].code;
-  const { code: minified } = await minify(entry, code);
+  const { code: minified } = await minifySync(entry, code);
 
   return {
     size: Buffer.byteLength(code),
