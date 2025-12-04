@@ -40,7 +40,7 @@
     "pathe": "^2.0.3",
     "pretty-bytes": "^7.1.0",
     "rolldown": "1.0.0-beta.53",
-    "rolldown-plugin-dts": "^0.18.1",
+    "rolldown-plugin-dts": "^0.18.2",
     "tinyglobby": "^0.2.15"
   },
   "devDependencies": {
