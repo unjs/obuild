@@ -1,6 +1,18 @@
 # Changelog
 
 
+## v0.4.6
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.5...v0.4.6)
+
+### 🚀 Enhancements
+
+- **rolldown:** Use `dist/_libs` for bundled dependencies ([ec8c3fe](https://github.com/unjs/obuild/commit/ec8c3fe))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.5
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.4...v0.4.5)
