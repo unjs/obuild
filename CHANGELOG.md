@@ -1,6 +1,18 @@
 # Changelog
 
 
+## v0.4.7
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.6...v0.4.7)
+
+### 💅 Refactors
+
+- **rolldown:** Use `dist/_chunks` for chunks ([c1c8877](https://github.com/unjs/obuild/commit/c1c8877))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.6
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.5...v0.4.6)
