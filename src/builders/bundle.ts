@@ -71,7 +71,7 @@ export async function rolldownBuild(
     cwd: ctx.pkgDir,
     input: inputs,
     plugins: [shebangPlugin()] as Plugin[],
-    platform: "neutral",
+    platform: "node",
     external: [
       ...builtinModules,
       ...builtinModules.map((m) => `node:${m}`),
@@ -94,6 +94,7 @@ export async function rolldownBuild(
 
   const outConfig: OutputOptions = {
     dir: outDir,
+    format: "esm",
     entryFileNames: "[name].mjs",
     chunkFileNames: "_chunks/[name]-[hash].mjs",
     minify: entry.minify,
