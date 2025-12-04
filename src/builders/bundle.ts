@@ -96,7 +96,7 @@ export async function rolldownBuild(
     dir: outDir,
     format: "esm",
     entryFileNames: "[name].mjs",
-    chunkFileNames: "[name].mjs",
+    chunkFileNames: "_chunks/[name].mjs",
     minify: entry.minify,
     advancedChunks: {
       groups: [
@@ -106,7 +106,7 @@ export async function rolldownBuild(
             const pkgName = moduleId.match(
               /.*\/node_modules\/(?<package>@[^/]+\/[^/]+|[^/]+)/,
             )?.groups?.package;
-            return `_libs/${pkgName || "_libs_common"}`;
+            return `libs/${pkgName || "common"}`;
           },
         },
       ],
