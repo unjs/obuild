@@ -1,6 +1,22 @@
 # Changelog
 
 
+## v0.4.5
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.4...v0.4.5)
+
+### 🩹 Fixes
+
+- **rolldown:** Default platform to node ([439b03a](https://github.com/unjs/obuild/commit/439b03a))
+
+### 🏡 Chore
+
+- Update deps ([3a9d8e6](https://github.com/unjs/obuild/commit/3a9d8e6))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.4
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.3...v0.4.4)
