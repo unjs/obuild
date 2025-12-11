@@ -34,17 +34,17 @@
     "defu": "^6.1.4",
     "exsolve": "^1.0.8",
     "magic-string": "^0.30.21",
-    "oxc-minify": "^0.101.0",
-    "oxc-parser": "^0.101.0",
-    "oxc-transform": "^0.101.0",
+    "oxc-minify": "^0.102.0",
+    "oxc-parser": "^0.102.0",
+    "oxc-transform": "^0.102.0",
     "pathe": "^2.0.3",
     "pretty-bytes": "^7.1.0",
-    "rolldown": "1.0.0-beta.53",
-    "rolldown-plugin-dts": "^0.18.2",
+    "rolldown": "1.0.0-beta.54",
+    "rolldown-plugin-dts": "^0.18.3",
     "tinyglobby": "^0.2.15"
   },
   "devDependencies": {
-    "@types/node": "^24.10.1",
+    "@types/node": "^24.10.3",
     "@vitest/coverage-v8": "^4.0.15",
     "automd": "^0.4.2",
     "changelogen": "^0.6.2",
@@ -54,5 +54,5 @@
     "typescript": "^5.9.3",
     "vitest": "^4.0.15"
   },
-  "packageManager": "pnpm@10.24.0"
+  "packageManager": "pnpm@10.25.0"
 }
