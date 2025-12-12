@@ -1,6 +1,28 @@
 # Changelog
 
 
+## v0.4.8
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.7...v0.4.8)
+
+### 📖 Documentation
+
+- Add `c12` to "currently used" section ([#66](https://github.com/unjs/obuild/pull/66))
+
+### 🏡 Chore
+
+- Update deps ([81d54e2](https://github.com/unjs/obuild/commit/81d54e2))
+
+### 🤖 CI
+
+- Bump actions checkout ([#64](https://github.com/unjs/obuild/pull/64))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Abeer0 ([@iiio2](https://github.com/iiio2))
+- David Abou ([@davidabou](https://github.com/davidabou))
+
 ## v0.4.7
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.6...v0.4.7)
