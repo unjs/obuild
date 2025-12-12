@@ -29,6 +29,7 @@ Some differences are not easy to adopt. Developing as a standalone project allow
 - [💥 srvx](https://github.com/h3js/srvx)
 - [🕊️ unenv](https://github.com/unjs/unenv)
 - [🕰️ omnichron](https://github.com/oritwoen/omnichron)
+- [⚙️ c12](https://github.com/unjs/c12)
 - [...add yours...]
 
 ## Usage
