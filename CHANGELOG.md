@@ -1,6 +1,18 @@
 # Changelog
 
 
+## v0.4.9
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.8...v0.4.9)
+
+### 🏡 Chore
+
+- Update deps ([afc4bff](https://github.com/unjs/obuild/commit/afc4bff))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.8
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.7...v0.4.8)
