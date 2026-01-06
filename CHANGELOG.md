@@ -1,6 +1,18 @@
 # Changelog
 
 
+## v0.4.13
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.12...v0.4.13)
+
+### 🩹 Fixes
+
+- **rolldown:** Revert `includeDependenciesRecursively` ([7325ddd](https://github.com/unjs/obuild/commit/7325ddd))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.12
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.11...v0.4.12)
