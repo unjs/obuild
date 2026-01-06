@@ -1,6 +1,19 @@
 # Changelog
 
 
+## v0.4.12
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.11...v0.4.12)
+
+### 🩹 Fixes
+
+- **rolldown:** Enable `includeDependenciesRecursively` ([6974fb5](https://github.com/unjs/obuild/commit/6974fb5))
+- **bundle:** Avoid recursion on `resolveDeps` ([2bba5b9](https://github.com/unjs/obuild/commit/2bba5b9))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.11
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.10...v0.4.11)
