@@ -133,10 +133,12 @@ export async function rolldownBuild(
 
   const depsCache = new Map<OutputChunk, Set<string>>();
   const resolveDeps = (chunk: OutputChunk) => {
-    if (!depsCache.has(chunk)) {
-      depsCache.set(chunk, new Set<string>());
+    let deps = depsCache.get(chunk);
+    if (deps) {
+      return [...deps].sort();
     }
-    const deps = depsCache.get(chunk)!;
+    deps = new Set<string>();
+    depsCache.set(chunk, deps);
     for (const id of chunk.imports) {
       if (builtinModules.includes(id) || id.startsWith("node:")) {
         deps.add(`[Node.js]`);
