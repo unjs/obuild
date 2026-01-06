@@ -99,6 +99,8 @@ export async function rolldownBuild(
     chunkFileNames: "_chunks/[name].mjs",
     minify: entry.minify,
     advancedChunks: {
+      // Avoid merging dependencies into a single chunk
+      includeDependenciesRecursively: false,
       groups: [
         {
           test: /node_modules/,
