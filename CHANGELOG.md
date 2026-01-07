@@ -1,6 +1,18 @@
 # Changelog
 
 
+## v0.4.14
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.13...v0.4.14)
+
+### 🏡 Chore
+
+- Update rolldown to `1.0.0-beta.59` ([51bd7d2](https://github.com/unjs/obuild/commit/51bd7d2))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.13
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.12...v0.4.13)
