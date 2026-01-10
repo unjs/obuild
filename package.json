@@ -44,7 +44,7 @@
     "tinyglobby": "^0.2.15"
   },
   "devDependencies": {
-    "@types/node": "^25.0.3",
+    "@types/node": "^25.0.6",
     "@vitest/coverage-v8": "^4.0.16",
     "automd": "^0.4.2",
     "changelogen": "^0.6.2",
@@ -54,5 +54,5 @@
     "typescript": "^5.9.3",
     "vitest": "^4.0.16"
   },
-  "packageManager": "pnpm@10.27.0"
+  "packageManager": "pnpm@10.28.0"
 }
