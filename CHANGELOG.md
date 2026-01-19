@@ -1,6 +1,22 @@
 # Changelog
 
 
+## v0.4.15
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.14...v0.4.15)
+
+### 📦 Build
+
+- Import oxc utils from `rolldown/experimental` ([cf5f16e](https://github.com/unjs/obuild/commit/cf5f16e))
+
+### 🏡 Chore
+
+- Update oxc to 0.110 ([bc7a8f8](https://github.com/unjs/obuild/commit/bc7a8f8))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.14
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.13...v0.4.14)
