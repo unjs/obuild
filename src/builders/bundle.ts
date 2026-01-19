@@ -98,7 +98,7 @@ export async function rolldownBuild(
     entryFileNames: "[name].mjs",
     chunkFileNames: "_chunks/[name].mjs",
     minify: entry.minify,
-    advancedChunks: {
+    codeSplitting: {
       groups: [
         {
           test: /node_modules/,
