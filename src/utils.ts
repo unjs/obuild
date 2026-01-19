@@ -2,7 +2,7 @@ import { readdirSync, statSync } from "node:fs";
 import { join, resolve } from "pathe";
 
 import { type Plugin, rolldown } from "rolldown";
-import { minifySync } from "oxc-minify";
+import { minifySync } from "rolldown/experimental";
 import { gzipSync } from "node:zlib";
 
 export function fmtPath(path: string): string {

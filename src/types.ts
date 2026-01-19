@@ -7,9 +7,11 @@ import type {
 } from "rolldown";
 
 import type { Options as DtsOptions } from "rolldown-plugin-dts";
-import type { TransformOptions } from "oxc-transform";
-import type { MinifyOptions as OXCMinifyOptions } from "oxc-minify";
 import type { ResolveOptions } from "exsolve";
+import type {
+  TransformOptions,
+  MinifyOptions as OXCMinifyOptions,
+} from "rolldown/experimental";
 
 export interface BuildContext {
   pkgDir: string;

@@ -7,11 +7,9 @@ import { consola } from "consola";
 import { colors as c } from "consola/utils";
 import { resolveModulePath, type ResolveOptions } from "exsolve";
 import MagicString from "magic-string";
-import { transformSync } from "oxc-transform";
-import { parseSync } from "oxc-parser";
 import { fmtPath } from "../utils.ts";
 import { glob } from "tinyglobby";
-import { minifySync } from "oxc-minify";
+import { minifySync, transformSync, parseSync } from "rolldown/experimental";
 import { makeExecutable, SHEBANG_RE } from "./plugins/shebang.ts";
 
 /**
