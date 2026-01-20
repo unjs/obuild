@@ -1,6 +1,31 @@
 # Changelog
 
 
+## v0.4.18
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.17...v0.4.18)
+
+### 🩹 Fixes
+
+- Add `.d` suffix to type chunk groups ([e55c9f4](https://github.com/unjs/obuild/commit/e55c9f4))
+
+### 💅 Refactors
+
+- Update rollup to latest ([74786e4](https://github.com/unjs/obuild/commit/74786e4))
+
+### 📦 Build
+
+- Always use `obuild` bin ([d92d40b](https://github.com/unjs/obuild/commit/d92d40b))
+
+### 🤖 CI
+
+- Setup nightly releases ([a74933a](https://github.com/unjs/obuild/commit/a74933a))
+- Build before nightly release ([2144b6e](https://github.com/unjs/obuild/commit/2144b6e))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.17
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.16...v0.4.17)
