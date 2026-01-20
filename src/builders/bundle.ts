@@ -72,6 +72,7 @@ export async function rolldownBuild(
     input: inputs,
     plugins: [shebangPlugin()] as Plugin[],
     platform: "node",
+    tsconfig: false,
     external: [
       ...builtinModules,
       ...builtinModules.map((m) => `node:${m}`),
