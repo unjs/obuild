@@ -106,7 +106,8 @@ export async function rolldownBuild(
             const pkgName = moduleId.match(
               /.*\/node_modules\/(?<package>@[^/]+\/[^/]+|[^/]+)/,
             )?.groups?.package;
-            return `libs/${pkgName || "common"}`;
+            const isDts = /\.d\.[mc]?ts$/.test(moduleId);
+            return `libs/${pkgName || "common"}${isDts ? ".d" : ""}`;
           },
         },
       ],
