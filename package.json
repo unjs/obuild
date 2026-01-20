@@ -11,7 +11,9 @@
     "./config": "./dist/config.mjs"
   },
   "types": "./dist/index.d.mts",
-  "bin": "./dist/cli.mjs",
+  "bin": {
+    "obuild": "./dist/cli.mjs"
+  },
   "files": [
     "dist"
   ],
