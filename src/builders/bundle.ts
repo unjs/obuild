@@ -72,7 +72,7 @@ export async function rolldownBuild(
     input: inputs,
     plugins: [shebangPlugin()] as Plugin[],
     platform: "node",
-    tsconfig: false,
+    tsconfig: false as any,
     external: [
       ...builtinModules,
       ...builtinModules.map((m) => `node:${m}`),
@@ -99,7 +99,7 @@ export async function rolldownBuild(
     entryFileNames: "[name].mjs",
     chunkFileNames: "_chunks/[name].mjs",
     minify: entry.minify,
-    codeSplitting: {
+    advancedChunks: {
       groups: [
         {
           test: /node_modules/,
