@@ -28,7 +28,7 @@
     "obuild": "node ./src/cli.ts",
     "release": "pnpm test && pnpm build && changelogen --release && npm publish && git push --follow-tags",
     "test": "pnpm lint && pnpm test:types && pnpm vitest run --coverage",
-    "test:types": "tsc --noEmit --skipLibCheck"
+    "test:types": "tsgo --noEmit --skipLibCheck"
   },
   "dependencies": {
     "c12": "^3.3.3",
@@ -38,20 +38,21 @@
     "magic-string": "^0.30.21",
     "pathe": "^2.0.3",
     "pretty-bytes": "^7.1.0",
-    "rolldown": "^1.0.0-beta.60",
-    "rolldown-plugin-dts": "^0.21.3",
+    "rolldown": "^1.0.0-rc.1",
+    "rolldown-plugin-dts": "^0.21.5",
     "tinyglobby": "^0.2.15"
   },
   "devDependencies": {
-    "@types/node": "^25.0.9",
+    "@types/node": "^25.0.10",
+    "@typescript/native-preview": "7.0.0-dev.20260122.3",
     "@vitest/coverage-v8": "^4.0.17",
     "automd": "^0.4.2",
     "changelogen": "^0.6.2",
     "eslint": "^9.39.2",
     "eslint-config-unjs": "^0.6.2",
-    "prettier": "^3.8.0",
+    "prettier": "^3.8.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.17"
   },
-  "packageManager": "pnpm@10.28.0"
+  "packageManager": "pnpm@10.28.1"
 }
