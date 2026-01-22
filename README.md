@@ -1,28 +1,8 @@
 # 📦 obuild 😯
 
-✅ Zero-config ESM/TS package builder.
+✅ Zero-config ESM/TS package builder powered by [**rolldown**](https://rolldown.rs/).
 
-Powered by [**oxc**](https://oxc.rs/), [**rolldown**](https://rolldown.rs/) and [**rolldown-plugin-dts**](https://github.com/sxzz/rolldown-plugin-dts).
-
-The **obuild** project aims to be the next-generation successor to the current [unbuild](https://github.com/unjs/unbuild).
-
-- 👌 Focus on ESM compatibility.
-- 🌱 Fresh rewrite with cleanups and removal of legacy features.
-- 🚀 Using [**oxc**](https://oxc.rs/) (for transform) and [**rolldown**](https://rolldown.rs/) (for bundle) for much faster builds!
-
-Some differences are not easy to adopt. Developing as a standalone project allows for faster progress and dogfooding in real projects.
-
-## Proof of Concept
-
-> [!IMPORTANT]
->
-> This is a proof-of-concept project.
->
-> Features are incomplete, and API and output behavior may change between 0.x versions.
->
-> Feedback and contributions are very welcome! If you'd like to make changes with more than a few lines of code, please open an issue first to discuss.
-
-## Currently Used by
+## Used by
 
 - [📦 obuild](https://github.com/unjs/obuild/)
 - [🌳 rou3](https://github.com/h3js/rou3/)
