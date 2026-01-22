@@ -1,6 +1,19 @@
 # Changelog
 
 
+## v0.4.19
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.18...v0.4.19)
+
+### 🏡 Chore
+
+- Update readme ([1affa56](https://github.com/unjs/obuild/commit/1affa56))
+- Update dependencies ([f1e82d1](https://github.com/unjs/obuild/commit/f1e82d1))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.18
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.17...v0.4.18)
