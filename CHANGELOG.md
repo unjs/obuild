@@ -1,6 +1,28 @@
 # Changelog
 
 
+## v0.4.20
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.19...v0.4.20)
+
+### 🩹 Fixes
+
+- Avoid analyze in stub mode ([c840ae9](https://github.com/unjs/obuild/commit/c840ae9))
+
+### 💅 Refactors
+
+- Update `inlineDynamicImports` to `codeSplitting` ([334eab9](https://github.com/unjs/obuild/commit/334eab9))
+- Multi-column layout for transform items ([8df3220](https://github.com/unjs/obuild/commit/8df3220))
+- Improve cli formatting ([e28cbd4](https://github.com/unjs/obuild/commit/e28cbd4))
+
+### 🏡 Chore
+
+- Update dev deps ([f817bff](https://github.com/unjs/obuild/commit/f817bff))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.19
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.18...v0.4.19)
