@@ -82,12 +82,14 @@ export async function build(config: BuildConfig): Promise<void> {
 
   await hooks.end?.(ctx);
 
-  const dirSize = analyzeDir(outDirs);
-  consola.log(
-    c.dim(
-      `\nΣ Total dist byte size: ${c.underline(prettyBytes(dirSize.size))} (${c.underline(dirSize.files)} files)`,
-    ),
-  );
+  if (!entries.every((e) => e.stub)) {
+    const dirSize = analyzeDir(outDirs);
+    consola.log(
+      c.dim(
+        `\nΣ Total dist byte size: ${c.underline(prettyBytes(dirSize.size))} (${c.underline(dirSize.files)} files)`,
+      ),
+    );
+  }
 
   consola.log(`\n✅ obuild finished in ${Date.now() - start}ms`);
 }
