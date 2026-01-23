@@ -55,7 +55,7 @@ export async function distSize(
   });
 
   const { output } = await build.generate({
-    inlineDynamicImports: true,
+    codeSplitting: false,
   });
 
   const code = output[0].code;
@@ -100,7 +100,7 @@ export async function sideEffectSize(
   });
 
   const { output } = await build.generate({
-    inlineDynamicImports: true,
+    codeSplitting: false,
   });
 
   if (process.env.INSPECT_BUILD) {
