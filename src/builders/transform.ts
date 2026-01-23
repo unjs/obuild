@@ -86,7 +86,7 @@ export async function transformDir(
   const writtenFiles = await Promise.all(promises);
 
   consola.log(
-    `\n${c.magenta("[transform] ")}${c.underline(fmtPath(entry.outDir!) + "/")}${entry.stub ? c.dim(" (stub)") : ""}\n${itemsTable(writtenFiles.map((f) => c.dim(fmtPath(f))))}`,
+    `\n${c.magenta("[transform] ")}${c.underline(fmtPath(entry.outDir!) + "/")}${entry.stub ? c.dim(" (stub)") : ""}\n${c.dim(itemsTable(writtenFiles.map((f) => fmtPath(f))))}`,
   );
 }
 
