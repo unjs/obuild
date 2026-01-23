@@ -86,10 +86,26 @@ export async function transformDir(
   const writtenFiles = await Promise.all(promises);
 
   consola.log(
-    `\n${c.magenta("[transform] ")}${c.underline(fmtPath(entry.outDir!) + "/")}${entry.stub ? c.dim(" (stub)") : ""}\n${writtenFiles
-      .map((f) => c.dim(fmtPath(f)))
-      .join("\n\n")}`,
+    `\n${c.magenta("[transform] ")}${c.underline(fmtPath(entry.outDir!) + "/")}${entry.stub ? c.dim(" (stub)") : ""}\n${itemsTable(writtenFiles.map((f) => c.dim(fmtPath(f))))}`,
   );
+}
+
+function itemsTable(
+  items: string[],
+  consoleWidth: number = process.stdout.columns || 80,
+): string {
+  if (items.length === 0) {
+    return "";
+  }
+  const maxItemWidth = Math.max(...items.map((item) => item.length));
+  const colWidth = maxItemWidth + 2;
+  const columns = Math.max(1, Math.floor(consoleWidth / colWidth));
+  const rows: string[] = [];
+  for (let i = 0; i < items.length; i += columns) {
+    const row = items.slice(i, i + columns);
+    rows.push(row.map((item) => item.padEnd(colWidth)).join(""));
+  }
+  return rows.join("\n");
 }
 
 /**
