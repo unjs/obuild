@@ -75,7 +75,7 @@ export async function rolldownBuild(
     onLog(level, log, defaultHandler) {
       // Suppress EVAL warns
       if (log.code === "EVAL") {
-        return
+        return;
       }
       defaultHandler(level, log);
     },
