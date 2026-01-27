@@ -1,6 +1,22 @@
 # Changelog
 
 
+## v0.4.21
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.20...v0.4.21)
+
+### 🔥 Performance
+
+- Default minify to `dce-only` ([823f72f](https://github.com/unjs/obuild/commit/823f72f))
+
+### 🏡 Chore
+
+- Update deps ([7f6ca84](https://github.com/unjs/obuild/commit/7f6ca84))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.20
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.19...v0.4.20)
