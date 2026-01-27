@@ -72,6 +72,13 @@ export async function rolldownBuild(
     input: inputs,
     plugins: [shebangPlugin()] as Plugin[],
     platform: "node",
+    onLog(level, log, defaultHandler) {
+      // Suppress EVAL warns
+      if (log.code === "EVAL") {
+        return
+      }
+      defaultHandler(level, log);
+    },
     external: [
       ...builtinModules,
       ...builtinModules.map((m) => `node:${m}`),
