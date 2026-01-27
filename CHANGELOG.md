@@ -1,6 +1,23 @@
 # Changelog
 
 
+## v0.4.22
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.21...v0.4.22)
+
+### 💅 Refactors
+
+- Silent build logs from analyze step ([2f7ec85](https://github.com/unjs/obuild/commit/2f7ec85))
+- Silent `EVAL` warns ([73668e4](https://github.com/unjs/obuild/commit/73668e4))
+
+### 🏡 Chore
+
+- Lint ([7833a45](https://github.com/unjs/obuild/commit/7833a45))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.21
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.20...v0.4.21)
