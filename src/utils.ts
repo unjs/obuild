@@ -51,6 +51,7 @@ export async function distSize(
     input: join(dir, entry),
     plugins: [],
     platform: "neutral",
+    logLevel: "silent",
     external: (id) => id[0] !== "." && !id.startsWith(dir),
   });
 
@@ -96,6 +97,7 @@ export async function sideEffectSize(
     input: "#entry",
     platform: "neutral",
     external: (id) => id[0] !== "." && !id.startsWith(dir),
+    logLevel: "silent",
     plugins: [virtualEntry],
   });
 
