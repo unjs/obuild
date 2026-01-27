@@ -97,7 +97,7 @@ export async function rolldownBuild(
     format: "esm",
     entryFileNames: "[name].mjs",
     chunkFileNames: "_chunks/[name].mjs",
-    minify: entry.minify,
+    minify: entry.minify ?? "dce-only",
     codeSplitting: {
       groups: [
         {
