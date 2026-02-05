@@ -5,7 +5,7 @@ import type {
   BundleEntry,
 } from "./types.ts";
 
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { isAbsolute, join, resolve } from "pathe";
 import { rm } from "node:fs/promises";
 import { consola } from "consola";
@@ -105,7 +105,8 @@ function normalizePath(path: string | URL | undefined, resolveFrom?: string) {
 }
 
 function readJSON(specifier: string) {
-  return import(specifier, {
+  const pkgPath = isAbsolute(specifier) ? pathToFileURL(specifier).href : specifier;
+  return import(pkgPath, {
     with: { type: "json" },
   }).then((r) => r.default);
 }
