@@ -29,6 +29,9 @@ importers:
       pathe:
         specifier: ^2.0.3
         version: 2.0.3
+      pkg-types:
+        specifier: ^2.3.0
+        version: 2.3.0
       pretty-bytes:
         specifier: ^7.1.0
         version: 7.1.0

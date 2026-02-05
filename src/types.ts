@@ -12,10 +12,11 @@ import type {
   TransformOptions,
   MinifyOptions as OXCMinifyOptions,
 } from "rolldown/experimental";
+import type { PackageJson } from "pkg-types";
 
 export interface BuildContext {
   pkgDir: string;
-  pkg: { name: string } & Record<string, unknown>;
+  pkg: PackageJson;
 }
 
 export type _BuildEntry = {
