@@ -1,6 +1,18 @@
 # Changelog
 
 
+## v0.4.23
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.22...v0.4.23)
+
+### 🏡 Chore
+
+- Update rolldown ([825b757](https://github.com/unjs/obuild/commit/825b757))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.22
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.21...v0.4.22)
