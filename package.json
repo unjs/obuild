@@ -37,7 +37,6 @@
     "exsolve": "^1.0.8",
     "magic-string": "^0.30.21",
     "pathe": "^2.0.3",
-    "pkg-types": "^2.3.0",
     "pretty-bytes": "^7.1.0",
     "rolldown": "^1.0.0-rc.3",
     "rolldown-plugin-dts": "^0.22.1",
