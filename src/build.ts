@@ -105,7 +105,9 @@ function normalizePath(path: string | URL | undefined, resolveFrom?: string) {
 }
 
 function readJSON(specifier: string) {
-  const pkgPath = isAbsolute(specifier) ? pathToFileURL(specifier).href : specifier;
+  const pkgPath = isAbsolute(specifier)
+    ? pathToFileURL(specifier).href
+    : specifier;
   return import(pkgPath, {
     with: { type: "json" },
   }).then((r) => r.default);
