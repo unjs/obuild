@@ -1,6 +1,18 @@
 # Changelog
 
 
+## v0.4.24
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.23...v0.4.24)
+
+### 🩹 Fixes
+
+- Windows compatibility for reading `package.json` ([#71](https://github.com/unjs/obuild/pull/71))
+
+### ❤️ Contributors
+
+- Yizack Rangel ([@Yizack](https://github.com/Yizack))
+
 ## v0.4.23
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.22...v0.4.23)
