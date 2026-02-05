@@ -43,16 +43,16 @@ importers:
         version: 0.2.15
     devDependencies:
       '@types/node':
-        specifier: ^25.0.10
+        specifier: ^25.2.1
         version: 25.2.1
       '@typescript/native-preview':
-        specifier: ^7.0.0-dev.20260127.1
+        specifier: ^7.0.0-dev.20260205.1
         version: 7.0.0-dev.20260205.1
       '@vitest/coverage-v8':
         specifier: ^4.0.18
         version: 4.0.18(vitest@4.0.18(@types/node@25.2.1)(jiti@2.6.1))
       automd:
-        specifier: ^0.4.2
+        specifier: ^0.4.3
         version: 0.4.3(magicast@0.5.2)
       changelogen:
         specifier: ^0.6.2
