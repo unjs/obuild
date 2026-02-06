@@ -1,6 +1,28 @@
 # Changelog
 
 
+## v0.4.25
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.23...v0.4.25)
+
+### 🚀 Enhancements
+
+- Generate `dist/THIRD-PARTY-LICENSES.md` ([#72](https://github.com/unjs/obuild/pull/72))
+
+### 🩹 Fixes
+
+- Windows compatibility for reading `package.json` ([#71](https://github.com/unjs/obuild/pull/71))
+
+### 🏡 Chore
+
+- **release:** V0.4.24 ([c2af661](https://github.com/unjs/obuild/commit/c2af661))
+- Apply automated updates ([c6ba2f1](https://github.com/unjs/obuild/commit/c6ba2f1))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Yizack Rangel ([@Yizack](https://github.com/Yizack))
+
 ## v0.4.24
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.23...v0.4.24)
