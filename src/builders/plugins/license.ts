@@ -6,12 +6,13 @@
  *      MIT Licensed: https://github.com/rollup/rollup/blob/master/LICENSE-CORE.md
  */
 
-import { mkdir, writeFile } from "node:fs/promises";
+import { appendFile, mkdir, writeFile } from "node:fs/promises";
 import license from "rollup-plugin-license";
 
 import type { Dependency } from "rollup-plugin-license";
 import type { Plugin, PluginContext } from "rolldown";
 import { dirname } from "node:path";
+import { existsSync } from "node:fs";
 
 export default function licensePlugin(opts: { output: string }): Plugin {
   const originalPlugin = (license as unknown as typeof license.default)({
@@ -90,17 +91,23 @@ export default function licensePlugin(opts: { output: string }): Plugin {
         return;
       }
 
-      const licenseText =
-        `# Licenses of Bundled Dependencies\n\n` +
-        `The published artifact additionally contains code with the following licenses:\n` +
-        `${licenses.join(", ")}\n\n` +
-        `# Bundled Dependencies\n\n` +
-        dependencyLicenseTexts;
+      if (existsSync(opts.output)) {
+        // TODO: Deep merge?
+        console.log("Appending third-party licenses to", opts.output);
+        await appendFile(opts.output, "\n\n" + dependencyLicenseTexts);
+      } else {
+        const licenseText =
+          `# Licenses of Bundled Dependencies\n\n` +
+          `The published artifact additionally contains code with the following licenses:\n` +
+          `${licenses.join(", ")}\n\n` +
+          `# Bundled Dependencies\n\n` +
+          dependencyLicenseTexts;
 
-      console.log("Writing third-party licenses to", opts.output);
+        console.log("Writing third-party licenses to", opts.output);
 
-      await mkdir(dirname(opts.output!), { recursive: true });
-      await writeFile(opts.output!, licenseText);
+        await mkdir(dirname(opts.output!), { recursive: true });
+        await writeFile(opts.output!, licenseText);
+      }
     },
   });
   // Skip for watch mode
