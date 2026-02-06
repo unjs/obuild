@@ -11,7 +11,7 @@ import license from "rollup-plugin-license";
 
 import type { Dependency } from "rollup-plugin-license";
 import type { Plugin, PluginContext } from "rolldown";
-import { dirname, join } from "node:path";
+import { dirname } from "node:path";
 
 export default function licensePlugin(opts: { output: string }): Plugin {
   const originalPlugin = (license as unknown as typeof license.default)({
