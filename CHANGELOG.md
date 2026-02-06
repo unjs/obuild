@@ -1,6 +1,22 @@
 # Changelog
 
 
+## v0.4.26
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.25...v0.4.26)
+
+### 🩹 Fixes
+
+- Prefer `module` over `main` for bundling ([57f42b6](https://github.com/unjs/obuild/commit/57f42b6))
+
+### 🏡 Chore
+
+- Lint ([cb1a3c8](https://github.com/unjs/obuild/commit/cb1a3c8))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.25
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.23...v0.4.25)
