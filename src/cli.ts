@@ -30,9 +30,7 @@ const { config = {} } = await loadConfig<BuildConfig>({
 });
 
 const rawEntries =
-  args.positionals.length > 0
-    ? (args.positionals as string[])
-    : config.entries || [];
+  args.positionals.length > 0 ? (args.positionals as string[]) : config.entries || [];
 
 const entries: BuildEntry[] = rawEntries.map((entry) => {
   if (typeof entry === "string") {

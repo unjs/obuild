@@ -8,10 +8,7 @@ import type {
 
 import type { Options as DtsOptions } from "rolldown-plugin-dts";
 import type { ResolveOptions } from "exsolve";
-import type {
-  TransformOptions,
-  MinifyOptions as OXCMinifyOptions,
-} from "rolldown/experimental";
+import type { TransformOptions, MinifyOptions as OXCMinifyOptions } from "rolldown/experimental";
 
 export interface BuildContext {
   pkgDir: string;
@@ -107,10 +104,7 @@ export interface BuildHooks {
   start?: (ctx: BuildContext) => void | Promise<void>;
   end?: (ctx: BuildContext) => void | Promise<void>;
   entries?: (entries: BuildEntry[], ctx: BuildContext) => void | Promise<void>;
-  rolldownConfig?: (
-    cfg: InputOptions,
-    ctx: BuildContext,
-  ) => void | Promise<void>;
+  rolldownConfig?: (cfg: InputOptions, ctx: BuildContext) => void | Promise<void>;
   rolldownOutput?: (
     cfg: OutputOptions,
     res: RolldownBuild,

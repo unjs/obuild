@@ -23,9 +23,7 @@ describe("obuild", () => {
   });
 
   test("dist files match expected", async () => {
-    const distFiles = await readdir(distDir, { recursive: true }).then((r) =>
-      r.sort(),
-    );
+    const distFiles = await readdir(distDir, { recursive: true }).then((r) => r.sort());
     expect(distFiles).toMatchInlineSnapshot(`
       [
         "cli.d.mts",
@@ -59,10 +57,7 @@ describe("obuild", () => {
   });
 
   test("runtime .dts files use .mjs extension", async () => {
-    const runtimeIndexMts = await readFile(
-      new URL("runtime/index.d.mts", distDir),
-      "utf8",
-    );
+    const runtimeIndexMts = await readFile(new URL("runtime/index.d.mts", distDir), "utf8");
     expect(runtimeIndexMts).contain("./test.mjs");
   });
 

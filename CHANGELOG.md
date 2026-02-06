@@ -1,6 +1,5 @@
 # Changelog
 
-
 ## v0.4.26
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.25...v0.4.26)
@@ -374,7 +373,7 @@
 
 ### 🚀 Enhancements
 
-- ⚠️  Stub transform with individual links ([#60](https://github.com/unjs/obuild/pull/60))
+- ⚠️ Stub transform with individual links ([#60](https://github.com/unjs/obuild/pull/60))
 
 ### 🩹 Fixes
 
@@ -388,7 +387,7 @@
 
 #### ⚠️ Breaking Changes
 
-- ⚠️  Stub transform with individual links ([#60](https://github.com/unjs/obuild/pull/60))
+- ⚠️ Stub transform with individual links ([#60](https://github.com/unjs/obuild/pull/60))
 
 ### ❤️ Contributors
 
@@ -447,7 +446,7 @@
 
 ### 📦 Build
 
-- ⚠️  Update deps ([b576b72](https://github.com/unjs/obuild/commit/b576b72))
+- ⚠️ Update deps ([b576b72](https://github.com/unjs/obuild/commit/b576b72))
 
 ### 🏡 Chore
 
@@ -457,7 +456,7 @@
 
 #### ⚠️ Breaking Changes
 
-- ⚠️  Update deps ([b576b72](https://github.com/unjs/obuild/commit/b576b72))
+- ⚠️ Update deps ([b576b72](https://github.com/unjs/obuild/commit/b576b72))
 
 ### ❤️ Contributors
 
@@ -498,10 +497,10 @@
 
 - Passthrough stub mode ([#28](https://github.com/unjs/obuild/pull/28))
 - Add `+x` permission to CLI entries ([#26](https://github.com/unjs/obuild/pull/26))
-- ⚠️  Allow passing all `dts` options for bundle ([2bab1e8](https://github.com/unjs/obuild/commit/2bab1e8))
-- ⚠️  Allow passing all `oxc-transform` options ([5729956](https://github.com/unjs/obuild/commit/5729956))
+- ⚠️ Allow passing all `dts` options for bundle ([2bab1e8](https://github.com/unjs/obuild/commit/2bab1e8))
+- ⚠️ Allow passing all `oxc-transform` options ([5729956](https://github.com/unjs/obuild/commit/5729956))
 - Allow passing all rolldown config to build entries ([edd39af](https://github.com/unjs/obuild/commit/edd39af))
-- ⚠️  Unified config for programmatic api ([33a5869](https://github.com/unjs/obuild/commit/33a5869))
+- ⚠️ Unified config for programmatic api ([33a5869](https://github.com/unjs/obuild/commit/33a5869))
 
 ### 📖 Documentation
 
@@ -523,9 +522,9 @@
 
 #### ⚠️ Breaking Changes
 
-- ⚠️  Allow passing all `dts` options for bundle ([2bab1e8](https://github.com/unjs/obuild/commit/2bab1e8))
-- ⚠️  Allow passing all `oxc-transform` options ([5729956](https://github.com/unjs/obuild/commit/5729956))
-- ⚠️  Unified config for programmatic api ([33a5869](https://github.com/unjs/obuild/commit/33a5869))
+- ⚠️ Allow passing all `dts` options for bundle ([2bab1e8](https://github.com/unjs/obuild/commit/2bab1e8))
+- ⚠️ Allow passing all `oxc-transform` options ([5729956](https://github.com/unjs/obuild/commit/5729956))
+- ⚠️ Unified config for programmatic api ([33a5869](https://github.com/unjs/obuild/commit/33a5869))
 
 ### ❤️ Contributors
 
@@ -554,7 +553,7 @@
 
 ### 🚀 Enhancements
 
-- ⚠️  Map dist paths based on source ([4170d54](https://github.com/unjs/obuild/commit/4170d54))
+- ⚠️ Map dist paths based on source ([4170d54](https://github.com/unjs/obuild/commit/4170d54))
 
 ### 💅 Refactors
 
@@ -562,7 +561,7 @@
 
 #### ⚠️ Breaking Changes
 
-- ⚠️  Map dist paths based on source ([4170d54](https://github.com/unjs/obuild/commit/4170d54))
+- ⚠️ Map dist paths based on source ([4170d54](https://github.com/unjs/obuild/commit/4170d54))
 
 ### ❤️ Contributors
 
@@ -704,7 +703,6 @@
 
 ## v0.0.1
 
-
 ### 📦 Build
 
 - Temp fix for cli bin ([1396284](https://github.com/unjs/obuild/commit/1396284))
@@ -717,4 +715,3 @@
 ### ❤️ Contributors
 
 - Pooya Parsa ([@pi0](https://github.com/pi0))
-

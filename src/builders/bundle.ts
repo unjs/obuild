@@ -13,12 +13,7 @@ import { makeExecutable, shebangPlugin } from "./plugins/shebang.ts";
 import licensePlugin from "./plugins/license.ts";
 import { defu } from "defu";
 
-import type {
-  OutputChunk,
-  Plugin,
-  InputOptions,
-  OutputOptions,
-} from "rolldown";
+import type { OutputChunk, Plugin, InputOptions, OutputOptions } from "rolldown";
 
 import type { Options as DtsOptions } from "rolldown-plugin-dts";
 import type { BuildContext, BuildHooks, BundleEntry } from "../types.ts";
@@ -28,24 +23,17 @@ export async function rolldownBuild(
   entry: BundleEntry,
   hooks: BuildHooks,
 ): Promise<void> {
-  const inputs: Record<string, string> = normalizeBundleInputs(
-    entry.input,
-    ctx,
-  );
+  const inputs: Record<string, string> = normalizeBundleInputs(entry.input, ctx);
 
   if (entry.stub) {
     for (const [distName, srcPath] of Object.entries(inputs)) {
       const distPath = join(ctx.pkgDir, "dist", `${distName}.mjs`);
       await mkdir(dirname(distPath), { recursive: true });
-      consola.log(
-        `${c.magenta("[bundle] ")} ${c.underline(fmtPath(distPath))} ${c.dim("(stub)")}`,
-      );
+      consola.log(`${c.magenta("[bundle] ")} ${c.underline(fmtPath(distPath))} ${c.dim("(stub)")}`);
       const srcContents = await readFile(srcPath, "utf8");
       const parsed = parseSync(srcPath, srcContents);
       const exportNames = parsed.module.staticExports.flatMap((e) =>
-        e.entries.map((e) =>
-          e.exportName.kind === "Default" ? "default" : e.exportName.name,
-        ),
+        e.entries.map((e) => (e.exportName.kind === "Default" ? "default" : e.exportName.name)),
       );
       const hasDefaultExport = exportNames.includes("default");
       const firstLine = srcContents.split("\n")[0];
@@ -74,11 +62,7 @@ export async function rolldownBuild(
     plugins: [
       shebangPlugin(),
       licensePlugin({
-        output: resolve(
-          ctx.pkgDir,
-          entry.outDir || "dist",
-          "THIRD-PARTY-LICENSES.md",
-        ),
+        output: resolve(ctx.pkgDir, entry.outDir || "dist", "THIRD-PARTY-LICENSES.md"),
       }),
     ] as Plugin[],
     platform: "node",
@@ -124,9 +108,8 @@ export async function rolldownBuild(
         {
           test: /node_modules/,
           name: (moduleId: string) => {
-            const pkgName = moduleId.match(
-              /.*\/node_modules\/(?<package>@[^/]+\/[^/]+|[^/]+)/,
-            )?.groups?.package;
+            const pkgName = moduleId.match(/.*\/node_modules\/(?<package>@[^/]+\/[^/]+|[^/]+)/)
+              ?.groups?.package;
             const isDts = /\.d\.[mc]?ts$/.test(moduleId);
             return `libs/${pkgName || "common"}${isDts ? ".d" : ""}`;
           },
@@ -164,9 +147,9 @@ export async function rolldownBuild(
         deps.add(`[Node.js]`);
         continue;
       }
-      const depChunk = output.find(
-        (o) => o.type === "chunk" && o.fileName === id,
-      ) as OutputChunk | undefined;
+      const depChunk = output.find((o) => o.type === "chunk" && o.fileName === id) as
+        | OutputChunk
+        | undefined;
       if (depChunk) {
         for (const dep of resolveDeps(depChunk)) {
           deps.add(dep);
@@ -195,19 +178,14 @@ export async function rolldownBuild(
     `\n${outputEntries
       .map((o) =>
         [
-          c.magenta(`[bundle] `) +
-            `${c.underline(fmtPath(join(outDir, o.name)))}`,
+          c.magenta(`[bundle] `) + `${c.underline(fmtPath(join(outDir, o.name)))}`,
           c.dim(
             `${c.bold("Size:")} ${prettyBytes(o.size)}, ${c.bold(prettyBytes(o.minSize))} minified, ${prettyBytes(o.minGzipSize)} min+gzipped (Side effects: ${prettyBytes(o.sideEffectSize)})`,
           ),
           o.exports.some((e) => e !== "default")
-            ? c.dim(
-                `${c.bold("Exports:")} ${o.exports.map((e) => e).join(", ")}`,
-              )
+            ? c.dim(`${c.bold("Exports:")} ${o.exports.map((e) => e).join(", ")}`)
             : "",
-          o.deps.length > 0
-            ? c.dim(`${c.bold("Dependencies:")} ${o.deps.join(", ")}`)
-            : "",
+          o.deps.length > 0 ? c.dim(`${c.bold("Dependencies:")} ${o.deps.join(", ")}`) : "",
         ]
           .filter(Boolean)
           .join("\n"),
@@ -232,15 +210,10 @@ export function normalizeBundleInputs(
       relativeSrc = relative(join(ctx.pkgDir), src);
     }
     if (relativeSrc.startsWith("..")) {
-      throw new Error(
-        `Source should be within the package directory (${ctx.pkgDir}): ${src}`,
-      );
+      throw new Error(`Source should be within the package directory (${ctx.pkgDir}): ${src}`);
     }
 
-    const distName = join(
-      dirname(relativeSrc),
-      basename(relativeSrc, extname(relativeSrc)),
-    );
+    const distName = join(dirname(relativeSrc), basename(relativeSrc, extname(relativeSrc)));
     if (inputs[distName]) {
       throw new Error(
         `Rename one of the entries to avoid a conflict in the dist name "${distName}":\n - ${src}\n - ${inputs[distName]}`,

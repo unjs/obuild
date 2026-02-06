@@ -69,10 +69,7 @@ export async function distSize(
   };
 }
 
-export async function sideEffectSize(
-  dir: string,
-  entry: string,
-): Promise<number> {
+export async function sideEffectSize(dir: string, entry: string): Promise<number> {
   const virtualEntry: Plugin = {
     name: "virtual-entry",
     async resolveId(id, importer, opts) {

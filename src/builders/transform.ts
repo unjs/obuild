@@ -15,10 +15,7 @@ import { makeExecutable, SHEBANG_RE } from "./plugins/shebang.ts";
 /**
  * Transform all .ts modules in a directory using oxc-transform.
  */
-export async function transformDir(
-  ctx: BuildContext,
-  entry: TransformEntry,
-): Promise<void> {
+export async function transformDir(ctx: BuildContext, entry: TransformEntry): Promise<void> {
   const promises: Promise<string>[] = [];
 
   for await (const entryName of await glob("**/*.*", { cwd: entry.input })) {
@@ -32,15 +29,8 @@ export async function transformDir(
         switch (ext) {
           case ".ts": {
             {
-              const entryDistPath = join(
-                entry.outDir!,
-                entryName.replace(/\.ts$/, ".mjs"),
-              );
-              const transformed = await transformModule(
-                entryPath,
-                entry,
-                entryDistPath,
-              );
+              const entryDistPath = join(entry.outDir!, entryName.replace(/\.ts$/, ".mjs"));
+              const transformed = await transformModule(entryPath, entry, entryDistPath);
               await mkdir(dirname(entryDistPath), { recursive: true });
               await writeFile(entryDistPath, transformed.code, "utf8");
 
@@ -63,11 +53,9 @@ export async function transformDir(
               const entryDistPath = join(entry.outDir!, entryName);
               await mkdir(dirname(entryDistPath), { recursive: true });
               if (entry.stub) {
-                await symlink(entryPath, entryDistPath, "junction").catch(
-                  () => {
-                    /* exists */
-                  },
-                );
+                await symlink(entryPath, entryDistPath, "junction").catch(() => {
+                  /* exists */
+                });
               } else {
                 const code = await readFile(entryPath, "utf8");
                 await writeFile(entryDistPath, code, "utf8");
@@ -90,10 +78,7 @@ export async function transformDir(
   );
 }
 
-function itemsTable(
-  items: string[],
-  consoleWidth: number = process.stdout.columns || 80,
-): string {
+function itemsTable(items: string[], consoleWidth: number = process.stdout.columns || 80): string {
   if (items.length === 0) {
     return "";
   }
@@ -111,11 +96,7 @@ function itemsTable(
 /**
  * Transform a .ts module using oxc-transform.
  */
-async function transformModule(
-  entryPath: string,
-  entry: TransformEntry,
-  entryDistPath: string,
-) {
+async function transformModule(entryPath: string, entry: TransformEntry, entryDistPath: string) {
   let sourceText = await readFile(entryPath, "utf8");
 
   const sourceOptions = {
@@ -151,13 +132,7 @@ async function transformModule(
   const resolveOptions: ResolveOptions = {
     ...entry.resolve,
     from: pathToFileURL(entryPath),
-    extensions: entry.resolve?.extensions ?? [
-      ".ts",
-      ".js",
-      ".mjs",
-      ".cjs",
-      ".json",
-    ],
+    extensions: entry.resolve?.extensions ?? [".ts", ".js", ".mjs", ".cjs", ".json"],
     suffixes: entry.resolve?.suffixes ?? ["", "/index"],
   };
 
@@ -165,11 +140,7 @@ async function transformModule(
 
   // Rewrite relative imports
   const updatedStarts = new Set<number>();
-  const rewriteSpecifier = (req: {
-    value: string;
-    start: number;
-    end: number;
-  }) => {
+  const rewriteSpecifier = (req: { value: string; start: number; end: number }) => {
     const moduleId = req.value;
     if (!moduleId.startsWith(".")) {
       return;
@@ -179,10 +150,7 @@ async function transformModule(
     }
     updatedStarts.add(req.start);
     const resolvedAbsolute = resolveModulePath(moduleId, resolveOptions);
-    const newId = relative(
-      dirname(entryPath),
-      resolvedAbsolute.replace(/\.ts$/, ".mjs"),
-    );
+    const newId = relative(dirname(entryPath), resolvedAbsolute.replace(/\.ts$/, ".mjs"));
     magicString.remove(req.start, req.end);
     magicString.prependLeft(
       req.start,
@@ -220,25 +188,14 @@ async function transformModule(
 
   if (transformErrors.length > 0) {
     // console.log(sourceText);
-    await writeFile(
-      "build-dump.ts",
-      `/** Error dump for ${entryPath} */\n\n` + sourceText,
-      "utf8",
-    );
-    throw new Error(
-      `Errors while transforming ${entryPath}: (hint: check build-dump.ts)`,
-      {
-        cause: transformErrors,
-      },
-    );
+    await writeFile("build-dump.ts", `/** Error dump for ${entryPath} */\n\n` + sourceText, "utf8");
+    throw new Error(`Errors while transforming ${entryPath}: (hint: check build-dump.ts)`, {
+      cause: transformErrors,
+    });
   }
 
   if (entry.minify) {
-    const res = minifySync(
-      entryPath,
-      transformed.code,
-      entry.minify === true ? {} : entry.minify,
-    );
+    const res = minifySync(entryPath, transformed.code, entry.minify === true ? {} : entry.minify);
     transformed.code = res.code;
     transformed.map = res.map;
   }

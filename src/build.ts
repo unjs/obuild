@@ -1,9 +1,4 @@
-import type {
-  BuildContext,
-  BuildConfig,
-  TransformEntry,
-  BundleEntry,
-} from "./types.ts";
+import type { BuildContext, BuildConfig, TransformEntry, BundleEntry } from "./types.ts";
 
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { isAbsolute, join, resolve } from "pathe";
@@ -25,9 +20,7 @@ export async function build(config: BuildConfig): Promise<void> {
   const pkg = await readJSON(join(pkgDir, "package.json")).catch(() => ({}));
   const ctx: BuildContext = { pkg, pkgDir };
 
-  consola.log(
-    `📦 Building \`${ctx.pkg.name || "<no name>"}\` (\`${ctx.pkgDir}\`)`,
-  );
+  consola.log(`📦 Building \`${ctx.pkg.name || "<no name>"}\` (\`${ctx.pkgDir}\`)`);
 
   const hooks = config.hooks || {};
 
@@ -37,10 +30,7 @@ export async function build(config: BuildConfig): Promise<void> {
     let entry: TransformEntry | BundleEntry;
 
     if (typeof rawEntry === "string") {
-      const [input, outDir] = rawEntry.split(":") as [
-        string,
-        string | undefined,
-      ];
+      const [input, outDir] = rawEntry.split(":") as [string, string | undefined];
       entry = input.endsWith("/")
         ? ({ type: "transform", input, outDir } as TransformEntry)
         : ({ type: "bundle", input: input.split(","), outDir } as BundleEntry);
@@ -49,9 +39,7 @@ export async function build(config: BuildConfig): Promise<void> {
     }
 
     if (!entry.input) {
-      throw new Error(
-        `Build entry missing \`input\`: ${JSON.stringify(entry, null, 2)}`,
-      );
+      throw new Error(`Build entry missing \`input\`: ${JSON.stringify(entry, null, 2)}`);
     }
     entry = { ...entry };
     entry.outDir = normalizePath(entry.outDir || "dist", pkgDir);
@@ -75,9 +63,7 @@ export async function build(config: BuildConfig): Promise<void> {
   }
 
   for (const entry of entries) {
-    await (entry.type === "bundle"
-      ? rolldownBuild(ctx, entry, hooks)
-      : transformDir(ctx, entry));
+    await (entry.type === "bundle" ? rolldownBuild(ctx, entry, hooks) : transformDir(ctx, entry));
   }
 
   await hooks.end?.(ctx);
@@ -105,9 +91,7 @@ function normalizePath(path: string | URL | undefined, resolveFrom?: string) {
 }
 
 function readJSON(specifier: string) {
-  const pkgPath = isAbsolute(specifier)
-    ? pathToFileURL(specifier).href
-    : specifier;
+  const pkgPath = isAbsolute(specifier) ? pathToFileURL(specifier).href : specifier;
   return import(pkgPath, {
     with: { type: "json" },
   }).then((r) => r.default);

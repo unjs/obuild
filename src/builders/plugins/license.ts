@@ -18,11 +18,7 @@ export default function licensePlugin(opts: { output: string }): Plugin {
     async thirdParty(dependencies: Dependency[]) {
       const deps = sortDependencies([...dependencies]);
       const licenses = sortLicenses(
-        new Set(
-          dependencies
-            .map((dep: Dependency) => dep.license)
-            .filter(Boolean) as string[],
-        ),
+        new Set(dependencies.map((dep: Dependency) => dep.license).filter(Boolean) as string[]),
       );
 
       let dependencyLicenseTexts = "";
@@ -46,9 +42,7 @@ export default function licensePlugin(opts: { output: string }): Plugin {
         if (
           depInfos.length > 1 &&
           depInfos.every(
-            (info) =>
-              info.license === depInfos[0].license &&
-              info.names === depInfos[0].names,
+            (info) => info.license === depInfos[0].license && info.names === depInfos[0].names,
           )
         ) {
           const { license, names } = depInfos[0];
@@ -125,11 +119,7 @@ export default function licensePlugin(opts: { output: string }): Plugin {
 
 function sortDependencies(dependencies: Dependency[]) {
   return dependencies.sort(({ name: nameA }, { name: nameB }) => {
-    return (nameA || "") > (nameB || "")
-      ? 1
-      : (nameB || "") > (nameA || "")
-        ? -1
-        : 0;
+    return (nameA || "") > (nameB || "") ? 1 : (nameB || "") > (nameA || "") ? -1 : 0;
   });
 }
 
@@ -174,9 +164,7 @@ function getDependencyInformation(dep: Dependency): DependencyInfo {
   }
 
   if (repository) {
-    info.repository = normalizeGitUrl(
-      typeof repository === "string" ? repository : repository.url,
-    );
+    info.repository = normalizeGitUrl(typeof repository === "string" ? repository : repository.url);
   }
 
   return info;
