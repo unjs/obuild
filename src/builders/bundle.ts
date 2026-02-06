@@ -10,6 +10,7 @@ import { resolveModulePath } from "exsolve";
 import prettyBytes from "pretty-bytes";
 import { distSize, fmtPath, sideEffectSize } from "../utils.ts";
 import { makeExecutable, shebangPlugin } from "./plugins/shebang.ts";
+import licensePlugin from "./plugins/license.ts";
 import { defu } from "defu";
 
 import type {
@@ -70,7 +71,7 @@ export async function rolldownBuild(
   const rolldownConfig = defu(entry.rolldown, {
     cwd: ctx.pkgDir,
     input: inputs,
-    plugins: [shebangPlugin()] as Plugin[],
+    plugins: [shebangPlugin(), licensePlugin()] as Plugin[],
     platform: "node",
     onLog(level, log, defaultHandler) {
       // Suppress EVAL warns
