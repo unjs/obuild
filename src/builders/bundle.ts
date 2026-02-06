@@ -89,6 +89,10 @@ export async function rolldownBuild(
       }
       defaultHandler(level, log);
     },
+    resolve: {
+      // Same as rolldown default for node platform but prefer "module" field over "main"
+      mainFields: ["module", "main"],
+    },
     external: [
       ...builtinModules,
       ...builtinModules.map((m) => `node:${m}`),
