@@ -13,9 +13,7 @@ import type { Dependency } from "rollup-plugin-license";
 import type { Plugin, PluginContext } from "rolldown";
 import { dirname, join } from "node:path";
 
-export default function licensePlugin(opts: {
-  output: string;
-}): Plugin {
+export default function licensePlugin(opts: { output: string }): Plugin {
   const originalPlugin = (license as unknown as typeof license.default)({
     async thirdParty(dependencies: Dependency[]) {
       const deps = sortDependencies([...dependencies]);
@@ -127,7 +125,11 @@ export default function licensePlugin(opts: {
 
 function sortDependencies(dependencies: Dependency[]) {
   return dependencies.sort(({ name: nameA }, { name: nameB }) => {
-    return (nameA || "") > (nameB || "") ? 1 : (nameB || "") > (nameA || "") ? -1 : 0;
+    return (nameA || "") > (nameB || "")
+      ? 1
+      : (nameB || "") > (nameA || "")
+        ? -1
+        : 0;
   });
 }
 
