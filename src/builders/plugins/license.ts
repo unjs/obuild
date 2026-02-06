@@ -6,14 +6,16 @@
  *      MIT Licensed: https://github.com/rollup/rollup/blob/master/LICENSE-CORE.md
  */
 
-import { writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import license from "rollup-plugin-license";
 
 import type { Dependency } from "rollup-plugin-license";
 import type { Plugin, PluginContext } from "rolldown";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 
-export default function licensePlugin(pkgDir: string = "."): Plugin {
+export default function licensePlugin(opts: {
+  output: string;
+}): Plugin {
   const originalPlugin = (license as unknown as typeof license.default)({
     async thirdParty(dependencies: Dependency[]) {
       const deps = sortDependencies([...dependencies]);
@@ -92,8 +94,6 @@ export default function licensePlugin(pkgDir: string = "."): Plugin {
         dependencyLicenseTexts += text;
       }
 
-      const thirdPartyLicensePath = join(pkgDir, "LICENSE.thirdparty.md");
-
       if (!dependencyLicenseTexts) {
         return;
       }
@@ -105,9 +105,10 @@ export default function licensePlugin(pkgDir: string = "."): Plugin {
         `# Bundled Dependencies\n\n` +
         dependencyLicenseTexts;
 
-      console.log("Writing third-party licenses to", thirdPartyLicensePath);
+      console.log("Writing third-party licenses to", opts.output);
 
-      await writeFile(thirdPartyLicensePath, licenseText);
+      await mkdir(dirname(opts.output!), { recursive: true });
+      await writeFile(opts.output!, licenseText);
     },
   });
   // Skip for watch mode
