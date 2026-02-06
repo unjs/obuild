@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.4.27
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.26...v0.4.27)
+
+### 🩹 Fixes
+
+- Append licenses with multi entries ([e504807](https://github.com/unjs/obuild/commit/e504807))
+
+### 🏡 Chore
+
+- Migrate to oxlint and oxfmt ([a989953](https://github.com/unjs/obuild/commit/a989953))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.26
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.25...v0.4.26)
