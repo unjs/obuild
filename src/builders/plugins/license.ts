@@ -6,17 +6,19 @@
  *      MIT Licensed: https://github.com/rollup/rollup/blob/master/LICENSE-CORE.md
  */
 
-import { writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import license from "rollup-plugin-license";
 
 import type { Dependency } from "rollup-plugin-license";
 import type { Plugin, PluginContext } from "rolldown";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 
-export default function licensePlugin(pkgDir: string = "."): Plugin {
+export default function licensePlugin(opts: {
+  output: string;
+}): Plugin {
   const originalPlugin = (license as unknown as typeof license.default)({
     async thirdParty(dependencies: Dependency[]) {
-      const deps = sortDependencies(dependencies);
+      const deps = sortDependencies([...dependencies]);
       const licenses = sortLicenses(
         new Set(
           dependencies
@@ -39,7 +41,7 @@ export default function licensePlugin(pkgDir: string = "."): Plugin {
           }
         }
 
-        let text = `## ${sameDeps.map((d) => d.name).join(", ")}\n\n`;
+        let text = `## ${sameDeps.map((d) => d.name || "unknown").join(", ")}\n\n`;
         const depInfos = sameDeps.map((d) => getDependencyInformation(d));
 
         // If all same dependencies have the same license and contributor names, show them only once
@@ -92,8 +94,6 @@ export default function licensePlugin(pkgDir: string = "."): Plugin {
         dependencyLicenseTexts += text;
       }
 
-      const thirdPartyLicensePath = join(pkgDir, "LICENSE.thirdparty.md");
-
       if (!dependencyLicenseTexts) {
         return;
       }
@@ -105,14 +105,16 @@ export default function licensePlugin(pkgDir: string = "."): Plugin {
         `# Bundled Dependencies\n\n` +
         dependencyLicenseTexts;
 
-      console.log("Writing third-party licenses to", thirdPartyLicensePath);
+      console.log("Writing third-party licenses to", opts.output);
 
-      await writeFile(thirdPartyLicensePath, licenseText);
+      await mkdir(dirname(opts.output!), { recursive: true });
+      await writeFile(opts.output!, licenseText);
     },
   });
   // Skip for watch mode
   for (const hook of ["renderChunk", "generateBundle"] as const) {
-    const originalHook = originalPlugin[hook]!;
+    const originalHook = originalPlugin[hook];
+    if (!originalHook) continue;
     // @ts-expect-error
     originalPlugin[hook] = function (this: PluginContext, ...args: unknown[]) {
       if (this.meta.watchMode) return;
@@ -125,7 +127,7 @@ export default function licensePlugin(pkgDir: string = "."): Plugin {
 
 function sortDependencies(dependencies: Dependency[]) {
   return dependencies.sort(({ name: nameA }, { name: nameB }) => {
-    return nameA! > nameB! ? 1 : nameB! > nameA! ? -1 : 0;
+    return (nameA || "") > (nameB || "") ? 1 : (nameB || "") > (nameA || "") ? -1 : 0;
   });
 }
 
@@ -184,7 +186,7 @@ function normalizeGitUrl(url: string): string {
     .replace(/^git\+/, "")
     .replace(/\.git$/, "")
     .replace(/(^|\/)[^/]+?@/, "$1") // remove "user@" from "ssh://user@host.com:..."
-    .replace(/(\.[^.]+?):/, "$1/") // change ".com:" to ".com/" from "ssh://user@host.com:..."
+    .replace(/(\.[^.]+?):(?!\d)/, "$1/") // change ".com:" to ".com/" from "ssh://user@host.com:..." (but not port numbers)
     .replace(/^git:\/\//, "https://")
     .replace(/^ssh:\/\//, "https://");
   if (url.startsWith("github:")) {
