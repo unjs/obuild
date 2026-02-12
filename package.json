@@ -20,8 +20,8 @@
   "scripts": {
     "build": "pnpm obuild",
     "dev": "pnpm vitest",
-    "lint": "oxlint . && oxfmt --check src test",
-    "lint:fix": "automd && oxlint . --fix && oxfmt src test",
+    "lint": "oxlint . && oxfmt --check",
+    "lint:fix": "automd && oxlint . --fix && oxfmt",
     "obuild": "node ./src/cli.ts",
     "release": "pnpm test && pnpm build && changelogen --release && npm publish && git push --follow-tags",
     "test": "pnpm lint && pnpm test:types && pnpm vitest run --coverage",
