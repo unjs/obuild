@@ -85,6 +85,9 @@ export async function rolldownBuild(
         ...Object.keys(ctx.pkg.peerDependencies || {}),
       ].flatMap((p) => [p, new RegExp(`^${p}/`)]),
     ],
+    treeshake: {
+      moduleSideEffects: "no-external"
+    }
   } satisfies InputOptions);
 
   if (entry.dts !== false) {
