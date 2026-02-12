@@ -86,8 +86,8 @@ export async function rolldownBuild(
       ].flatMap((p) => [p, new RegExp(`^${p}/`)]),
     ],
     treeshake: {
-      moduleSideEffects: "no-external"
-    }
+      moduleSideEffects: "no-external",
+    },
   } satisfies InputOptions);
 
   if (entry.dts !== false) {
