@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.4.28
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.27...v0.4.28)
+
+### 🩹 Fixes
+
+- Enable `treeshake.moduleSideEffects: "no-external"` for rolldown ([4826ad0](https://github.com/unjs/obuild/commit/4826ad0))
+
+### 🏡 Chore
+
+- Update deps ([9f3f705](https://github.com/unjs/obuild/commit/9f3f705))
+- Lint ([8aff7a1](https://github.com/unjs/obuild/commit/8aff7a1))
+- Update deps ([ecfe0a0](https://github.com/unjs/obuild/commit/ecfe0a0))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.27
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.26...v0.4.27)
