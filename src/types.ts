@@ -96,6 +96,11 @@ export type TransformEntry = _BuildEntry & {
    * A filter function to exclude files from being transformed.
    */
   filter?: (filePath: string) => boolean | Promise<boolean>;
+
+  /**
+   * If sets to `false`, or if the function returns `false`, declaration files won't be emitted for the module.
+   */
+  dts?: boolean | ((filePath: string) => boolean | Promise<boolean>);
 };
 
 export type BuildEntry = BundleEntry | TransformEntry;

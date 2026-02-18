@@ -201,12 +201,17 @@ async function transformModule(entryPath: string, entry: TransformEntry, entryDi
 
   sourceText = magicString.toString();
 
+  let emitDeclaration = entry.dts;
+  if (typeof emitDeclaration === "function") {
+    emitDeclaration = await emitDeclaration(entryPath);
+  }
+
   const transformed = transformSync(entryPath, sourceText, {
     ...entry.oxc,
     ...sourceOptions,
     cwd: dirname(entryPath),
     typescript: {
-      declaration: { stripInternal: true },
+      declaration: emitDeclaration ? { stripInternal: true } : undefined,
       ...entry.oxc?.typescript,
     },
   });
