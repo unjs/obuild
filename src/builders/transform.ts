@@ -76,11 +76,26 @@ export async function transformDir(ctx: BuildContext, entry: TransformEntry): Pr
   const errors = results
     .filter((result): result is PromiseRejectedResult => result.status === "rejected")
     .map((result) => result.reason);
+
   if (errors.length > 0) {
-    for (const error of errors) {
+    let isolatedErrors: Error[] = [];
+    let otherErrors: Error[] = [];
+    for (const error of errors.flatMap((err) => (Array.isArray(err.cause) ? err.cause : [err]))) {
+      if (error.message?.includes("--isolatedDeclarations")) {
+        isolatedErrors.push(error);
+      } else {
+        otherErrors.push(error);
+      }
+    }
+    for (const error of otherErrors) {
       consola.error(error);
     }
-    throw new Error(`Errors while transforming ${entry.input} (${errors.length} failed)`);
+    for (const error of isolatedErrors) {
+      consola.warn(error);
+    }
+    if (otherErrors.length > 0) {
+      throw new Error(`Errors while transforming ${entry.input}`);
+    }
   }
 
   const writtenFiles = results
