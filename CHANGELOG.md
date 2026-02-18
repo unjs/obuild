@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.4.31
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.30...v0.4.31)
+
+### 🚀 Enhancements
+
+- Support `dts` filter for transform entries ([ae925ae](https://github.com/unjs/obuild/commit/ae925ae))
+
+### 🩹 Fixes
+
+- **transform:** Show all errors in the end ([154b770](https://github.com/unjs/obuild/commit/154b770))
+- **transform:** Warn only for isolated decl errors ([5543925](https://github.com/unjs/obuild/commit/5543925))
+- Default dts to true for transform ([8624948](https://github.com/unjs/obuild/commit/8624948))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.30
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.29...v0.4.30)
