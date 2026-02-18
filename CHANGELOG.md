@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.4.30
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.29...v0.4.30)
+
+### 🩹 Fixes
+
+- **bundle:** Do not skip isolated declaration errors ([ce10fc5](https://github.com/unjs/obuild/commit/ce10fc5))
+- **transform:** Also show transform warnings ([f06a619](https://github.com/unjs/obuild/commit/f06a619))
+
+### 💅 Refactors
+
+- Migrate to `rolldown/utils` ([ceb4d8c](https://github.com/unjs/obuild/commit/ceb4d8c))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.29
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.28...v0.4.29)
