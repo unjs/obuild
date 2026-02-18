@@ -9,7 +9,7 @@ import { resolveModulePath, type ResolveOptions } from "exsolve";
 import MagicString from "magic-string";
 import { fmtPath } from "../utils.ts";
 import { glob } from "tinyglobby";
-import { minifySync, transformSync, parseSync } from "rolldown/experimental";
+import { minifySync, transformSync, parseSync } from "rolldown/utils";
 import { makeExecutable, SHEBANG_RE } from "./plugins/shebang.ts";
 
 /**

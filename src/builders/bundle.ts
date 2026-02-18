@@ -5,7 +5,7 @@ import { consola } from "consola";
 import { colors as c } from "consola/utils";
 import { rolldown } from "rolldown";
 import { dts } from "rolldown-plugin-dts";
-import { parseSync } from "rolldown/experimental";
+import { parseSync } from "rolldown/utils";
 import { resolveModulePath } from "exsolve";
 import prettyBytes from "pretty-bytes";
 import { distSize, fmtPath, sideEffectSize } from "../utils.ts";
