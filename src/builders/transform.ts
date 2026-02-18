@@ -182,6 +182,12 @@ async function transformModule(entryPath: string, entry: TransformEntry, entryDi
     },
   });
 
+  if (transformed.warnings.length > 0) {
+    for (const warning of transformed.warnings) {
+      consola.warn(warning);
+    }
+  }
+
   if (transformed.errors.length > 0) {
     if (transformed.errors.length === 1) {
       throw transformed.errors[0];
