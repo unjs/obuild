@@ -182,15 +182,12 @@ async function transformModule(entryPath: string, entry: TransformEntry, entryDi
     },
   });
 
-  const transformErrors = transformed.errors.filter(
-    (err) => !err.message.includes("--isolatedDeclarations"),
-  );
-
-  if (transformErrors.length > 0) {
-    // console.log(sourceText);
-    await writeFile("build-dump.ts", `/** Error dump for ${entryPath} */\n\n` + sourceText, "utf8");
+  if (transformed.errors.length > 0) {
+    if (transformed.errors.length === 1) {
+      throw transformed.errors[0];
+    }
     throw new Error(`Errors while transforming ${entryPath}: (hint: check build-dump.ts)`, {
-      cause: transformErrors,
+      cause: transformed.errors,
     });
   }
 
