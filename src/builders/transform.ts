@@ -201,7 +201,7 @@ async function transformModule(entryPath: string, entry: TransformEntry, entryDi
 
   sourceText = magicString.toString();
 
-  let emitDeclaration = entry.dts;
+  let emitDeclaration = entry.dts ?? true;
   if (typeof emitDeclaration === "function") {
     emitDeclaration = await emitDeclaration(entryPath);
   }
