@@ -71,7 +71,21 @@ export async function transformDir(ctx: BuildContext, entry: TransformEntry): Pr
     );
   }
 
-  const writtenFiles = await Promise.all(promises);
+  const results = await Promise.allSettled(promises);
+
+  const errors = results
+    .filter((result): result is PromiseRejectedResult => result.status === "rejected")
+    .map((result) => result.reason);
+  if (errors.length > 0) {
+    for (const error of errors) {
+      consola.error(error);
+    }
+    throw new Error(`Errors while transforming ${entry.input} (${errors.length} failed)`);
+  }
+
+  const writtenFiles = results
+    .filter((result): result is PromiseFulfilledResult<string> => result.status === "fulfilled")
+    .map((result) => result.value);
 
   consola.log(
     `\n${c.magenta("[transform] ")}${c.underline(fmtPath(entry.outDir!) + "/")}${entry.stub ? c.dim(" (stub)") : ""}\n${c.dim(itemsTable(writtenFiles.map((f) => fmtPath(f))))}`,
@@ -192,7 +206,7 @@ async function transformModule(entryPath: string, entry: TransformEntry, entryDi
     if (transformed.errors.length === 1) {
       throw transformed.errors[0];
     }
-    throw new Error(`Errors while transforming ${entryPath}: (hint: check build-dump.ts)`, {
+    throw new Error(`Errors while transforming ${entryPath}`, {
       cause: transformed.errors,
     });
   }
