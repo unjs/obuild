@@ -1,5 +1,7 @@
 import type { BuildConfig } from "./types.ts";
 
+export type { BuildConfig };
+
 export function defineBuildConfig(config: BuildConfig): BuildConfig {
   return config;
 }
