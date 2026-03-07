@@ -1,5 +1,27 @@
 # Changelog
 
+## v0.4.32
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.31...v0.4.32)
+
+### 🩹 Fixes
+
+- **bundle:** Mark `#` subpath imports as external ([5841515](https://github.com/unjs/obuild/commit/5841515))
+
+### 📦 Build
+
+- Export `BuildConfig` type ([#74](https://github.com/unjs/obuild/pull/74))
+
+### 🏡 Chore
+
+- Update deps ([2152c14](https://github.com/unjs/obuild/commit/2152c14))
+- Add agents.md ([2a64596](https://github.com/unjs/obuild/commit/2a64596))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Thierry Goettelmann ([@ByScripts](https://github.com/ByScripts))
+
 ## v0.4.31
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.30...v0.4.31)
