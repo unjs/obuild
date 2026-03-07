@@ -78,6 +78,7 @@ export async function rolldownBuild(
       mainFields: ["module", "main"],
     },
     external: [
+      /^#/,
       ...builtinModules,
       ...builtinModules.map((m) => `node:${m}`),
       ...[

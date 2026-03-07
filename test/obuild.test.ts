@@ -61,6 +61,11 @@ describe("obuild", () => {
     expect(runtimeIndexMts).contain("./test.mjs");
   });
 
+  test("# imports are external", async () => {
+    const indexContent = await readFile(new URL("index.mjs", distDir), "utf8");
+    expect(indexContent).contain("#internal");
+  });
+
   test("cli shebang is executable", async () => {
     const cliPath = new URL("cli.mjs", distDir);
     const stats = await stat(cliPath);

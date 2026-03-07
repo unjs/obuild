@@ -1,5 +1,8 @@
 {
   "name": "test-fixture",
+  "imports": {
+    "#internal": "./src/internal.ts"
+  },
   "exports": {
     ".": "./dist/index.mjs",
     "./cli": "./dist/cli.mjs",
