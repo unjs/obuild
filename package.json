@@ -28,32 +28,32 @@
     "test:types": "tsgo --noEmit --skipLibCheck"
   },
   "dependencies": {
-    "c12": "^4.0.0-beta.3",
+    "c12": "^4.0.0-beta.4",
     "consola": "^3.4.2",
     "defu": "^6.1.4",
     "exsolve": "^1.0.8",
     "magic-string": "^0.30.21",
     "pathe": "^2.0.3",
     "pretty-bytes": "^7.1.0",
-    "rolldown": "^1.0.0-rc.7",
-    "rolldown-plugin-dts": "^0.22.4",
+    "rolldown": "^1.0.0-rc.9",
+    "rolldown-plugin-dts": "^0.22.5",
     "rollup-plugin-license": "^3.7.0",
     "tinyglobby": "^0.2.15"
   },
   "devDependencies": {
-    "@types/node": "^25.3.5",
-    "@typescript/native-preview": "^7.0.0-dev.20260307.1",
-    "@vitest/coverage-v8": "^4.0.18",
+    "@types/node": "^25.5.0",
+    "@typescript/native-preview": "^7.0.0-dev.20260317.1",
+    "@vitest/coverage-v8": "^4.1.0",
     "automd": "^0.4.3",
     "changelogen": "^0.6.2",
     "eslint-config-unjs": "^0.6.2",
-    "oxfmt": "^0.36.0",
-    "oxlint": "^1.51.0",
+    "oxfmt": "^0.41.0",
+    "oxlint": "^1.56.0",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.0"
   },
   "resolutions": {
     "obuild": "link:."
   },
-  "packageManager": "pnpm@10.30.3"
+  "packageManager": "pnpm@10.32.1"
 }
