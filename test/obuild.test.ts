@@ -26,6 +26,10 @@ describe("obuild", () => {
     const distFiles = await readdir(distDir, { recursive: true }).then((r) => r.sort());
     expect(distFiles).toMatchInlineSnapshot(`
       [
+        "THIRD-PARTY-LICENSES.md",
+        "_chunks",
+        "_chunks/libs",
+        "_chunks/libs/defu.mjs",
         "cli.d.mts",
         "cli.mjs",
         "index.d.mts",
@@ -70,5 +74,20 @@ describe("obuild", () => {
     const cliPath = new URL("cli.mjs", distDir);
     const stats = await stat(cliPath);
     expect(stats.mode & 0o111).toBe(0o111); // Check if executable
+  });
+
+  test("license file is generated with correct structure", async () => {
+    const content = await readFile(new URL("THIRD-PARTY-LICENSES.md", distDir), "utf8");
+    expect(content).toContain("# Licenses of Bundled Dependencies");
+    expect(content).toContain("# Bundled Dependencies");
+    expect(content).toContain("MIT");
+  });
+
+  test("license file contains bundled dependency info", async () => {
+    const content = await readFile(new URL("THIRD-PARTY-LICENSES.md", distDir), "utf8");
+    expect(content).toContain("## defu");
+    expect(content).toContain("License: MIT");
+    expect(content).toContain("Pooya Parsa");
+    expect(content).toContain("> MIT License");
   });
 });

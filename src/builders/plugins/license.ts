@@ -6,127 +6,219 @@
  *      MIT Licensed: https://github.com/rollup/rollup/blob/master/LICENSE-CORE.md
  */
 
-import { appendFile, mkdir, writeFile } from "node:fs/promises";
-import license from "rollup-plugin-license";
-
-import type { Dependency } from "rollup-plugin-license";
-import type { Plugin, PluginContext } from "rolldown";
-import { dirname } from "node:path";
+import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
+import { dirname, join, sep } from "node:path";
+import type { Plugin, PluginContext } from "rolldown";
+
+interface Person {
+  name?: string;
+  email?: string;
+  url?: string;
+}
+
+interface Dependency {
+  name?: string;
+  version?: string;
+  license?: string;
+  licenseText?: string;
+  author?: string | Person;
+  maintainers: (string | Person)[];
+  contributors: (string | Person)[];
+  repository?: string | { type?: string; url: string };
+}
+
+async function collectDependencies(
+  moduleIds: Iterable<string>,
+): Promise<Dependency[]> {
+  const seen = new Set<string>();
+  const deps: Dependency[] = [];
+
+  for (const id of moduleIds) {
+    const nodeModulesIdx = id.lastIndexOf(`${sep}node_modules${sep}`);
+    if (nodeModulesIdx === -1) continue;
+
+    const afterNodeModules = id.slice(
+      nodeModulesIdx + `${sep}node_modules${sep}`.length,
+    );
+    // Handle scoped packages (@scope/name)
+    const parts = afterNodeModules.split(sep);
+    const pkgName =
+      parts[0].startsWith("@") ? `${parts[0]}/${parts[1]}` : parts[0];
+
+    if (seen.has(pkgName)) continue;
+    seen.add(pkgName);
+
+    const pkgDir = id.slice(
+      0,
+      nodeModulesIdx +
+        `${sep}node_modules${sep}`.length +
+        pkgName.length,
+    );
+    const pkgJsonPath = join(pkgDir, "package.json");
+
+    try {
+      const pkgJson = JSON.parse(await readFile(pkgJsonPath, "utf8"));
+      const dep: Dependency = {
+        name: pkgJson.name,
+        version: pkgJson.version,
+        license: pkgJson.license,
+        author: pkgJson.author,
+        maintainers: pkgJson.maintainers || [],
+        contributors: pkgJson.contributors || [],
+        repository: pkgJson.repository,
+      };
+
+      // Try to find LICENSE file
+      for (const licenseFile of [
+        "LICENSE",
+        "LICENSE.md",
+        "LICENSE.txt",
+        "LICENCE",
+        "LICENCE.md",
+        "LICENCE.txt",
+        "license",
+        "license.md",
+        "license.txt",
+      ]) {
+        const licensePath = join(pkgDir, licenseFile);
+        if (existsSync(licensePath)) {
+          dep.licenseText = await readFile(licensePath, "utf8");
+          break;
+        }
+      }
+
+      deps.push(dep);
+    } catch {
+      // Skip packages without a valid package.json
+    }
+  }
+
+  return deps;
+}
 
 export default function licensePlugin(opts: { output: string }): Plugin {
-  const originalPlugin = (license as unknown as typeof license.default)({
-    async thirdParty(dependencies: Dependency[]) {
-      const deps = sortDependencies([...dependencies]);
-      const licenses = sortLicenses(
-        new Set(dependencies.map((dep: Dependency) => dep.license).filter(Boolean) as string[]),
-      );
-
-      let dependencyLicenseTexts = "";
-      for (let i = 0; i < deps.length; i++) {
-        // Find dependencies with the same license text so it can be shared
-        const licenseText = deps[i].licenseText;
-        const sameDeps = [deps[i]];
-        if (licenseText) {
-          for (let j = i + 1; j < deps.length; j++) {
-            if (licenseText === deps[j].licenseText) {
-              sameDeps.push(...deps.splice(j, 1));
-              j--;
-            }
-          }
-        }
-
-        let text = `## ${sameDeps.map((d) => d.name || "unknown").join(", ")}\n\n`;
-        const depInfos = sameDeps.map((d) => getDependencyInformation(d));
-
-        // If all same dependencies have the same license and contributor names, show them only once
-        if (
-          depInfos.length > 1 &&
-          depInfos.every(
-            (info) => info.license === depInfos[0].license && info.names === depInfos[0].names,
-          )
-        ) {
-          const { license, names } = depInfos[0];
-          const repositoryText = depInfos
-            .map((info) => info.repository)
-            .filter(Boolean)
-            .join(", ");
-
-          if (license) text += `License: ${license}\n`;
-          if (names) text += `By: ${names}\n`;
-          if (repositoryText) text += `Repositories: ${repositoryText}\n`;
-        }
-        // Else show each dependency separately
-        else {
-          for (let j = 0; j < depInfos.length; j++) {
-            const { license, names, repository } = depInfos[j];
-
-            if (license) text += `License: ${license}\n`;
-            if (names) text += `By: ${names}\n`;
-            if (repository) text += `Repository: ${repository}\n`;
-            if (j !== depInfos.length - 1) text += "\n";
-          }
-        }
-
-        if (licenseText) {
-          text +=
-            "\n" +
-            licenseText
-              .trim()
-              .replace(/\r\n|\r/g, "\n")
-              .split("\n")
-              .map((line: string) => `> ${line}`)
-              .join("\n") +
-            "\n";
-        }
-
-        if (i !== deps.length - 1) {
-          text += "\n---------------------------------------\n\n";
-        }
-
-        dependencyLicenseTexts += text;
-      }
-
-      if (!dependencyLicenseTexts) {
-        return;
-      }
-
-      if (existsSync(opts.output)) {
-        // TODO: Deep merge?
-        console.log("Appending third-party licenses to", opts.output);
-        await appendFile(opts.output, "\n\n" + dependencyLicenseTexts);
-      } else {
-        const licenseText =
-          `# Licenses of Bundled Dependencies\n\n` +
-          `The published artifact additionally contains code with the following licenses:\n` +
-          `${licenses.join(", ")}\n\n` +
-          `# Bundled Dependencies\n\n` +
-          dependencyLicenseTexts;
-
-        console.log("Writing third-party licenses to", opts.output);
-
-        await mkdir(dirname(opts.output!), { recursive: true });
-        await writeFile(opts.output!, licenseText);
-      }
-    },
-  });
-  // Skip for watch mode
-  for (const hook of ["renderChunk", "generateBundle"] as const) {
-    const originalHook = originalPlugin[hook];
-    if (!originalHook) continue;
-    // @ts-expect-error
-    originalPlugin[hook] = function (this: PluginContext, ...args: unknown[]) {
+  return {
+    name: "obuild:license",
+    async generateBundle(this: PluginContext) {
       if (this.meta.watchMode) return;
-      // @ts-expect-error
-      return originalHook.apply(this, args);
-    };
+
+      const dependencies = await collectDependencies(this.getModuleIds());
+      await generateLicenseFile(dependencies, opts.output);
+    },
+  };
+}
+
+async function generateLicenseFile(
+  dependencies: Dependency[],
+  output: string,
+): Promise<void> {
+  const deps = sortDependencies([...dependencies]);
+  const licenses = sortLicenses(
+    new Set(
+      dependencies
+        .map((dep: Dependency) => dep.license)
+        .filter(Boolean) as string[],
+    ),
+  );
+
+  let dependencyLicenseTexts = "";
+  for (let i = 0; i < deps.length; i++) {
+    // Find dependencies with the same license text so it can be shared
+    const licenseText = deps[i].licenseText;
+    const sameDeps = [deps[i]];
+    if (licenseText) {
+      for (let j = i + 1; j < deps.length; j++) {
+        if (licenseText === deps[j].licenseText) {
+          sameDeps.push(...deps.splice(j, 1));
+          j--;
+        }
+      }
+    }
+
+    let text = `## ${sameDeps.map((d) => d.name || "unknown").join(", ")}\n\n`;
+    const depInfos = sameDeps.map((d) => getDependencyInformation(d));
+
+    // If all same dependencies have the same license and contributor names, show them only once
+    if (
+      depInfos.length > 1 &&
+      depInfos.every(
+        (info) =>
+          info.license === depInfos[0].license &&
+          info.names === depInfos[0].names,
+      )
+    ) {
+      const { license, names } = depInfos[0];
+      const repositoryText = depInfos
+        .map((info) => info.repository)
+        .filter(Boolean)
+        .join(", ");
+
+      if (license) text += `License: ${license}\n`;
+      if (names) text += `By: ${names}\n`;
+      if (repositoryText) text += `Repositories: ${repositoryText}\n`;
+    }
+    // Else show each dependency separately
+    else {
+      for (let j = 0; j < depInfos.length; j++) {
+        const { license, names, repository } = depInfos[j];
+
+        if (license) text += `License: ${license}\n`;
+        if (names) text += `By: ${names}\n`;
+        if (repository) text += `Repository: ${repository}\n`;
+        if (j !== depInfos.length - 1) text += "\n";
+      }
+    }
+
+    if (licenseText) {
+      text +=
+        "\n" +
+        licenseText
+          .trim()
+          .replace(/\r\n|\r/g, "\n")
+          .split("\n")
+          .map((line: string) => `> ${line}`)
+          .join("\n") +
+        "\n";
+    }
+
+    if (i !== deps.length - 1) {
+      text += "\n---------------------------------------\n\n";
+    }
+
+    dependencyLicenseTexts += text;
   }
-  return originalPlugin as Plugin;
+
+  if (!dependencyLicenseTexts) {
+    return;
+  }
+
+  if (existsSync(output)) {
+    // TODO: Deep merge?
+    console.log("Appending third-party licenses to", output);
+    await appendFile(output, "\n\n" + dependencyLicenseTexts);
+  } else {
+    const licenseText =
+      `# Licenses of Bundled Dependencies\n\n` +
+      `The published artifact additionally contains code with the following licenses:\n` +
+      `${licenses.join(", ")}\n\n` +
+      `# Bundled Dependencies\n\n` +
+      dependencyLicenseTexts;
+
+    console.log("Writing third-party licenses to", output);
+
+    await mkdir(dirname(output!), { recursive: true });
+    await writeFile(output!, licenseText);
+  }
 }
 
 function sortDependencies(dependencies: Dependency[]) {
   return dependencies.sort(({ name: nameA }, { name: nameB }) => {
-    return (nameA || "") > (nameB || "") ? 1 : (nameB || "") > (nameA || "") ? -1 : 0;
+    return (nameA || "") > (nameB || "")
+      ? 1
+      : (nameB || "") > (nameA || "")
+        ? -1
+        : 0;
   });
 }
 
@@ -171,7 +263,9 @@ function getDependencyInformation(dep: Dependency): DependencyInfo {
   }
 
   if (repository) {
-    info.repository = normalizeGitUrl(typeof repository === "string" ? repository : repository.url);
+    info.repository = normalizeGitUrl(
+      typeof repository === "string" ? repository : repository.url,
+    );
   }
 
   return info;
