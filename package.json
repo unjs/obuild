@@ -36,7 +36,7 @@
     "pathe": "^2.0.3",
     "pretty-bytes": "^7.1.0",
     "rolldown": "^1.0.0-rc.13",
-    "rolldown-plugin-dts": "^0.22.5",
+    "rolldown-plugin-dts": "^0.23.2",
     "rollup-plugin-license": "^3.7.0",
     "tinyglobby": "^0.2.15"
   },
