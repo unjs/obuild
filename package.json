@@ -30,30 +30,30 @@
   "dependencies": {
     "c12": "^4.0.0-beta.4",
     "consola": "^3.4.2",
-    "defu": "^6.1.4",
+    "defu": "^6.1.6",
     "exsolve": "^1.0.8",
     "magic-string": "^0.30.21",
     "pathe": "^2.0.3",
     "pretty-bytes": "^7.1.0",
-    "rolldown": "^1.0.0-rc.10",
+    "rolldown": "^1.0.0-rc.13",
     "rolldown-plugin-dts": "^0.22.5",
     "rollup-plugin-license": "^3.7.0",
     "tinyglobby": "^0.2.15"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
-    "@typescript/native-preview": "^7.0.0-dev.20260319.1",
-    "@vitest/coverage-v8": "^4.1.0",
+    "@typescript/native-preview": "^7.0.0-dev.20260401.1",
+    "@vitest/coverage-v8": "^4.1.2",
     "automd": "^0.4.3",
     "changelogen": "^0.6.2",
     "eslint-config-unjs": "^0.6.2",
-    "oxfmt": "^0.41.0",
-    "oxlint": "^1.56.0",
-    "typescript": "^5.9.3",
-    "vitest": "^4.1.0"
+    "oxfmt": "^0.43.0",
+    "oxlint": "^1.58.0",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.2"
   },
   "resolutions": {
     "obuild": "link:."
   },
-  "packageManager": "pnpm@10.32.1"
+  "packageManager": "pnpm@10.33.0"
 }
