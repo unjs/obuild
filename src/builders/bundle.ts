@@ -8,6 +8,7 @@ import { dts } from "rolldown-plugin-dts";
 import { parseSync } from "rolldown/utils";
 import { resolveModulePath } from "exsolve";
 import prettyBytes from "pretty-bytes";
+import MagicString from "magic-string";
 import { distSize, fmtPath, sideEffectSize } from "../utils.ts";
 import { makeExecutable, shebangPlugin } from "./plugins/shebang.ts";
 import licensePlugin from "./plugins/license.ts";
@@ -59,11 +60,15 @@ export async function rolldownBuild(
   const rolldownConfig = defu(entry.rolldown, {
     cwd: ctx.pkgDir,
     input: inputs,
+    experimental: {
+      attachDebugInfo: "none" as const,
+    },
     plugins: [
       shebangPlugin(),
       licensePlugin({
         output: resolve(ctx.pkgDir, entry.outDir || "dist", "THIRD-PARTY-LICENSES.md"),
       }),
+      removeCommentsPlugin(),
     ] as Plugin[],
     platform: "node",
     onLog(level, log, defaultHandler) {
@@ -227,4 +232,24 @@ export function normalizeBundleInputs(
   }
 
   return inputs;
+}
+
+function removeCommentsPlugin(): Plugin {
+  return {
+    name: "remove-comments",
+    renderChunk(code) {
+      const parsed = parseSync("chunk.js", code);
+      if (parsed.comments.length === 0) {
+        return;
+      }
+      const ms = new MagicString(code);
+      for (const comment of parsed.comments) {
+        if (/^\s*[#@]/.test(comment.value) || code.startsWith("#!", comment.start)) {
+          continue;
+        }
+        ms.remove(comment.start, comment.end);
+      }
+      return ms.toString();
+    },
+  };
 }
