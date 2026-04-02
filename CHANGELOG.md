@@ -1,5 +1,28 @@
 # Changelog
 
+## v0.4.33
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.32...v0.4.33)
+
+### 🚀 Enhancements
+
+- **bundle:** Add build output optimizations ([380c961](https://github.com/unjs/obuild/commit/380c961))
+
+### 💅 Refactors
+
+- Extract `removeComments` to utils and apply to transform builder ([ac5ab2d](https://github.com/unjs/obuild/commit/ac5ab2d))
+
+### 🏡 Chore
+
+- Update lockfile ([07bf9e0](https://github.com/unjs/obuild/commit/07bf9e0))
+- Update deps ([249101c](https://github.com/unjs/obuild/commit/249101c))
+- Update rolldown-plugin-dts ([3165c66](https://github.com/unjs/obuild/commit/3165c66))
+- Rename fmt script ([9d34c00](https://github.com/unjs/obuild/commit/9d34c00))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.32
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.31...v0.4.32)
