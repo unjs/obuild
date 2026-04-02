@@ -2,8 +2,9 @@ import { readdirSync, statSync } from "node:fs";
 import { join, resolve } from "pathe";
 
 import { type Plugin, rolldown } from "rolldown";
-import { minifySync } from "rolldown/utils";
+import { minifySync, parseSync } from "rolldown/utils";
 import { gzipSync } from "node:zlib";
+import MagicString from "magic-string";
 
 export function fmtPath(path: string): string {
   return resolve(path).replace(process.cwd(), ".");
@@ -110,4 +111,19 @@ export async function sideEffectSize(dir: string, entry: string): Promise<number
   }
 
   return Buffer.byteLength(output[0].code.trim());
+}
+
+export function removeComments(code: string): string {
+  const parsed = parseSync("code.js", code);
+  if (parsed.comments.length === 0) {
+    return code;
+  }
+  const ms = new MagicString(code);
+  for (const comment of parsed.comments) {
+    if (/^\s*[#@]/.test(comment.value) || code.startsWith("#!", comment.start)) {
+      continue;
+    }
+    ms.remove(comment.start, comment.end);
+  }
+  return ms.toString();
 }

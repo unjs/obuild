@@ -8,8 +8,7 @@ import { dts } from "rolldown-plugin-dts";
 import { parseSync } from "rolldown/utils";
 import { resolveModulePath } from "exsolve";
 import prettyBytes from "pretty-bytes";
-import MagicString from "magic-string";
-import { distSize, fmtPath, sideEffectSize } from "../utils.ts";
+import { distSize, fmtPath, removeComments, sideEffectSize } from "../utils.ts";
 import { makeExecutable, shebangPlugin } from "./plugins/shebang.ts";
 import licensePlugin from "./plugins/license.ts";
 import { defu } from "defu";
@@ -238,18 +237,7 @@ function removeCommentsPlugin(): Plugin {
   return {
     name: "remove-comments",
     renderChunk(code) {
-      const parsed = parseSync("chunk.js", code);
-      if (parsed.comments.length === 0) {
-        return;
-      }
-      const ms = new MagicString(code);
-      for (const comment of parsed.comments) {
-        if (/^\s*[#@]/.test(comment.value) || code.startsWith("#!", comment.start)) {
-          continue;
-        }
-        ms.remove(comment.start, comment.end);
-      }
-      return ms.toString();
+      return removeComments(code);
     },
   };
 }

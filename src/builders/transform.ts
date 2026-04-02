@@ -7,7 +7,7 @@ import { consola } from "consola";
 import { colors as c } from "consola/utils";
 import { resolveModulePath, type ResolveOptions } from "exsolve";
 import MagicString from "magic-string";
-import { fmtPath } from "../utils.ts";
+import { fmtPath, removeComments } from "../utils.ts";
 import { glob } from "tinyglobby";
 import { minifySync, transformSync, parseSync } from "rolldown/utils";
 import { makeExecutable, SHEBANG_RE } from "./plugins/shebang.ts";
@@ -236,6 +236,8 @@ async function transformModule(entryPath: string, entry: TransformEntry, entryDi
     transformed.code = res.code;
     transformed.map = res.map;
   }
+
+  transformed.code = removeComments(transformed.code);
 
   return transformed;
 }
