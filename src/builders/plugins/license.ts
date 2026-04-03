@@ -39,12 +39,13 @@ async function collectDependencies(moduleIds: Iterable<string>): Promise<Depende
     const afterNodeModules = id.slice(nodeModulesIdx + `${sep}node_modules${sep}`.length);
     // Handle scoped packages (@scope/name)
     const parts = afterNodeModules.split(sep);
-    const pkgName = parts[0].startsWith("@") ? `${parts[0]}/${parts[1]}` : parts[0];
+    const pkgName = parts[0].startsWith("@") ? join(parts[0], parts[1]) : parts[0];
 
     if (seen.has(pkgName)) continue;
     seen.add(pkgName);
 
-    const pkgDir = id.slice(0, nodeModulesIdx + `${sep}node_modules${sep}`.length + pkgName.length);
+    const nodeModulesDir = id.slice(0, nodeModulesIdx + `${sep}node_modules${sep}`.length);
+    const pkgDir = join(nodeModulesDir, pkgName);
     const pkgJsonPath = join(pkgDir, "package.json");
 
     try {
