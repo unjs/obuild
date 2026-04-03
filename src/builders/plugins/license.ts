@@ -28,9 +28,7 @@ interface Dependency {
   repository?: string | { type?: string; url: string };
 }
 
-async function collectDependencies(
-  moduleIds: Iterable<string>,
-): Promise<Dependency[]> {
+async function collectDependencies(moduleIds: Iterable<string>): Promise<Dependency[]> {
   const seen = new Set<string>();
   const deps: Dependency[] = [];
 
@@ -38,23 +36,15 @@ async function collectDependencies(
     const nodeModulesIdx = id.lastIndexOf(`${sep}node_modules${sep}`);
     if (nodeModulesIdx === -1) continue;
 
-    const afterNodeModules = id.slice(
-      nodeModulesIdx + `${sep}node_modules${sep}`.length,
-    );
+    const afterNodeModules = id.slice(nodeModulesIdx + `${sep}node_modules${sep}`.length);
     // Handle scoped packages (@scope/name)
     const parts = afterNodeModules.split(sep);
-    const pkgName =
-      parts[0].startsWith("@") ? `${parts[0]}/${parts[1]}` : parts[0];
+    const pkgName = parts[0].startsWith("@") ? `${parts[0]}/${parts[1]}` : parts[0];
 
     if (seen.has(pkgName)) continue;
     seen.add(pkgName);
 
-    const pkgDir = id.slice(
-      0,
-      nodeModulesIdx +
-        `${sep}node_modules${sep}`.length +
-        pkgName.length,
-    );
+    const pkgDir = id.slice(0, nodeModulesIdx + `${sep}node_modules${sep}`.length + pkgName.length);
     const pkgJsonPath = join(pkgDir, "package.json");
 
     try {
@@ -109,17 +99,10 @@ export default function licensePlugin(opts: { output: string }): Plugin {
   };
 }
 
-async function generateLicenseFile(
-  dependencies: Dependency[],
-  output: string,
-): Promise<void> {
+async function generateLicenseFile(dependencies: Dependency[], output: string): Promise<void> {
   const deps = sortDependencies([...dependencies]);
   const licenses = sortLicenses(
-    new Set(
-      dependencies
-        .map((dep: Dependency) => dep.license)
-        .filter(Boolean) as string[],
-    ),
+    new Set(dependencies.map((dep: Dependency) => dep.license).filter(Boolean) as string[]),
   );
 
   let dependencyLicenseTexts = "";
@@ -143,9 +126,7 @@ async function generateLicenseFile(
     if (
       depInfos.length > 1 &&
       depInfos.every(
-        (info) =>
-          info.license === depInfos[0].license &&
-          info.names === depInfos[0].names,
+        (info) => info.license === depInfos[0].license && info.names === depInfos[0].names,
       )
     ) {
       const { license, names } = depInfos[0];
@@ -214,11 +195,7 @@ async function generateLicenseFile(
 
 function sortDependencies(dependencies: Dependency[]) {
   return dependencies.sort(({ name: nameA }, { name: nameB }) => {
-    return (nameA || "") > (nameB || "")
-      ? 1
-      : (nameB || "") > (nameA || "")
-        ? -1
-        : 0;
+    return (nameA || "") > (nameB || "") ? 1 : (nameB || "") > (nameA || "") ? -1 : 0;
   });
 }
 
@@ -263,9 +240,7 @@ function getDependencyInformation(dep: Dependency): DependencyInfo {
   }
 
   if (repository) {
-    info.repository = normalizeGitUrl(
-      typeof repository === "string" ? repository : repository.url,
-    );
+    info.repository = normalizeGitUrl(typeof repository === "string" ? repository : repository.url);
   }
 
   return info;
