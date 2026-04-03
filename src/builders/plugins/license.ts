@@ -188,8 +188,8 @@ async function generateLicenseFile(dependencies: Dependency[], output: string): 
 
     console.log("Writing third-party licenses to", output);
 
-    await mkdir(dirname(output!), { recursive: true });
-    await writeFile(output!, licenseText);
+    await mkdir(dirname(output), { recursive: true });
+    await writeFile(output, licenseText);
   }
 }
 
