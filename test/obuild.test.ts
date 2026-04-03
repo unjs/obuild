@@ -26,6 +26,10 @@ describe("obuild", () => {
     const distFiles = await readdir(distDir, { recursive: true }).then((r) => r.sort());
     expect(distFiles).toMatchInlineSnapshot(`
       [
+        "THIRD-PARTY-LICENSES.md",
+        "_chunks",
+        "_chunks/libs",
+        "_chunks/libs/defu.mjs",
         "cli.d.mts",
         "cli.mjs",
         "index.d.mts",
@@ -70,5 +74,10 @@ describe("obuild", () => {
     const cliPath = new URL("cli.mjs", distDir);
     const stats = await stat(cliPath);
     expect(stats.mode & 0o111).toBe(0o111); // Check if executable
+  });
+
+  test("license file matches snapshot", async () => {
+    const content = await readFile(new URL("THIRD-PARTY-LICENSES.md", distDir), "utf8");
+    expect(content).toMatchSnapshot();
   });
 });
