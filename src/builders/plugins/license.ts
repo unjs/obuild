@@ -8,7 +8,7 @@
 
 import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import { dirname, join, sep } from "node:path";
+import { dirname, join } from "node:path";
 import type { Plugin, PluginContext } from "rolldown";
 
 interface Person {
@@ -33,15 +33,16 @@ async function collectDependencies(moduleIds: Iterable<string>): Promise<Depende
   const deps: Dependency[] = [];
 
   for (const id of moduleIds) {
-    const nodeModulesIdx = id.lastIndexOf(`${sep}node_modules${sep}`);
+    const normalizedId = id.replaceAll("\\", "/");
+    const nodeModulesIdx = normalizedId.lastIndexOf("/node_modules/");
     if (nodeModulesIdx === -1) continue;
 
-    const afterNodeModules = id.slice(nodeModulesIdx + `${sep}node_modules${sep}`.length);
+    const afterNodeModules = normalizedId.slice(nodeModulesIdx + "/node_modules/".length);
     // Handle scoped packages (@scope/name)
-    const parts = afterNodeModules.split(sep);
-    const pkgName = parts[0].startsWith("@") ? join(parts[0], parts[1]) : parts[0];
+    const parts = afterNodeModules.split("/");
+    const pkgName = parts[0].startsWith("@") ? [parts[0], parts[1]].join("/") : parts[0];
 
-    const nodeModulesDir = id.slice(0, nodeModulesIdx + `${sep}node_modules${sep}`.length);
+    const nodeModulesDir = id.slice(0, nodeModulesIdx + "/node_modules/".length);
     const pkgDir = join(nodeModulesDir, pkgName);
     if (seen.has(pkgDir)) continue;
     seen.add(pkgDir);
