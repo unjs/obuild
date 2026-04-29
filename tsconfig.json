@@ -12,5 +12,5 @@
     "isolatedDeclarations": true
   },
   "include": ["src", "test"],
-  "exclude": ["test/fixture-isolated-decl"]
+  "exclude": ["**/broken.ts"]
 }
