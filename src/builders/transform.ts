@@ -212,8 +212,8 @@ async function transformModule(entryPath: string, entry: TransformEntry, entryDi
       ...sourceOptions,
       cwd: dirname(entryPath),
       typescript: {
-        declaration: declaration ? { stripInternal: true } : undefined,
         ...entry.oxc?.typescript,
+        declaration: declaration ? { stripInternal: true } : undefined,
       },
     });
 

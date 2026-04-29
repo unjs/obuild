@@ -94,6 +94,7 @@ describe("transform: isolated-declarations fallback", () => {
     // The failing file does not get a declaration; sibling files still do.
     expect(distFiles).not.toContain("broken.d.mts");
     expect(distFiles).toContain("ok.d.mts");
+    expect(distFiles).toContain("index.d.mts");
   });
 
   test("dist is loadable at runtime (no ERR_MODULE_NOT_FOUND)", async () => {
