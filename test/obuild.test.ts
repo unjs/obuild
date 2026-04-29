@@ -31,6 +31,7 @@ describe("obuild", () => {
         "index.d.mts",
         "index.mjs",
         "runtime",
+        "runtime/broken.mjs",
         "runtime/index.d.mts",
         "runtime/index.mjs",
         "runtime/js-module.js",
@@ -70,5 +71,15 @@ describe("obuild", () => {
     const cliPath = new URL("cli.mjs", distDir);
     const stats = await stat(cliPath);
     expect(stats.mode & 0o111).toBe(0o111); // Check if executable
+  });
+
+  test("isolatedDeclarations fallback: .mjs emitted, .d.mts skipped, runtime loads", async () => {
+    const runtimeDistFiles = await readdir(new URL("runtime/", distDir));
+    expect(runtimeDistFiles).toContain("broken.mjs");
+    expect(runtimeDistFiles).not.toContain("broken.d.mts");
+
+    const runtimeIndex = await import(new URL("runtime/index.mjs", distDir).href);
+    const broken = await runtimeIndex.loadBroken();
+    expect(broken.Flags).toMatchObject({ None: 0 });
   });
 });

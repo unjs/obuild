@@ -11,5 +11,6 @@
     "allowImportingTsExtensions": true,
     "isolatedDeclarations": true
   },
-  "include": ["src", "test"]
+  "include": ["src", "test"],
+  "exclude": ["**/broken.ts"]
 }
