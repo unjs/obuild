@@ -8,8 +8,14 @@
 
 import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
+import { gzipSync, gunzipSync } from "node:zlib";
 import { dirname, join } from "node:path";
 import type { Plugin, PluginContext } from "rolldown";
+
+export interface LicensePluginOptions {
+  output: string;
+  gzip?: boolean;
+}
 
 interface Person {
   name?: string;
@@ -92,7 +98,7 @@ async function collectDependencies(moduleIds: Iterable<string>): Promise<Depende
   return deps;
 }
 
-export default function licensePlugin(opts: { output: string }): Plugin {
+export default function licensePlugin(opts: LicensePluginOptions): Plugin {
   return {
     name: "obuild:license",
     async generateBundle(this: PluginContext, _options, bundle) {
@@ -107,12 +113,16 @@ export default function licensePlugin(opts: { output: string }): Plugin {
       }
 
       const dependencies = await collectDependencies(moduleIds);
-      await generateLicenseFile(dependencies, opts.output);
+      await generateLicenseFile(dependencies, opts.output, opts.gzip);
     },
   };
 }
 
-async function generateLicenseFile(dependencies: Dependency[], output: string): Promise<void> {
+async function generateLicenseFile(
+  dependencies: Dependency[],
+  output: string,
+  gzip?: boolean,
+): Promise<void> {
   const deps = sortDependencies([...dependencies]);
   const licenses = sortLicenses(
     new Set(dependencies.map((dep: Dependency) => dep.license).filter(Boolean) as string[]),
@@ -187,10 +197,17 @@ async function generateLicenseFile(dependencies: Dependency[], output: string): 
     return;
   }
 
-  if (existsSync(output)) {
+  const outputPath = gzip ? `${output}.gz` : output;
+
+  if (existsSync(outputPath)) {
     // TODO: Deep merge?
-    console.log("Appending third-party licenses to", output);
-    await appendFile(output, "\n\n" + dependencyLicenseTexts);
+    console.log("Appending third-party licenses to", outputPath);
+    if (gzip) {
+      const existing = gunzipSync(await readFile(outputPath)).toString("utf8");
+      await writeFile(outputPath, gzipSync(existing + "\n\n" + dependencyLicenseTexts));
+    } else {
+      await appendFile(outputPath, "\n\n" + dependencyLicenseTexts);
+    }
   } else {
     const licenseText =
       `# Licenses of Bundled Dependencies\n\n` +
@@ -199,10 +216,10 @@ async function generateLicenseFile(dependencies: Dependency[], output: string): 
       `# Bundled Dependencies\n\n` +
       dependencyLicenseTexts;
 
-    console.log("Writing third-party licenses to", output);
+    console.log("Writing third-party licenses to", outputPath);
 
-    await mkdir(dirname(output), { recursive: true });
-    await writeFile(output, licenseText);
+    await mkdir(dirname(outputPath), { recursive: true });
+    await writeFile(outputPath, gzip ? gzipSync(licenseText) : licenseText);
   }
 }
 

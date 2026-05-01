@@ -61,6 +61,17 @@ export type BundleEntry = _BuildEntry & {
    * Set to `false` to disable.
    */
   dts?: boolean | DtsOptions;
+
+  /**
+   * Configure third-party licenses file emission.
+   *
+   * By default, a `THIRD-PARTY-LICENSES.md` file is emitted to `outDir`.
+   *
+   * Set to `false` to disable.
+   *
+   * Set `gzip: true` to emit a gzipped `THIRD-PARTY-LICENSES.md.gz` file instead.
+   */
+  license?: false | { gzip?: boolean };
 };
 
 export type TransformEntry = _BuildEntry & {

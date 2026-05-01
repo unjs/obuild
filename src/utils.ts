@@ -124,10 +124,7 @@ export function prettyBytes(bytes: number): string {
   if (abs < 1) {
     return `${sign}${abs} B`;
   }
-  const exponent = Math.min(
-    Math.floor(Math.log10(abs) / 3),
-    PRETTY_BYTES_UNITS.length - 1,
-  );
+  const exponent = Math.min(Math.floor(Math.log10(abs) / 3), PRETTY_BYTES_UNITS.length - 1);
   const value = Number((abs / Math.pow(1000, exponent)).toPrecision(3));
   return `${sign}${value} ${PRETTY_BYTES_UNITS[exponent]}`;
 }

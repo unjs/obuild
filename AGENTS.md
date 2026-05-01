@@ -41,13 +41,13 @@
 ### Plugins (`src/builders/plugins/`)
 
 - **shebang.ts** - Detects `#!` lines and makes output files executable (`chmod 0o755`)
-- **license.ts** - Generates `THIRD-PARTY-LICENSES.md` from bundled dependencies (based on Vite's approach)
+- **license.ts** - Generates `THIRD-PARTY-LICENSES.md` from bundled dependencies (based on Vite's approach). Disable per-entry with `license: false`; emit gzipped (`THIRD-PARTY-LICENSES.md.gz`) with `license: { gzip: true }`.
 
 ### Types (`src/types.ts`)
 
 - `BuildConfig` - Top-level config: `cwd`, `entries`, `hooks`
 - `BuildEntry` = `BundleEntry | TransformEntry`
-- `BundleEntry` - `type: "bundle"`, `input` (string/array), `minify`, `rolldown` options, `dts`
+- `BundleEntry` - `type: "bundle"`, `input` (string/array), `minify`, `rolldown` options, `dts`, `license`
 - `TransformEntry` - `type: "transform"`, `input` (directory), `minify`, `oxc` options, `resolve`, `filter`, `dts`
 - `BuildHooks` - `start`, `end`, `entries`, `rolldownConfig`, `rolldownOutput`
 

@@ -56,6 +56,7 @@ export default defineBuildConfig({
       // stub: false,
       // rolldown: {}, // https://rolldown.rs/reference/config-options
       // dts: {}, // https://github.com/sxzz/rolldown-plugin-dts#options
+      // license: { gzip: true }, // emit `THIRD-PARTY-LICENSES.md.gz` (set `false` to disable)
     },
     {
       type: "transform",

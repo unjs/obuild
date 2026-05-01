@@ -63,9 +63,14 @@ export async function rolldownBuild(
     },
     plugins: [
       shebangPlugin(),
-      licensePlugin({
-        output: resolve(ctx.pkgDir, entry.outDir || "dist", "THIRD-PARTY-LICENSES.md"),
-      }),
+      ...(entry.license === false
+        ? []
+        : [
+            licensePlugin({
+              output: resolve(ctx.pkgDir, entry.outDir || "dist", "THIRD-PARTY-LICENSES.md"),
+              gzip: entry.license?.gzip,
+            }),
+          ]),
       removeCommentsPlugin(),
     ] as Plugin[],
     platform: "node",

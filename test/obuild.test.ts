@@ -1,4 +1,5 @@
 import { describe, test, expect, beforeAll } from "vitest";
+import { gunzipSync } from "node:zlib";
 
 import { build } from "../src/build.ts";
 import { readdir, readFile, rm, stat } from "node:fs/promises";
@@ -80,6 +81,32 @@ describe("obuild", () => {
   test("license file matches snapshot", async () => {
     const content = await readFile(new URL("THIRD-PARTY-LICENSES.md", distDir), "utf8");
     expect(content).toMatchSnapshot();
+  });
+
+  test("license: { gzip: true } emits gzipped file", async () => {
+    const gzDistDir = new URL("dist-gz/", fixtureDir);
+    await rm(gzDistDir, { recursive: true, force: true });
+    try {
+      await build({
+        cwd: fixtureDir,
+        entries: [
+          {
+            type: "bundle",
+            input: ["src/index"],
+            outDir: "dist-gz",
+            license: { gzip: true },
+          },
+        ],
+      });
+      const gzFiles = await readdir(gzDistDir);
+      expect(gzFiles).toContain("THIRD-PARTY-LICENSES.md.gz");
+      expect(gzFiles).not.toContain("THIRD-PARTY-LICENSES.md");
+      const gzipped = await readFile(new URL("THIRD-PARTY-LICENSES.md.gz", gzDistDir));
+      const decompressed = gunzipSync(gzipped).toString("utf8");
+      expect(decompressed).toContain("# Licenses of Bundled Dependencies");
+    } finally {
+      await rm(gzDistDir, { recursive: true, force: true });
+    }
   });
 
   test("isolatedDeclarations fallback: .mjs emitted, .d.mts skipped, runtime loads", async () => {
