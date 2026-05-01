@@ -29,7 +29,8 @@ interface Dependency {
 }
 
 async function collectDependencies(moduleIds: Iterable<string>): Promise<Dependency[]> {
-  const seen = new Set<string>();
+  const seenDirs = new Set<string>();
+  const seenPkgs = new Set<string>();
   const deps: Dependency[] = [];
 
   for (const id of moduleIds) {
@@ -44,12 +45,15 @@ async function collectDependencies(moduleIds: Iterable<string>): Promise<Depende
 
     const nodeModulesDir = id.slice(0, nodeModulesIdx + "/node_modules/".length);
     const pkgDir = join(nodeModulesDir, pkgName);
-    if (seen.has(pkgDir)) continue;
-    seen.add(pkgDir);
+    if (seenDirs.has(pkgDir)) continue;
+    seenDirs.add(pkgDir);
     const pkgJsonPath = join(pkgDir, "package.json");
 
     try {
       const pkgJson = JSON.parse(await readFile(pkgJsonPath, "utf8"));
+      const pkgKey = `${pkgJson.name}@${pkgJson.version}`;
+      if (seenPkgs.has(pkgKey)) continue;
+      seenPkgs.add(pkgKey);
       const dep: Dependency = {
         name: pkgJson.name,
         version: pkgJson.version,
@@ -91,10 +95,18 @@ async function collectDependencies(moduleIds: Iterable<string>): Promise<Depende
 export default function licensePlugin(opts: { output: string }): Plugin {
   return {
     name: "obuild:license",
-    async generateBundle(this: PluginContext) {
+    async generateBundle(this: PluginContext, _options, bundle) {
       if (this.meta.watchMode) return;
 
-      const dependencies = await collectDependencies(this.getModuleIds());
+      const moduleIds = new Set<string>();
+      for (const chunk of Object.values(bundle)) {
+        if (chunk.type !== "chunk") continue;
+        for (const moduleId of Object.keys(chunk.modules)) {
+          moduleIds.add(moduleId);
+        }
+      }
+
+      const dependencies = await collectDependencies(moduleIds);
       await generateLicenseFile(dependencies, opts.output);
     },
   };
