@@ -7,8 +7,7 @@ import { consola } from "consola";
 import { colors as c } from "consola/utils";
 import { rolldownBuild } from "./builders/bundle.ts";
 import { transformDir } from "./builders/transform.ts";
-import { fmtPath, analyzeDir } from "./utils.ts";
-import prettyBytes from "pretty-bytes";
+import { fmtPath, analyzeDir, prettyBytes } from "./utils.ts";
 
 /**
  * Build dist/ from src/

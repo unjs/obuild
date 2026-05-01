@@ -113,6 +113,25 @@ export async function sideEffectSize(dir: string, entry: string): Promise<number
   return Buffer.byteLength(output[0].code.trim());
 }
 
+const PRETTY_BYTES_UNITS = ["B", "kB", "MB", "GB", "TB", "PB"];
+
+export function prettyBytes(bytes: number): string {
+  if (!Number.isFinite(bytes)) {
+    return String(bytes);
+  }
+  const sign = bytes < 0 ? "-" : "";
+  const abs = Math.abs(bytes);
+  if (abs < 1) {
+    return `${sign}${abs} B`;
+  }
+  const exponent = Math.min(
+    Math.floor(Math.log10(abs) / 3),
+    PRETTY_BYTES_UNITS.length - 1,
+  );
+  const value = Number((abs / Math.pow(1000, exponent)).toPrecision(3));
+  return `${sign}${value} ${PRETTY_BYTES_UNITS[exponent]}`;
+}
+
 export function removeComments(code: string): string {
   const parsed = parseSync("code.js", code);
   if (parsed.comments.length === 0) {
