@@ -206,15 +206,36 @@ async function transformModule(entryPath: string, entry: TransformEntry, entryDi
     emitDeclaration = await emitDeclaration(entryPath);
   }
 
-  const transformed = transformSync(entryPath, sourceText, {
-    ...entry.oxc,
-    ...sourceOptions,
-    cwd: dirname(entryPath),
-    typescript: {
-      declaration: emitDeclaration ? { stripInternal: true } : undefined,
-      ...entry.oxc?.typescript,
-    },
-  });
+  const runTransform = (declaration: boolean) =>
+    transformSync(entryPath, sourceText, {
+      ...entry.oxc,
+      ...sourceOptions,
+      cwd: dirname(entryPath),
+      typescript: {
+        ...entry.oxc?.typescript,
+        declaration: declaration ? { stripInternal: true } : undefined,
+      },
+    });
+
+  let transformed = runTransform(!!emitDeclaration);
+
+  // If the only failures are isolated-declaration parse errors, retry without
+  // declaration emit so the .mjs is still written. Without this, a single
+  // un-inferable type drops the whole file from dist while the build reports
+  // success — see https://github.com/unjs/obuild/issues/82.
+  if (
+    emitDeclaration &&
+    transformed.errors.length > 0 &&
+    transformed.errors.every((err) => err.message?.includes("--isolatedDeclarations"))
+  ) {
+    for (const err of transformed.errors) {
+      consola.warn(err);
+    }
+    consola.warn(
+      `[obuild] declaration emit skipped for ${fmtPath(entryPath)} (--isolatedDeclarations); .mjs still emitted, .d.mts missing`,
+    );
+    transformed = runTransform(false);
+  }
 
   if (transformed.warnings.length > 0) {
     for (const warning of transformed.warnings) {
