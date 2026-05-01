@@ -1,5 +1,33 @@
 # Changelog
 
+## v0.4.34
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.33...v0.4.34)
+
+### 🚀 Enhancements
+
+- Support `license: { gzip: true }` ([488f9e3](https://github.com/unjs/obuild/commit/488f9e3))
+
+### 🩹 Fixes
+
+- **transform:** Fall back to declaration-less emit on isolatedDeclarations errors ([#83](https://github.com/unjs/obuild/pull/83))
+- **license:** Dedup by name@version and only scan modules in emitted chunks ([98f1fda](https://github.com/unjs/obuild/commit/98f1fda))
+
+### 💅 Refactors
+
+- Replace `rollup-plugin-license` with native Rolldown plugin ([#81](https://github.com/unjs/obuild/pull/81))
+- Inline pretty-bytes impl ([dc1606c](https://github.com/unjs/obuild/commit/dc1606c))
+
+### 🏡 Chore
+
+- Update deps ([90f0a3f](https://github.com/unjs/obuild/commit/90f0a3f))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- ナイトウコウスケ ([@naitokosuke](https://github.com/naitokosuke))
+- Wind ([@productdevbook](https://github.com/productdevbook))
+
 ## v0.4.33
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.32...v0.4.33)
