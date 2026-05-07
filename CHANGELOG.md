@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.4.35
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.34...v0.4.35)
+
+### 🏡 Chore
+
+- Update deps ([5047837](https://github.com/unjs/obuild/commit/5047837))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.34
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.33...v0.4.34)
