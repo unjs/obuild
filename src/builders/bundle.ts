@@ -66,11 +66,11 @@ export async function rolldownBuild(
       ...(entry.license === false
         ? []
         : [
-          licensePlugin({
-            output: resolve(ctx.pkgDir, entry.outDir || "dist", "THIRD-PARTY-LICENSES.md"),
-            gzip: entry.license?.gzip,
-          }),
-        ]),
+            licensePlugin({
+              output: resolve(ctx.pkgDir, entry.outDir || "dist", "THIRD-PARTY-LICENSES.md"),
+              gzip: entry.license?.gzip,
+            }),
+          ]),
       removeCommentsPlugin(),
     ] as Plugin[],
     platform: "node",
