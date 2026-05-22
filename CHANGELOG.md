@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.4.36
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.35...v0.4.36)
+
+### 🩹 Fixes
+
+- **rolldown:** Do not minify internal exports by default ([a5cd7c2](https://github.com/unjs/obuild/commit/a5cd7c2))
+
+### 🏡 Chore
+
+- Update deps ([0efd4b7](https://github.com/unjs/obuild/commit/0efd4b7))
+
+### ❤️ Contributors
+
+- Pooya Parsa <x@pi0.io>
+
 ## v0.4.35
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.34...v0.4.35)
