@@ -66,11 +66,11 @@ export async function rolldownBuild(
       ...(entry.license === false
         ? []
         : [
-            licensePlugin({
-              output: resolve(ctx.pkgDir, entry.outDir || "dist", "THIRD-PARTY-LICENSES.md"),
-              gzip: entry.license?.gzip,
-            }),
-          ]),
+          licensePlugin({
+            output: resolve(ctx.pkgDir, entry.outDir || "dist", "THIRD-PARTY-LICENSES.md"),
+            gzip: entry.license?.gzip,
+          }),
+        ]),
       removeCommentsPlugin(),
     ] as Plugin[],
     platform: "node",
@@ -115,6 +115,7 @@ export async function rolldownBuild(
     entryFileNames: "[name].mjs",
     chunkFileNames: "_chunks/[name].mjs",
     minify: entry.minify ?? "dce-only",
+    minifyInternalExports: false,
     codeSplitting: {
       groups: [
         {
