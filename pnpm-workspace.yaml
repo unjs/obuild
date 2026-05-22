@@ -3,3 +3,5 @@ packages:
   - test/fixture
 allowBuilds:
   "@parcel/watcher": false
+minimumReleaseAgeExclude:
+  - "@typescript/native-preview*"
