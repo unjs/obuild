@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.4.37
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.36...v0.4.37)
+
+### 🏡 Chore
+
+- Update deps ([f0f1c78](https://github.com/unjs/obuild/commit/f0f1c78))
+- Update tsc command ([25e0d29](https://github.com/unjs/obuild/commit/25e0d29))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.36
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.35...v0.4.36)
