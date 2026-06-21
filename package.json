@@ -25,7 +25,7 @@
     "obuild": "node ./src/cli.ts",
     "release": "pnpm test && pnpm build && changelogen --release && npm publish && git push --follow-tags",
     "test": "pnpm lint && pnpm test:types && pnpm vitest run --coverage",
-    "test:types": "tsgo --noEmit --skipLibCheck"
+    "test:types": "tsc --noEmit --skipLibCheck"
   },
   "dependencies": {
     "c12": "4.0.0-beta.5",
