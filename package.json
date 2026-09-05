@@ -52,5 +52,5 @@
   "resolutions": {
     "obuild": "link:."
   },
-  "packageManager": "pnpm@11.8.0"
+  "packageManager": "pnpm@12.3.0"
 }
