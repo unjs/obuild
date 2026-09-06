@@ -40,14 +40,14 @@
   },
   "devDependencies": {
     "@types/node": "^26.4.0",
-    "@vitest/coverage-v8": "^4.1.11",
+    "@vitest/coverage-v8": "^5.0.0",
     "automd": "^0.4.3",
     "changelogen": "^0.6.2",
     "eslint-config-unjs": "^0.6.2",
     "oxfmt": "^0.65.0",
     "oxlint": "^1.80.0",
     "typescript": "7.0.2",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.0"
   },
   "resolutions": {
     "obuild": "link:."
