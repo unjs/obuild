@@ -25,7 +25,8 @@
 - Uses **rolldown-plugin-dts** for `.d.mts` generation (enabled by default, `dts: false` to disable)
 - Output: ESM (`.mjs`) with code-splitting for `node_modules` into `_chunks/libs/`
 - Externals: Node.js builtins + `dependencies` + `peerDependencies` from `package.json`
-- Plugins: shebang (executable detection), license (third-party license file)
+- Plugins: shebang (executable detection), license (third-party license file), nf3 externals (opt-in via `trace`)
+- Dependency tracing: `trace: string[] | TraceOptions` (opt-in, per package) lazily imports `nf3/plugin`; listed packages are matched by exact name (`pkg`, `pkg/sub`, `.../node_modules/pkg/...`), externalized and traced into `<outDir>/node_modules`. Everything else is bundled as usual.
 - Stub mode: generates re-export files pointing to source
 - Post-build: reports size, minified size, gzip size, side-effect size per entry
 
@@ -47,7 +48,8 @@
 
 - `BuildConfig` - Top-level config: `cwd`, `entries`, `hooks`
 - `BuildEntry` = `BundleEntry | TransformEntry`
-- `BundleEntry` - `type: "bundle"`, `input` (string/array), `minify`, `rolldown` options, `dts`, `license`
+- `BundleEntry` - `type: "bundle"`, `input` (string/array), `minify`, `rolldown` options, `dts`, `license`, `trace`
+- `TraceOptions` - nf3 `ExternalsTraceOptions` + `include: string[]` (package names)
 - `TransformEntry` - `type: "transform"`, `input` (directory), `minify`, `oxc` options, `resolve`, `filter`, `dts`
 - `BuildHooks` - `start`, `end`, `entries`, `rolldownConfig`, `rolldownOutput`
 
@@ -85,6 +87,7 @@ export default { entries: [...] } satisfies BuildConfig;
 | --------------------- | ------------------------------------------------ |
 | `rolldown`            | Bundler (Rust-based, Rollup-compatible)          |
 | `rolldown-plugin-dts` | Declaration file generation for bundle           |
+| `nf3`                 | Per-package `node_modules` tracing (`trace`)     |
 | `rolldown/utils`      | `transformSync`, `parseSync`, `minifySync` (oxc) |
 | `exsolve`             | Module path resolution                           |
 | `magic-string`        | Source text manipulation for import rewriting    |
@@ -117,4 +120,4 @@ pnpm test:types   # uses tsgo
 ## Test Structure
 
 - `test/obuild.test.ts` - Integration test: builds fixture, verifies output files, validates exports, checks shebang permissions
-- `test/fixture/` - Test fixture with `build.config.ts`, bundle entries (`index`, `cli`, `utils`), and transform entry (`runtime/`)
+- `test/fixture/` - Test fixture with `build.config.ts`, bundle entries (`index`, `cli`, `utils`, `trace`), and transform entry (`runtime/`)

@@ -33,6 +33,7 @@
     "defu": "^6.1.7",
     "exsolve": "^1.1.1",
     "magic-string": "^1.2.3",
+    "nf3": "^0.3.24",
     "pathe": "^2.0.3",
     "rolldown": "^1.2.6",
     "rolldown-plugin-dts": "^0.28.4",

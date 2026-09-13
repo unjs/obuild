@@ -15,6 +15,7 @@
     "obuild": "latest"
   },
   "devDependencies": {
-    "defu": "*"
+    "defu": "*",
+    "pathe": "^2.0.3"
   }
 }

@@ -109,6 +109,37 @@ describe("obuild", () => {
     }
   });
 
+  test("trace: [...] externalizes and traces only listed packages", async () => {
+    const traceDistDir = new URL("dist-trace/", fixtureDir);
+    await rm(traceDistDir, { recursive: true, force: true });
+    try {
+      await build({
+        cwd: fixtureDir,
+        entries: [
+          {
+            type: "bundle",
+            input: ["src/trace"],
+            outDir: "dist-trace",
+            trace: ["defu"],
+            dts: false,
+          },
+        ],
+      });
+      const traceFiles = await readdir(traceDistDir, { recursive: true }).then((r) => r.sort());
+      // `defu` is traced into node_modules, `pathe` is still bundled
+      expect(traceFiles).toContain("node_modules/defu/package.json");
+      expect(traceFiles).not.toContain("_chunks/libs/defu.mjs");
+      expect(traceFiles).toContain("_chunks/libs/pathe.mjs");
+      expect(traceFiles.some((f) => f.startsWith("node_modules/pathe"))).toBe(false);
+      const content = await readFile(new URL("trace.mjs", traceDistDir), "utf8");
+      expect(content).toMatch(/from\s*["']defu["']/);
+      const dist = await import(new URL("trace.mjs", traceDistDir).href);
+      expect(dist.traced()).toBe("a/b{}");
+    } finally {
+      await rm(traceDistDir, { recursive: true, force: true });
+    }
+  });
+
   test("isolatedDeclarations fallback: .mjs emitted, .d.mts skipped, runtime loads", async () => {
     const runtimeDistFiles = await readdir(new URL("runtime/", distDir));
     expect(runtimeDistFiles).toContain("broken.mjs");

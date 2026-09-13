@@ -7,6 +7,7 @@ import type {
 } from "rolldown";
 
 import type { Options as DtsOptions } from "rolldown-plugin-dts";
+import type { ExternalsTraceOptions } from "nf3";
 import type { ResolveOptions } from "exsolve";
 import type { TransformOptions, MinifyOptions as OXCMinifyOptions } from "rolldown/utils";
 
@@ -72,6 +73,22 @@ export type BundleEntry = _BuildEntry & {
    * Set `gzip: true` to emit a gzipped `THIRD-PARTY-LICENSES.md.gz` file instead.
    */
   license?: false | { gzip?: boolean };
+
+  /**
+   * Package names to trace with [nf3](https://github.com/unjs/nf3) instead of bundling.
+   *
+   * Listed packages (and their subpath imports) are kept as external imports, and only the files
+   * actually required at runtime are copied into `<outDir>/node_modules` (tree-shaken and deduplicated).
+   * All other `node_modules` imports are bundled as usual.
+   *
+   * Pass an object to also customize nf3 trace options (`hooks`, `transform`, `fullTraceInclude`, `traceInclude`, ...).
+   *
+   * @example
+   * ```ts
+   * trace: ["youch", "cookie-es"]
+   * ```
+   */
+  trace?: string[] | TraceOptions;
 };
 
 export type TransformEntry = _BuildEntry & {
@@ -112,6 +129,13 @@ export type TransformEntry = _BuildEntry & {
    * If sets to `false`, or if the function returns `false`, declaration files won't be emitted for the module.
    */
   dts?: boolean | ((filePath: string) => boolean | Promise<boolean>);
+};
+
+export type TraceOptions = ExternalsTraceOptions & {
+  /**
+   * Package names to externalize and trace.
+   */
+  include: string[];
 };
 
 export type BuildEntry = BundleEntry | TransformEntry;

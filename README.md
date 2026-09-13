@@ -57,6 +57,7 @@ export default defineBuildConfig({
       // rolldown: {}, // https://rolldown.rs/reference/config-options
       // dts: {}, // https://github.com/sxzz/rolldown-plugin-dts#options
       // license: { gzip: true }, // emit `THIRD-PARTY-LICENSES.md.gz` (set `false` to disable)
+      // trace: ["some-dep"], // trace listed deps with nf3 instead of bundling (see below)
     },
     {
       type: "transform",
@@ -76,6 +77,36 @@ export default defineBuildConfig({
     // rolldownOutput: (output, res, ctx) => {},
   },
 });
+```
+
+## Dependency Tracing
+
+Some `node_modules` dependencies cannot be bundled reliably (native bindings, relative file access, dynamic requires, ...).
+
+Set `trace` on a bundle entry to a list of package names to opt them out of bundling via [nf3](https://github.com/unjs/nf3): listed packages (including subpath imports) are kept as external imports, and only the files actually required at runtime are copied into `<outDir>/node_modules` (tree-shaken and deduplicated). All other `node_modules` imports are bundled as usual.
+
+```js
+export default defineBuildConfig({
+  entries: [
+    {
+      type: "bundle",
+      input: ["./src/index.ts"],
+      trace: ["youch", "cookie-es"],
+    },
+  ],
+});
+```
+
+Pass an object to also customize [nf3 trace options](https://github.com/unjs/nf3#hooks):
+
+```js
+trace: {
+  include: ["youch", "cookie-es"],
+  // traceInclude: ["some-native-dep"], // force trace even if not statically imported
+  // fullTraceInclude: ["pkg-with-assets"], // copy all files of a package
+  // transform: [{ filter: (id) => /\.m?js$/.test(id), handler: (code, id) => minify(id, code).code }],
+  // hooks: { tracedPackages: (pkgs) => {} },
+}
 ```
 
 ## Stub Mode

@@ -15,7 +15,7 @@ import { defu } from "defu";
 import type { OutputChunk, Plugin, InputOptions, OutputOptions } from "rolldown";
 
 import type { Options as DtsOptions } from "rolldown-plugin-dts";
-import type { BuildContext, BuildHooks, BundleEntry } from "../types.ts";
+import type { BuildContext, BuildHooks, BundleEntry, TraceOptions } from "../types.ts";
 
 export async function rolldownBuild(
   ctx: BuildContext,
@@ -55,6 +55,8 @@ export async function rolldownBuild(
     return;
   }
 
+  const outDir = resolve(ctx.pkgDir, entry.outDir || "dist");
+
   const rolldownConfig = defu(entry.rolldown, {
     cwd: ctx.pkgDir,
     input: inputs,
@@ -62,12 +64,13 @@ export async function rolldownBuild(
       attachDebugInfo: "none" as const,
     },
     plugins: [
+      ...(entry.trace ? [await tracePlugin(ctx, entry, outDir)] : []),
       shebangPlugin(),
       ...(entry.license === false
         ? []
         : [
             licensePlugin({
-              output: resolve(ctx.pkgDir, entry.outDir || "dist", "THIRD-PARTY-LICENSES.md"),
+              output: join(outDir, "THIRD-PARTY-LICENSES.md"),
               gzip: entry.license?.gzip,
             }),
           ]),
@@ -106,8 +109,6 @@ export async function rolldownBuild(
   await hooks.rolldownConfig?.(rolldownConfig, ctx);
 
   const res = await rolldown(rolldownConfig);
-
-  const outDir = resolve(ctx.pkgDir, entry.outDir || "dist");
 
   const outConfig: OutputOptions = {
     dir: outDir,
@@ -236,6 +237,23 @@ export function normalizeBundleInputs(
   }
 
   return inputs;
+}
+
+async function tracePlugin(ctx: BuildContext, entry: BundleEntry, outDir: string): Promise<Plugin> {
+  const { externals } = await import("nf3/plugin");
+  const { include, ...traceOpts }: TraceOptions = Array.isArray(entry.trace)
+    ? { include: entry.trace }
+    : entry.trace!;
+  return externals({
+    rootDir: ctx.pkgDir,
+    conditions: traceOpts.conditions,
+    // Match bare specifiers (`pkg`, `pkg/sub`) and resolved paths (`.../node_modules/pkg/...`)
+    include: include.map((name) => {
+      const escaped = name.replace(/[-\\^$*+?.()|[\]{}]/g, String.raw`\$&`);
+      return new RegExp(String.raw`(?:^|[/\\]node_modules[/\\])${escaped}(?:[/\\]|$)`);
+    }),
+    trace: { rootDir: ctx.pkgDir, outDir, ...traceOpts },
+  }) as Plugin;
 }
 
 function removeCommentsPlugin(): Plugin {
