@@ -9,6 +9,7 @@ import { parseSync } from "rolldown/utils";
 import { resolveModulePath } from "exsolve";
 import { distSize, fmtPath, prettyBytes, removeComments, sideEffectSize } from "../utils.ts";
 import { makeExecutable, shebangPlugin } from "./plugins/shebang.ts";
+import { importAttributesPlugin } from "./plugins/import-attributes.ts";
 import licensePlugin from "./plugins/license.ts";
 import { defu } from "defu";
 
@@ -66,6 +67,7 @@ export async function rolldownBuild(
     plugins: [
       ...(entry.trace ? [await tracePlugin(ctx, entry, outDir)] : []),
       shebangPlugin(),
+      importAttributesPlugin(),
       ...(entry.license === false
         ? []
         : [

@@ -109,6 +109,19 @@ trace: {
 }
 ```
 
+## Bytes and Text Imports
+
+Bundle entries support the [import bytes](https://github.com/tc39/proposal-import-bytes) and [import text](https://github.com/tc39/proposal-import-text) proposals. Files imported with a `bytes` or `text` type attribute are inlined into the bundle as a `Uint8Array` or a string, regardless of their extension:
+
+```ts
+import wasm from "./lib.wasm" with { type: "bytes" }; // Uint8Array
+import readme from "../README.md" with { type: "text" }; // string
+
+const { default: template } = await import("./template.html", { with: { type: "text" } });
+```
+
+Generated `.d.mts` files type these as `Uint8Array` and `string`. TypeScript itself does not implement the proposals yet, so the importing source needs a `// @ts-expect-error` comment (or a module declaration) until it does.
+
 ## Stub Mode
 
 When working on a package locally, it can be tedious to rebuild or run the watch command every time.

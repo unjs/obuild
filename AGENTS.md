@@ -25,7 +25,7 @@
 - Uses **rolldown-plugin-dts** for `.d.mts` generation (enabled by default, `dts: false` to disable)
 - Output: ESM (`.mjs`) with code-splitting for `node_modules` into `_chunks/libs/`
 - Externals: Node.js builtins + `dependencies` + `peerDependencies` from `package.json`
-- Plugins: shebang (executable detection), license (third-party license file), nf3 externals (opt-in via `trace`)
+- Plugins: shebang (executable detection), import-attributes (`bytes`/`text` imports), license (third-party license file), nf3 externals (opt-in via `trace`)
 - Dependency tracing: `trace: string[] | TraceOptions` (opt-in, per package) lazily imports `nf3/plugin`; listed packages are matched by exact name (`pkg`, `pkg/sub`, `.../node_modules/pkg/...`), externalized and traced into `<outDir>/node_modules`. Everything else is bundled as usual.
 - Stub mode: generates re-export files pointing to source
 - Post-build: reports size, minified size, gzip size, side-effect size per entry
@@ -42,6 +42,7 @@
 ### Plugins (`src/builders/plugins/`)
 
 - **shebang.ts** - Detects `#!` lines and makes output files executable (`chmod 0o755`)
+- **import-attributes.ts** - Implements `with { type: "bytes" | "text" }` imports (TC39 proposals; rolldown parses but drops the attributes). Rewrites them via oxc `parseSync` + `Visitor` + magic-string to `bytes:`/`text:` specifiers, resolved to `\0<path>?obuild-<type>` virtual modules: text is loaded with rolldown's `text` module type, bytes as a base64 `Uint8Array` JS module (plugins can only return UTF-8 strings, so the built-in `binary` type is unusable). `.d.ts` importers (dts plugin) resolve to `\0obuild-<type>.d.ts` declaring `Uint8Array`/`string`.
 - **license.ts** - Generates `THIRD-PARTY-LICENSES.md` from bundled dependencies (based on Vite's approach). Disable per-entry with `license: false`; emit gzipped (`THIRD-PARTY-LICENSES.md.gz`) with `license: { gzip: true }`.
 
 ### Types (`src/types.ts`)
@@ -120,4 +121,4 @@ pnpm test:types   # uses tsgo
 ## Test Structure
 
 - `test/obuild.test.ts` - Integration test: builds fixture, verifies output files, validates exports, checks shebang permissions
-- `test/fixture/` - Test fixture with `build.config.ts`, bundle entries (`index`, `cli`, `utils`, `trace`), and transform entry (`runtime/`)
+- `test/fixture/` - Test fixture with `build.config.ts`, bundle entries (`index`, `cli`, `utils`, `trace`, `import-attributes`), transform entry (`runtime/`), and `files/` (imported as bytes/text; `bytes.bin` holds every byte value)

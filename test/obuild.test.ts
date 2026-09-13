@@ -19,6 +19,7 @@ describe("obuild", () => {
         { type: "bundle", input: ["src/index", "src/cli"] },
         { type: "transform", input: "src/runtime", outDir: "dist/runtime" },
         "src/utils.ts",
+        "src/import-attributes.ts",
       ],
     });
   });
@@ -29,10 +30,14 @@ describe("obuild", () => {
       [
         "THIRD-PARTY-LICENSES.md",
         "_chunks",
+        "_chunks/dynamic.mjs",
+        "_chunks/dynamic2.mjs",
         "_chunks/libs",
         "_chunks/libs/defu.mjs",
         "cli.d.mts",
         "cli.mjs",
+        "import-attributes.d.mts",
+        "import-attributes.mjs",
         "index.d.mts",
         "index.mjs",
         "runtime",
@@ -70,6 +75,30 @@ describe("obuild", () => {
   test("# imports are external", async () => {
     const indexContent = await readFile(new URL("index.mjs", distDir), "utf8");
     expect(indexContent).contain("#internal");
+  });
+
+  test("bytes and text import attributes", async () => {
+    const dist = await import(new URL("import-attributes.mjs", distDir).href);
+    // Every byte value survives the base64 round trip
+    expect(dist.bytes).toBeInstanceOf(Uint8Array);
+    expect([...dist.bytes]).toEqual([...Array.from({ length: 256 }).keys()]);
+    expect(dist.text).toBe("Hello from text\n");
+    // File type is ignored: `.json` as text, `.txt` as bytes
+    expect(dist.jsonAsText).toBe('{ "json": true }\n');
+    expect(dist.textAsBytes).toBeInstanceOf(Uint8Array);
+    expect(new TextDecoder().decode(dist.textAsBytes)).toBe("Hello from text\n");
+    // Dynamic imports
+    const dynamic = await dist.dynamic();
+    expect(dynamic.text).toBe("Dynamically imported\n");
+    expect(new TextDecoder().decode(dynamic.bytes)).toBe("Dynamically imported\n");
+    // Contents are inlined
+    const code = await readFile(new URL("import-attributes.mjs", distDir), "utf8");
+    expect(code).not.toContain("files/");
+    expect(code).toContain("Hello from text");
+    // Declarations use the value types
+    const dts = await readFile(new URL("import-attributes.d.mts", distDir), "utf8");
+    expect(dts).toContain("declare const _default: Uint8Array;");
+    expect(dts).toContain("declare const _default$1: string;");
   });
 
   test("cli shebang is executable", async () => {

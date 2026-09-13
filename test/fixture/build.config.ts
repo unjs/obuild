@@ -4,7 +4,7 @@ export default <BuildConfig>{
   entries: [
     {
       type: "bundle",
-      input: ["./src/index.ts", "./src/cli.ts", "./src/utils.ts"],
+      input: ["./src/index.ts", "./src/cli.ts", "./src/utils.ts", "./src/import-attributes.ts"],
     },
     {
       type: "transform",
