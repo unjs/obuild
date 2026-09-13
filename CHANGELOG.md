@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.4.40
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.39...v0.4.40)
+
+### 🚀 Enhancements
+
+- Opt-in per-package dependency tracing with nf3 (`trace` option) ([80b4430](https://github.com/unjs/obuild/commit/80b4430))
+- Support `bytes` and `text` import attributes in bundle entries ([af6483b](https://github.com/unjs/obuild/commit/af6483b))
+
+### 🏡 Chore
+
+- Fix release script ([f553d06](https://github.com/unjs/obuild/commit/f553d06))
+- Update deps ([b55fa44](https://github.com/unjs/obuild/commit/b55fa44))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.39
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.38...v0.4.39)
