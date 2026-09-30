@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.4.42
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.41...v0.4.42)
+
+### 🩹 Fixes
+
+- **rolldown:** Add missing debugName ([6a3e0e6](https://github.com/unjs/obuild/commit/6a3e0e6))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.41
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.40...v0.4.41)
