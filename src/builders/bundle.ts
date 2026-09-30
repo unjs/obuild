@@ -144,6 +144,7 @@ export async function rolldownBuild(
       groups: [
         {
           test: /node_modules/,
+          debugName: "libs",
           name: (moduleId: string) => {
             const pkgName = moduleId.match(/.*\/node_modules\/(?<package>@[^/]+\/[^/]+|[^/]+)/)
               ?.groups?.package;
