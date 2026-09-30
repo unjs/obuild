@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.4.43
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.42...v0.4.43)
+
+### 🩹 Fixes
+
+- **bundle:** Handle windows paths in lib chunk names ([cf2e1e7](https://github.com/unjs/obuild/commit/cf2e1e7))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.42
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.41...v0.4.42)
