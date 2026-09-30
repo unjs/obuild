@@ -46,6 +46,20 @@ export type BundleEntry = _BuildEntry & {
   minify?: boolean | "dce-only" | MinifyOptions;
 
   /**
+   * Minify only bundled dependency chunks (`_chunks/libs/*`), keeping your own code readable.
+   *
+   * Set to `true` to minify all bundled dependencies, or pass a list of package names to only minify those.
+   *
+   * Has no effect when `minify` is enabled (everything is already minified).
+   *
+   * @example
+   * ```ts
+   * minifyLibs: ["zod", "@scope/pkg"]
+   * ```
+   */
+  minifyLibs?: boolean | string[];
+
+  /**
    * Options passed to rolldown.
    *
    * See [rolldown config options](https://rolldown.rs/reference/config-options) for more details.

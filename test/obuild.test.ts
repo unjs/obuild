@@ -169,6 +169,35 @@ describe("obuild", () => {
     }
   });
 
+  test("minifyLibs: [...] minifies only listed lib chunks", async () => {
+    const minDistDir = new URL("dist-minify-libs/", fixtureDir);
+    await rm(minDistDir, { recursive: true, force: true });
+    try {
+      await build({
+        cwd: fixtureDir,
+        entries: [
+          {
+            type: "bundle",
+            input: ["src/trace"],
+            outDir: "dist-minify-libs",
+            minifyLibs: ["pathe"],
+            dts: false,
+          },
+        ],
+      });
+      const read = (path: string) => readFile(new URL(path, minDistDir), "utf8");
+      const lineCount = async (path: string) => (await read(path)).trim().split("\n").length;
+      // `pathe` is minified, `defu` and the entry are left readable
+      expect(await lineCount("_chunks/libs/pathe.mjs")).toBeLessThanOrEqual(2);
+      expect(await lineCount("_chunks/libs/defu.mjs")).toBeGreaterThan(10);
+      expect(await read("trace.mjs")).toContain("function traced()");
+      const dist = await import(new URL("trace.mjs", minDistDir).href);
+      expect(dist.traced()).toBe("a/b{}");
+    } finally {
+      await rm(minDistDir, { recursive: true, force: true });
+    }
+  });
+
   test("isolatedDeclarations fallback: .mjs emitted, .d.mts skipped, runtime loads", async () => {
     const runtimeDistFiles = await readdir(new URL("runtime/", distDir));
     expect(runtimeDistFiles).toContain("broken.mjs");

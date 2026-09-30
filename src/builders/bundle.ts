@@ -5,7 +5,7 @@ import { consola } from "consola";
 import { colors as c } from "consola/utils";
 import { rolldown } from "rolldown";
 import { dts } from "rolldown-plugin-dts";
-import { parseSync } from "rolldown/utils";
+import { minifySync, parseSync } from "rolldown/utils";
 import { resolveModulePath } from "exsolve";
 import { distSize, fmtPath, prettyBytes, removeComments, sideEffectSize } from "../utils.ts";
 import { makeExecutable, shebangPlugin } from "./plugins/shebang.ts";
@@ -77,6 +77,7 @@ export async function rolldownBuild(
             }),
           ]),
       removeCommentsPlugin(),
+      ...(entry.minifyLibs ? [minifyLibsPlugin(entry.minifyLibs)] : []),
     ] as Plugin[],
     platform: "node",
     onLog(level, log, defaultHandler) {
@@ -256,6 +257,36 @@ async function tracePlugin(ctx: BuildContext, entry: BundleEntry, outDir: string
     }),
     trace: { rootDir: ctx.pkgDir, outDir, ...traceOpts },
   }) as Plugin;
+}
+
+// Minify `libs/<pkg>` chunks (see `codeSplitting.groups`), optionally only for listed packages.
+// Runs in `generateBundle` since rolldown re-prints chunks after `renderChunk` (`minify: "dce-only"`).
+function minifyLibsPlugin(libs: true | string[]): Plugin {
+  return {
+    name: "obuild:minify-libs",
+    generateBundle(_outputOptions, bundle) {
+      for (const chunk of Object.values(bundle)) {
+        if (chunk.type !== "chunk" || /\.d\.[mc]?ts$/.test(chunk.fileName)) continue;
+        const pkgName = chunk.name.match(/^libs\/(?<pkg>.+)$/)?.groups?.pkg;
+        if (!pkgName || (libs !== true && !libs.includes(pkgName))) continue;
+        const res = minifySync(chunk.fileName, chunk.code, {
+          module: true,
+          sourcemap: !!chunk.map,
+          inputMap: chunk.map || undefined,
+        });
+        if (res.errors.length > 0) {
+          this.warn(`Failed to minify ${chunk.fileName}: ${res.errors[0].message}`);
+          continue;
+        }
+        // Minifier drops the `//# sourceMappingURL=` comment rolldown already appended
+        const sourceMapComment = chunk.code.match(/\n\/\/# sourceMappingURL=\S+\s*$/)?.[0];
+        chunk.code = res.code + (sourceMapComment || "");
+        if (res.map) {
+          chunk.map = res.map as typeof chunk.map;
+        }
+      }
+    },
+  };
 }
 
 function removeCommentsPlugin(): Plugin {

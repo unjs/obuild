@@ -27,6 +27,7 @@
 - Externals: Node.js builtins + `dependencies` + `peerDependencies` from `package.json`
 - Plugins: shebang (executable detection), import-attributes (`bytes`/`text` imports), license (third-party license file), nf3 externals (opt-in via `trace`)
 - Dependency tracing: `trace: string[] | TraceOptions` (opt-in, per package) lazily imports `nf3/plugin`; listed packages are matched by exact name (`pkg`, `pkg/sub`, `.../node_modules/pkg/...`), externalized and traced into `<outDir>/node_modules`. Everything else is bundled as usual.
+- Lib minification: `minifyLibs: boolean | string[]` minifies only `libs/<pkg>` chunks (all, or listed package names) with oxc `minifySync` in `generateBundle` (after rolldown's own `dce-only` pass re-prints chunks); chains sourcemaps via `inputMap` and keeps the `sourceMappingURL` comment
 - Stub mode: generates re-export files pointing to source
 - Post-build: reports size, minified size, gzip size, side-effect size per entry
 
@@ -49,7 +50,7 @@
 
 - `BuildConfig` - Top-level config: `cwd`, `entries`, `hooks`
 - `BuildEntry` = `BundleEntry | TransformEntry`
-- `BundleEntry` - `type: "bundle"`, `input` (string/array), `minify`, `rolldown` options, `dts`, `license`, `trace`
+- `BundleEntry` - `type: "bundle"`, `input` (string/array), `minify`, `minifyLibs`, `rolldown` options, `dts`, `license`, `trace`
 - `TraceOptions` - nf3 `ExternalsTraceOptions` + `include: string[]` (package names)
 - `TransformEntry` - `type: "transform"`, `input` (directory), `minify`, `oxc` options, `resolve`, `filter`, `dts`
 - `BuildHooks` - `start`, `end`, `entries`, `rolldownConfig`, `rolldownOutput`

@@ -53,6 +53,7 @@ export default defineBuildConfig({
       input: ["./src/index.ts", "./src/cli.ts"],
       // outDir: "./dist",
       // minify: false,
+      // minifyLibs: true, // minify only bundled deps in `_chunks/libs/` (or a list of package names)
       // stub: false,
       // rolldown: {}, // https://rolldown.rs/reference/config-options
       // dts: {}, // https://github.com/sxzz/rolldown-plugin-dts#options
