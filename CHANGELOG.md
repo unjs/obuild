@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.4.41
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.40...v0.4.41)
+
+### 🚀 Enhancements
+
+- MinifyLibs ([a1a8ee7](https://github.com/unjs/obuild/commit/a1a8ee7))
+- CompressLibs ([13745d5](https://github.com/unjs/obuild/commit/13745d5))
+
+### 🏡 Chore
+
+- Update deps ([a660d1d](https://github.com/unjs/obuild/commit/a660d1d))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.40
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.39...v0.4.40)
