@@ -11,6 +11,7 @@ import {
   distSize,
   fmtPath,
   isLibChunk,
+  libChunkName,
   prettyBytes,
   removeComments,
   sideEffectSize,
@@ -145,12 +146,7 @@ export async function rolldownBuild(
         {
           test: /node_modules/,
           debugName: "libs",
-          name: (moduleId: string) => {
-            const pkgName = moduleId.match(/.*\/node_modules\/(?<package>@[^/]+\/[^/]+|[^/]+)/)
-              ?.groups?.package;
-            const isDts = /\.d\.[mc]?ts$/.test(moduleId);
-            return `libs/${pkgName || "common"}${isDts ? ".d" : ""}`;
-          },
+          name: libChunkName,
         },
       ],
     },

@@ -7,6 +7,18 @@ import { gzipSync } from "node:zlib";
 import MagicString from "magic-string";
 
 /**
+ * Code-splitting group name for a `node_modules` module: `libs/<pkg>` (`.d` suffix for declarations).
+ * Accepts both `/` and `\` separators (Windows module IDs).
+ */
+export function libChunkName(moduleId: string): string {
+  const pkgName = moduleId
+    .match(/.*[/\\]node_modules[/\\](?<package>@[^/\\]+[/\\][^/\\]+|[^/\\]+)/)
+    ?.groups?.package.replace("\\", "/");
+  const isDts = /\.d\.[mc]?ts$/.test(moduleId);
+  return `libs/${pkgName || "common"}${isDts ? ".d" : ""}`;
+}
+
+/**
  * Whether an output file is a JS `libs/<pkg>` chunk (see `codeSplitting.groups`),
  * optionally limited to listed package names.
  */

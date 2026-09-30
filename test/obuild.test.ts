@@ -11,6 +11,7 @@ import {
   base122Encode,
   compressModule,
 } from "../src/builders/plugins/compress-libs.ts";
+import { libChunkName } from "../src/utils.ts";
 import { mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 
 const fixtureDir = new URL("fixture/", import.meta.url);
@@ -302,6 +303,21 @@ describe("obuild", () => {
       server.close();
       await rm(compressDistDir, { recursive: true, force: true });
     }
+  });
+
+  test("libChunkName: one chunk per package (POSIX and Windows paths)", () => {
+    expect(libChunkName("/proj/node_modules/pkg/index.js")).toBe("libs/pkg");
+    expect(libChunkName("/proj/node_modules/@scope/pkg/index.js")).toBe("libs/@scope/pkg");
+    expect(libChunkName("/proj/node_modules/a/node_modules/b/index.js")).toBe("libs/b");
+    expect(libChunkName("/proj/node_modules/pkg/index.d.mts")).toBe("libs/pkg.d");
+    expect(libChunkName(String.raw`C:\proj\node_modules\pkg\index.js`)).toBe("libs/pkg");
+    expect(libChunkName(String.raw`C:\proj\node_modules\@scope\pkg\index.js`)).toBe(
+      "libs/@scope/pkg",
+    );
+    expect(libChunkName(String.raw`C:\proj\node_modules\@scope\pkg\index.d.ts`)).toBe(
+      "libs/@scope/pkg.d",
+    );
+    expect(libChunkName("\0virtual:node_modules")).toBe("libs/common");
   });
 
   test("base122 encoding round-trips", () => {

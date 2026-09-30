@@ -59,6 +59,7 @@
 
 ### Utilities (`src/utils.ts`)
 
+- `libChunkName()` - `codeSplitting` group name (`libs/<pkg>`, `.d` for declarations) from a module ID; separator-agnostic (Windows `\` IDs)
 - `isLibChunk()` - Match `libs/<pkg>` JS chunks (optionally by package list); shared by `minifyLibs`/`compressLibs`
 - `fmtPath()` - Format path relative to cwd
 - `analyzeDir()` - Count files and total byte size
