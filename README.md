@@ -54,6 +54,8 @@ export default defineBuildConfig({
       // outDir: "./dist",
       // minify: false,
       // minifyLibs: true, // minify only bundled deps in `_chunks/libs/` (or a list of package names)
+      // compressLibs: true, // compress bundled deps in `_chunks/libs/` into self-extracting ES modules (or a list of package names)
+      // compressLibs: { algorithm: "deflate" }, // browser compatible (default "brotli" is ~20% smaller, Node.js only)
       // stub: false,
       // rolldown: {}, // https://rolldown.rs/reference/config-options
       // dts: {}, // https://github.com/sxzz/rolldown-plugin-dts#options

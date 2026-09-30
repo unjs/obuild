@@ -50,8 +50,5 @@
     "typescript": "7.0.2",
     "vitest": "^5.0.2"
   },
-  "resolutions": {
-    "obuild": "link:."
-  },
   "packageManager": "pnpm@11.26.0"
 }

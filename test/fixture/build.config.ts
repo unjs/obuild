@@ -4,7 +4,15 @@ export default <BuildConfig>{
   entries: [
     {
       type: "bundle",
-      input: ["./src/index.ts", "./src/cli.ts", "./src/utils.ts", "./src/import-attributes.ts"],
+      input: [
+        "./src/index.ts",
+        "./src/cli.ts",
+        "./src/utils.ts",
+        "./src/import-attributes.ts",
+        "./src/compress.ts",
+      ],
+      minifyLibs: ["undici"],
+      compressLibs: ["undici"],
     },
     {
       type: "transform",

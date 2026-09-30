@@ -60,6 +60,26 @@ export type BundleEntry = _BuildEntry & {
   minifyLibs?: boolean | string[];
 
   /**
+   * Compress bundled dependency chunks (`_chunks/libs/*`) into self-extracting ES modules to reduce disk size.
+   *
+   * Import/export statements are preserved; the rest of the chunk is compressed and inlined as a base122 string,
+   * then evaluated at load time (adds ~20ms per 2MB of minified code to a cold import).
+   *
+   * Set to `true` to compress all bundled dependencies, pass a list of package names to only compress those,
+   * or pass options (see {@link CompressLibsOptions}). Combine with `minifyLibs` for the smallest output.
+   *
+   * Caveats: compressed chunks rely on `new Function` (blocked by CSP without `unsafe-eval`), export snapshots
+   * instead of live bindings, have no sourcemaps and do not benefit from `NODE_COMPILE_CACHE`.
+   *
+   * @example
+   * ```ts
+   * compressLibs: ["undici"]
+   * compressLibs: { algorithm: "deflate" } // browser compatible
+   * ```
+   */
+  compressLibs?: boolean | string[] | CompressLibsOptions;
+
+  /**
    * Options passed to rolldown.
    *
    * See [rolldown config options](https://rolldown.rs/reference/config-options) for more details.
@@ -150,6 +170,31 @@ export type TraceOptions = ExternalsTraceOptions & {
    * Package names to externalize and trace.
    */
   include: string[];
+};
+
+export type CompressLibsOptions = {
+  /**
+   * Package names to compress. Defaults to all bundled dependencies.
+   */
+  include?: string[];
+
+  /**
+   * Compression algorithm.
+   *
+   * - `"brotli"` (default): smallest output (~28% of minified size). Node.js only (static `node:zlib`
+   *   import, no browser fallback), no top-level await, so chunks stay loadable with `require(esm)`.
+   * - `"deflate"`: ~25% larger than brotli (~35% of minified size), but works everywhere. Node.js inflates
+   *   synchronously via `process.getBuiltinModule("node:zlib")`, other runtimes (browsers) use
+   *   `DecompressionStream` with top-level await, which makes chunks unloadable with `require(esm)`.
+   */
+  algorithm?: "deflate" | "brotli";
+
+  /**
+   * Compression level: `0-9` for deflate (default `9`), `0-11` for brotli (default `11`).
+   *
+   * Lower brotli levels build much faster (`9` is ~20x faster than `11`) for ~9% larger output.
+   */
+  level?: number;
 };
 
 export type BuildEntry = BundleEntry | TransformEntry;

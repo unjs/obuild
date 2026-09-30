@@ -16,6 +16,7 @@
   },
   "devDependencies": {
     "defu": "*",
-    "pathe": "^2.0.3"
+    "pathe": "^2.0.3",
+    "undici": "^8.11.2"
   }
 }

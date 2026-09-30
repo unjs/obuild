@@ -1,6 +1,8 @@
 ignoreWorkspaceRootCheck: true
 packages:
   - test/fixture
+overrides:
+  obuild: "link:."
 allowBuilds:
   "@parcel/watcher": false
 minimumReleaseAgeExclude:

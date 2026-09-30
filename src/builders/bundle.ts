@@ -7,8 +7,16 @@ import { rolldown } from "rolldown";
 import { dts } from "rolldown-plugin-dts";
 import { minifySync, parseSync } from "rolldown/utils";
 import { resolveModulePath } from "exsolve";
-import { distSize, fmtPath, prettyBytes, removeComments, sideEffectSize } from "../utils.ts";
+import {
+  distSize,
+  fmtPath,
+  isLibChunk,
+  prettyBytes,
+  removeComments,
+  sideEffectSize,
+} from "../utils.ts";
 import { makeExecutable, shebangPlugin } from "./plugins/shebang.ts";
+import { compressLibsPlugin } from "./plugins/compress-libs.ts";
 import { importAttributesPlugin } from "./plugins/import-attributes.ts";
 import licensePlugin from "./plugins/license.ts";
 import { defu } from "defu";
@@ -78,6 +86,18 @@ export async function rolldownBuild(
           ]),
       removeCommentsPlugin(),
       ...(entry.minifyLibs ? [minifyLibsPlugin(entry.minifyLibs)] : []),
+      // After `minifyLibs` (same `generateBundle` hook, runs in plugin order)
+      ...(entry.compressLibs
+        ? [
+            compressLibsPlugin(
+              entry.compressLibs === true
+                ? {}
+                : Array.isArray(entry.compressLibs)
+                  ? { include: entry.compressLibs }
+                  : entry.compressLibs,
+            ),
+          ]
+        : []),
     ] as Plugin[],
     platform: "node",
     onLog(level, log, defaultHandler) {
@@ -266,9 +286,7 @@ function minifyLibsPlugin(libs: true | string[]): Plugin {
     name: "obuild:minify-libs",
     generateBundle(_outputOptions, bundle) {
       for (const chunk of Object.values(bundle)) {
-        if (chunk.type !== "chunk" || /\.d\.[mc]?ts$/.test(chunk.fileName)) continue;
-        const pkgName = chunk.name.match(/^libs\/(?<pkg>.+)$/)?.groups?.pkg;
-        if (!pkgName || (libs !== true && !libs.includes(pkgName))) continue;
+        if (!isLibChunk(chunk, libs)) continue;
         const res = minifySync(chunk.fileName, chunk.code, {
           module: true,
           sourcemap: !!chunk.map,

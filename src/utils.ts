@@ -1,10 +1,23 @@
 import { readdirSync, statSync } from "node:fs";
 import { join, resolve } from "pathe";
 
-import { type Plugin, rolldown } from "rolldown";
+import { type OutputAsset, type OutputChunk, type Plugin, rolldown } from "rolldown";
 import { minifySync, parseSync } from "rolldown/utils";
 import { gzipSync } from "node:zlib";
 import MagicString from "magic-string";
+
+/**
+ * Whether an output file is a JS `libs/<pkg>` chunk (see `codeSplitting.groups`),
+ * optionally limited to listed package names.
+ */
+export function isLibChunk(
+  chunk: OutputChunk | OutputAsset,
+  libs: true | string[],
+): chunk is OutputChunk {
+  if (chunk.type !== "chunk" || /\.d\.[mc]?ts$/.test(chunk.fileName)) return false;
+  const pkgName = chunk.name.match(/^libs\/(?<pkg>.+)$/)?.groups?.pkg;
+  return !!pkgName && (libs === true || libs.includes(pkgName));
+}
 
 export function fmtPath(path: string): string {
   return resolve(path).replace(process.cwd(), ".");
