@@ -33,22 +33,22 @@
     "defu": "^6.1.7",
     "exsolve": "^1.1.1",
     "magic-string": "^1.4.2",
-    "nf3": "^0.3.24",
+    "nf3": "^0.4.0",
     "pathe": "^2.0.3",
-    "rolldown": "^1.2.11",
+    "rolldown": "^1.2.12",
     "rolldown-plugin-dts": "^0.28.6",
     "tinyglobby": "^0.2.17"
   },
   "devDependencies": {
     "@types/node": "^26.6.3",
-    "@vitest/coverage-v8": "^5.0.2",
+    "@vitest/coverage-v8": "^5.0.3",
     "automd": "^0.4.3",
     "changelogen": "^0.6.2",
     "eslint-config-unjs": "^0.6.2",
     "oxfmt": ">=0.71.0",
     "oxlint": "^1.86.0",
     "typescript": "7.0.2",
-    "vitest": "^5.0.2"
+    "vitest": "^5.0.3"
   },
-  "packageManager": "pnpm@11.26.0"
+  "packageManager": "pnpm@11.28.3"
 }
