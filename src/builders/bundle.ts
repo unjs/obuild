@@ -82,7 +82,7 @@ export async function rolldownBuild(
         : [
             licensePlugin({
               output: join(outDir, "THIRD-PARTY-LICENSES.md"),
-              gzip: entry.license?.gzip,
+              gzip: entry.license?.gzip ?? true,
             }),
           ]),
       removeCommentsPlugin(),

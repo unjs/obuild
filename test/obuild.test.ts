@@ -38,7 +38,7 @@ describe("obuild", () => {
     const distFiles = await readdir(distDir, { recursive: true }).then((r) => r.sort());
     expect(distFiles).toMatchInlineSnapshot(`
       [
-        "THIRD-PARTY-LICENSES.md",
+        "THIRD-PARTY-LICENSES.md.gz",
         "_chunks",
         "_chunks/dynamic.mjs",
         "_chunks/dynamic2.mjs",
@@ -118,13 +118,14 @@ describe("obuild", () => {
   });
 
   test("license file matches snapshot", async () => {
-    const content = await readFile(new URL("THIRD-PARTY-LICENSES.md", distDir), "utf8");
+    const gzipped = await readFile(new URL("THIRD-PARTY-LICENSES.md.gz", distDir));
+    const content = gunzipSync(gzipped).toString("utf8");
     expect(content).toMatchSnapshot();
   });
 
-  test("license: { gzip: true } emits gzipped file", async () => {
-    const gzDistDir = new URL("dist-gz/", fixtureDir);
-    await rm(gzDistDir, { recursive: true, force: true });
+  test("license: { gzip: false } emits plain file", async () => {
+    const plainDistDir = new URL("dist-plain/", fixtureDir);
+    await rm(plainDistDir, { recursive: true, force: true });
     try {
       await build({
         cwd: fixtureDir,
@@ -132,19 +133,18 @@ describe("obuild", () => {
           {
             type: "bundle",
             input: ["src/index"],
-            outDir: "dist-gz",
-            license: { gzip: true },
+            outDir: "dist-plain",
+            license: { gzip: false },
           },
         ],
       });
-      const gzFiles = await readdir(gzDistDir);
-      expect(gzFiles).toContain("THIRD-PARTY-LICENSES.md.gz");
-      expect(gzFiles).not.toContain("THIRD-PARTY-LICENSES.md");
-      const gzipped = await readFile(new URL("THIRD-PARTY-LICENSES.md.gz", gzDistDir));
-      const decompressed = gunzipSync(gzipped).toString("utf8");
-      expect(decompressed).toContain("# Licenses of Bundled Dependencies");
+      const plainFiles = await readdir(plainDistDir);
+      expect(plainFiles).toContain("THIRD-PARTY-LICENSES.md");
+      expect(plainFiles).not.toContain("THIRD-PARTY-LICENSES.md.gz");
+      const content = await readFile(new URL("THIRD-PARTY-LICENSES.md", plainDistDir), "utf8");
+      expect(content).toContain("# Licenses of Bundled Dependencies");
     } finally {
-      await rm(gzDistDir, { recursive: true, force: true });
+      await rm(plainDistDir, { recursive: true, force: true });
     }
   });
 

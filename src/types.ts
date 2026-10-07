@@ -100,11 +100,11 @@ export type BundleEntry = _BuildEntry & {
   /**
    * Configure third-party licenses file emission.
    *
-   * By default, a `THIRD-PARTY-LICENSES.md` file is emitted to `outDir`.
+   * By default, a gzipped `THIRD-PARTY-LICENSES.md.gz` file is emitted to `outDir`.
    *
    * Set to `false` to disable.
    *
-   * Set `gzip: true` to emit a gzipped `THIRD-PARTY-LICENSES.md.gz` file instead.
+   * Set `gzip: false` to emit a plain `THIRD-PARTY-LICENSES.md` file instead.
    */
   license?: false | { gzip?: boolean };
 

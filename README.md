@@ -59,7 +59,7 @@ export default defineBuildConfig({
       // stub: false,
       // rolldown: {}, // https://rolldown.rs/reference/config-options
       // dts: {}, // https://github.com/sxzz/rolldown-plugin-dts#options
-      // license: { gzip: true }, // emit `THIRD-PARTY-LICENSES.md.gz` (set `false` to disable)
+      // license: { gzip: false }, // emit plain `THIRD-PARTY-LICENSES.md` instead of `.md.gz` (set `false` to disable)
       // trace: ["some-dep"], // trace listed deps with nf3 instead of bundling (see below)
     },
     {
