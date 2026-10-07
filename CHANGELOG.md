@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.4.44
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.43...v0.4.44)
+
+### 🚀 Enhancements
+
+- **license:** Gzip `THIRD-PARTY-LICENSES.md` by default ([10a5538](https://github.com/unjs/obuild/commit/10a5538))
+
+### 🏡 Chore
+
+- Update deps ([e3ade62](https://github.com/unjs/obuild/commit/e3ade62))
+
+### ❤️ Contributors
+
+- Pooya Parsa <pooya@pi0.io>
+
 ## v0.4.43
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.42...v0.4.43)
