@@ -1,5 +1,5 @@
 import { readdirSync, statSync } from "node:fs";
-import { join, resolve } from "pathe";
+import { join, normalize, resolve } from "pathe";
 
 import { type OutputAsset, type OutputChunk, type Plugin, rolldown } from "rolldown";
 import { minifySync, parseSync } from "rolldown/utils";
@@ -78,7 +78,7 @@ export async function distSize(
     plugins: [],
     platform: "neutral",
     logLevel: "silent",
-    external: (id) => id[0] !== "." && !id.startsWith(dir),
+    external: (id) => id[0] !== "." && !normalize(id).startsWith(dir),
   });
 
   const { output } = await build.generate({
@@ -119,7 +119,7 @@ export async function sideEffectSize(dir: string, entry: string): Promise<number
   const build = await rolldown({
     input: "#entry",
     platform: "neutral",
-    external: (id) => id[0] !== "." && !id.startsWith(dir),
+    external: (id) => id[0] !== "." && !normalize(id).startsWith(dir),
     logLevel: "silent",
     plugins: [virtualEntry],
   });
