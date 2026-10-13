@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.4.45
+
+[compare changes](https://github.com/unjs/obuild/compare/v0.4.44...v0.4.45)
+
+### 🩹 Fixes
+
+- Normalize resolved ids in size checks on windows ([2eb8511](https://github.com/unjs/obuild/commit/2eb8511))
+
+### 🏡 Chore
+
+- Update deps ([0431581](https://github.com/unjs/obuild/commit/0431581))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v0.4.44
 
 [compare changes](https://github.com/unjs/obuild/compare/v0.4.43...v0.4.44)
