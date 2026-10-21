@@ -24,7 +24,7 @@
 - Uses **rolldown** for bundling
 - Uses **rolldown-plugin-dts** for `.d.mts` generation (enabled by default, `dts: false` to disable)
 - Output: ESM (`.mjs`) with code-splitting for `node_modules` into `_chunks/libs/`
-- Externals: Node.js builtins + `dependencies` + `peerDependencies` from `package.json`
+- Externals: Node.js builtins + `dependencies` + `peerDependencies` from `package.json` + the package's own `name` when it has `exports` (self-references point into the cleaned output dir)
 - Plugins: shebang (executable detection), import-attributes (`bytes`/`text` imports), license (third-party license file), nf3 externals (opt-in via `trace`)
 - Dependency tracing: `trace: string[] | TraceOptions` (opt-in, per package) lazily imports `nf3/plugin`; listed packages are matched by exact name (`pkg`, `pkg/sub`, `.../node_modules/pkg/...`), externalized and traced into `<outDir>/node_modules`. Everything else is bundled as usual.
 - Lib minification: `minifyLibs: boolean | string[]` minifies only `libs/<pkg>` chunks (all, or listed package names) with oxc `minifySync` in `generateBundle` (after rolldown's own `dce-only` pass re-prints chunks); chains sourcemaps via `inputMap` and keeps the `sourceMappingURL` comment
