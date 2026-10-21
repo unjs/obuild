@@ -385,17 +385,26 @@ export { getCount, basename as base, name as "kebab-name" };
       await writeFile(
         join(pkgDir, "package.json"),
         JSON.stringify({
-          name: "self-ref-pkg",
+          name: "self.ref",
           type: "module",
           exports: { ".": "./dist/index.mjs", "./foo": "./dist/foo.mjs" },
         }),
       );
+      const lookalikeDir = join(pkgDir, "node_modules/selfxref");
+      await mkdir(lookalikeDir, { recursive: true });
+      await writeFile(
+        join(lookalikeDir, "package.json"),
+        JSON.stringify({ name: "selfxref", type: "module", exports: { "./foo": "./foo.mjs" } }),
+      );
+      await writeFile(join(lookalikeDir, "foo.mjs"), `export const lookalike = "lookalike";\n`);
       await mkdir(join(pkgDir, "src"));
       await writeFile(join(pkgDir, "src/foo.ts"), `export const foo = "foo";\n`);
       await writeFile(
         join(pkgDir, "src/index.ts"),
-        `export const load = () => import("self-ref-pkg/foo").then((m) => m.foo);\n` +
-          `export const loadRoot = () => import("self-ref-pkg");\n`,
+        `export const load = () => import("self.ref/foo").then((m) => m.foo);\n` +
+          `export const loadRoot = () => import("self.ref");\n` +
+          // Matches `/^self.ref\//` unless the name is escaped, so it must stay bundled
+          `export const loadLookalike = () => import("selfxref/foo").then((m) => m.lookalike);\n`,
       );
       const codes: string[] = [];
       await build({
@@ -411,10 +420,12 @@ export { getCount, basename as base, name as "kebab-name" };
       });
       expect(codes).not.toContain("UNRESOLVED_IMPORT");
       const content = await readFile(join(pkgDir, "dist/index.mjs"), "utf8");
-      expect(content).toContain(`import("self-ref-pkg/foo")`);
-      expect(content).toContain(`import("self-ref-pkg")`);
+      expect(content).toContain(`import("self.ref/foo")`);
+      expect(content).toContain(`import("self.ref")`);
+      expect(content).not.toContain(`"selfxref/foo"`);
       const dist = await import(pathToFileURL(join(pkgDir, "dist/index.mjs")).href);
       await expect(dist.load()).resolves.toBe("foo");
+      await expect(dist.loadLookalike()).resolves.toBe("lookalike");
     } finally {
       await rm(pkgDir, { recursive: true, force: true });
     }

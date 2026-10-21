@@ -123,7 +123,7 @@ export async function rolldownBuild(
         // into the output dir, which is cleaned before the build, so keep them
         // external instead of letting rolldown fail to resolve them.
         ...(ctx.pkg.name && ctx.pkg.exports ? [ctx.pkg.name] : []),
-      ].flatMap((p) => [p, new RegExp(`^${p}/`)]),
+      ].flatMap((p) => [p, new RegExp(`^${escapeRegExp(p)}/`)]),
     ],
     treeshake: {
       moduleSideEffects: "no-external",
@@ -273,8 +273,7 @@ async function tracePlugin(ctx: BuildContext, entry: BundleEntry, outDir: string
     conditions: traceOpts.conditions,
     // Match bare specifiers (`pkg`, `pkg/sub`) and resolved paths (`.../node_modules/pkg/...`)
     include: include.map((name) => {
-      const escaped = name.replace(/[-\\^$*+?.()|[\]{}]/g, String.raw`\$&`);
-      return new RegExp(String.raw`(?:^|[/\\]node_modules[/\\])${escaped}(?:[/\\]|$)`);
+      return new RegExp(String.raw`(?:^|[/\\]node_modules[/\\])${escapeRegExp(name)}(?:[/\\]|$)`);
     }),
     trace: { rootDir: ctx.pkgDir, outDir, ...traceOpts },
   }) as Plugin;
@@ -315,4 +314,8 @@ function removeCommentsPlugin(): Plugin {
       return removeComments(code);
     },
   };
+}
+
+function escapeRegExp(str: string): string {
+  return str.replace(/[-\\^$*+?.()|[\]{}]/g, String.raw`\$&`);
 }
