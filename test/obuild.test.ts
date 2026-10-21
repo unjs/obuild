@@ -12,7 +12,10 @@ import {
   compressModule,
 } from "../src/builders/plugins/compress-libs.ts";
 import { libChunkName } from "../src/utils.ts";
-import { mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { pathToFileURL } from "node:url";
+import { join } from "node:path";
 
 const fixtureDir = new URL("fixture/", import.meta.url);
 const distDir = new URL("dist/", fixtureDir);
@@ -375,6 +378,47 @@ export { getCount, basename as base, name as "kebab-name" };
       }
     },
   );
+
+  test("self-referencing imports are external without UNRESOLVED_IMPORT warnings", async () => {
+    const pkgDir = await mkdtemp(join(tmpdir(), "obuild-self-ref-"));
+    try {
+      await writeFile(
+        join(pkgDir, "package.json"),
+        JSON.stringify({
+          name: "self-ref-pkg",
+          type: "module",
+          exports: { ".": "./dist/index.mjs", "./foo": "./dist/foo.mjs" },
+        }),
+      );
+      await mkdir(join(pkgDir, "src"));
+      await writeFile(join(pkgDir, "src/foo.ts"), `export const foo = "foo";\n`);
+      await writeFile(
+        join(pkgDir, "src/index.ts"),
+        `export const load = () => import("self-ref-pkg/foo").then((m) => m.foo);\n` +
+          `export const loadRoot = () => import("self-ref-pkg");\n`,
+      );
+      const codes: string[] = [];
+      await build({
+        cwd: pkgDir,
+        entries: [
+          {
+            type: "bundle",
+            input: ["src/index.ts", "src/foo.ts"],
+            dts: false,
+            rolldown: { onLog: (_level, log) => void codes.push(log.code ?? "") },
+          },
+        ],
+      });
+      expect(codes).not.toContain("UNRESOLVED_IMPORT");
+      const content = await readFile(join(pkgDir, "dist/index.mjs"), "utf8");
+      expect(content).toContain(`import("self-ref-pkg/foo")`);
+      expect(content).toContain(`import("self-ref-pkg")`);
+      const dist = await import(pathToFileURL(join(pkgDir, "dist/index.mjs")).href);
+      await expect(dist.load()).resolves.toBe("foo");
+    } finally {
+      await rm(pkgDir, { recursive: true, force: true });
+    }
+  });
 
   test("isolatedDeclarations fallback: .mjs emitted, .d.mts skipped, runtime loads", async () => {
     const runtimeDistFiles = await readdir(new URL("runtime/", distDir));

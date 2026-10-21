@@ -119,6 +119,10 @@ export async function rolldownBuild(
       ...[
         ...Object.keys(ctx.pkg.dependencies || {}),
         ...Object.keys(ctx.pkg.peerDependencies || {}),
+        // Self-references (`import "<own name>/..."`) resolve through `exports`
+        // into the output dir, which is cleaned before the build, so keep them
+        // external instead of letting rolldown fail to resolve them.
+        ...(ctx.pkg.name && ctx.pkg.exports ? [ctx.pkg.name] : []),
       ].flatMap((p) => [p, new RegExp(`^${p}/`)]),
     ],
     treeshake: {
