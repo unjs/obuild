@@ -425,6 +425,7 @@ export { getCount, basename as base, name as "kebab-name" };
       expect(content).not.toContain(`"selfxref/foo"`);
       const dist = await import(pathToFileURL(join(pkgDir, "dist/index.mjs")).href);
       await expect(dist.load()).resolves.toBe("foo");
+      expect((await dist.loadRoot()).load).toBeTypeOf("function");
       await expect(dist.loadLookalike()).resolves.toBe("lookalike");
     } finally {
       await rm(pkgDir, { recursive: true, force: true });
