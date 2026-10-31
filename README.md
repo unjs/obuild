@@ -10,6 +10,7 @@
 - [🕊️ unenv](https://github.com/unjs/unenv)
 - [🕰️ omnichron](https://github.com/oritwoen/omnichron)
 - [⚙️ c12](https://github.com/unjs/c12)
+- [🔗 oRPC](https://github.com/middleapi/orpc)
 - [...add yours...]
 
 ## Usage
