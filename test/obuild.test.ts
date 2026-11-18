@@ -3,6 +3,8 @@ import { gunzipSync } from "node:zlib";
 import { createServer } from "node:http";
 import { createRequire } from "node:module";
 import { randomBytes } from "node:crypto";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import type { AddressInfo } from "node:net";
 
 import { build } from "../src/build.ts";
@@ -402,6 +404,7 @@ export { getCount, basename as base, name as "kebab-name" };
         `export default (): string => "hello-world";\n`,
       );
       await writeFile(new URL("tpl.ts", srcDir), `export const label: string = "tpl";\n`);
+      await writeFile(new URL("prebuilt%23part.mjs", srcDir), `export default import.meta.url;\n`);
       await writeFile(
         new URL("sub/index.ts", srcDir),
         `export const fromSub = async (): Promise<string> => (await import("../hello-world.ts")).default();\n`,
@@ -418,6 +421,9 @@ export { getCount, basename as base, name as "kebab-name" };
           `export const loadVar = (spec: string): Promise<unknown> => import(spec);`,
           `export const loadBuiltin = (): Promise<typeof import("node:os")> => import("node:os");`,
           `export const loadPrebuilt = (): Promise<unknown> => import("./prebuilt.mjs" as string);`,
+          `export const loadTagged = (): Promise<{ default: string }> => import("./prebuilt%23part.mjs?instance=1#named");`,
+          `export const loadOther = (): Promise<{ default: string }> => import("./prebuilt%23part.mjs?instance=2");`,
+          `export const loadTsWithQuery = (): Promise<unknown> => import("./hello-world?instance=3");`,
           `export const run = async (): Promise<string> => {`,
           `  const { default: hello } = await loadHello();`,
           `  const { fromSub } = await loadSub();`,
@@ -454,6 +460,28 @@ export { getCount, basename as base, name as "kebab-name" };
 
       const mod = await import(new URL("index.mjs", outDir).href);
       expect(await mod.run()).toBe("hello-world:hello-world:tpl");
+      // Run with Node's loader so URL handling is tested independently of Vitest.
+      const { stdout } = await promisify(execFile)(
+        process.execPath,
+        [
+          "--input-type=module",
+          "--eval",
+          `
+            import { loadTagged, loadOther, loadTsWithQuery } from "./index.mjs";
+            console.log(JSON.stringify([
+              (await loadTagged()).default,
+              (await loadOther()).default,
+              (await loadTsWithQuery()).default(),
+            ]));
+          `,
+        ],
+        { cwd: outDir },
+      );
+      expect(JSON.parse(stdout)).toEqual([
+        new URL("prebuilt%23part.mjs?instance=1#named", outDir).href,
+        new URL("prebuilt%23part.mjs?instance=2", outDir).href,
+        "hello-world",
+      ]);
     } finally {
       await rm(tmpDir, { recursive: true, force: true });
     }

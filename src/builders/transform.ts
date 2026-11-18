@@ -181,18 +181,23 @@ async function transformModule(entryPath: string, entry: TransformEntry, entryDi
       return; // prevent double rewritings
     }
     updatedStarts.add(req.start);
+    // Resolve the path without its URL suffix so extension and index lookup still work.
+    const suffixStart = moduleId.search(/[?#]/);
+    const pathname = suffixStart === -1 ? moduleId : moduleId.slice(0, suffixStart);
+    const suffix = suffixStart === -1 ? "" : moduleId.slice(suffixStart);
     const resolvedAbsolute = tryResolve
-      ? resolveModulePath(moduleId, { ...resolveOptions, try: true })
-      : resolveModulePath(moduleId, resolveOptions);
+      ? resolveModulePath(pathname, { ...resolveOptions, try: true })
+      : resolveModulePath(pathname, resolveOptions);
     if (!resolvedAbsolute) {
       return;
     }
-    const newId = relative(dirname(entryPath), resolvedAbsolute.replace(/\.ts$/, ".mjs"));
+    const newPath = relative(dirname(entryPath), resolvedAbsolute.replace(/\.ts$/, ".mjs"))
+      .split("/")
+      .map(encodeURIComponent)
+      .join("/");
+    const newId = (newPath.startsWith(".") ? newPath : `./${newPath}`) + suffix;
     magicString.remove(req.start, req.end);
-    magicString.prependLeft(
-      req.start,
-      JSON.stringify(newId.startsWith(".") ? newId : `./${newId}`),
-    );
+    magicString.prependLeft(req.start, JSON.stringify(newId));
   };
 
   for (const staticImport of parsed.module.staticImports) {
