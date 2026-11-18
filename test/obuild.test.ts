@@ -527,7 +527,8 @@ export { getCount, basename as base, name as "kebab-name" };
       expect(await loadFeature()).toBe("from TypeScript");
 
       await rm(featureTs);
-      await writeFile(new URL("feature.mjs", srcDir), `export default "from JavaScript";\n`);
+      await mkdir(new URL("feature/", srcDir));
+      await writeFile(new URL("feature/index.mjs", srcDir), `export default "from JavaScript";\n`);
       await rebuild();
       expect(await loadFeature()).toBe("from JavaScript");
     } finally {
