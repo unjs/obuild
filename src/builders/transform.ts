@@ -160,6 +160,8 @@ async function transformModule(entryPath: string, entry: TransformEntry, entryDi
 
   const resolveOptions: ResolveOptions = {
     ...entry.resolve,
+    // Keep default results local to this transform so a rebuild sees filesystem changes.
+    cache: entry.resolve?.cache ?? new Map<string, unknown>(),
     from: pathToFileURL(entryPath),
     extensions: entry.resolve?.extensions ?? [".ts", ".js", ".mjs", ".cjs", ".json"],
     suffixes: entry.resolve?.suffixes ?? ["", "/index"],

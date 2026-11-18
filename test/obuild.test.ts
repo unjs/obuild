@@ -486,4 +486,52 @@ export { getCount, basename as base, name as "kebab-name" };
       await rm(tmpDir, { recursive: true, force: true });
     }
   });
+
+  test("transform resolves dynamic imports again on a subsequent build", async () => {
+    const tmpDir = new URL("dist-transform-rebuild/", fixtureDir);
+    const srcDir = new URL("src/", tmpDir);
+    const outDir = new URL("out/", tmpDir);
+    await rm(tmpDir, { recursive: true, force: true });
+    try {
+      await mkdir(srcDir, { recursive: true });
+      await writeFile(
+        new URL("index.ts", srcDir),
+        `export const load = () => import("./feature");\n`,
+      );
+
+      const rebuild = () =>
+        build({
+          cwd: tmpDir,
+          entries: [{ type: "transform", input: "./src", outDir: "./out", dts: false }],
+        });
+      const readIndex = () => readFile(new URL("index.mjs", outDir), "utf8");
+      const loadFeature = async () => {
+        const { stdout } = await promisify(execFile)(
+          process.execPath,
+          [
+            "--input-type=module",
+            "--eval",
+            `import { load } from "./index.mjs"; console.log((await load()).default);`,
+          ],
+          { cwd: outDir },
+        );
+        return stdout.trim();
+      };
+
+      await rebuild();
+      expect(await readIndex()).toContain(`import("./feature")`);
+
+      const featureTs = new URL("feature.ts", srcDir);
+      await writeFile(featureTs, `export default "from TypeScript";\n`);
+      await rebuild();
+      expect(await loadFeature()).toBe("from TypeScript");
+
+      await rm(featureTs);
+      await writeFile(new URL("feature.mjs", srcDir), `export default "from JavaScript";\n`);
+      await rebuild();
+      expect(await loadFeature()).toBe("from JavaScript");
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
 });
