@@ -385,4 +385,77 @@ export { getCount, basename as base, name as "kebab-name" };
     const broken = await runtimeIndex.loadBroken();
     expect(broken.Flags).toMatchObject({ None: 0 });
   });
+
+  test("transform rewrites dynamic and type import specifiers", async () => {
+    const tmpDir = new URL("dist-transform-dynamic/", fixtureDir);
+    const srcDir = new URL("src/", tmpDir);
+    const outDir = new URL("out/", tmpDir);
+    await rm(tmpDir, { recursive: true, force: true });
+    try {
+      await mkdir(new URL("sub/", srcDir), { recursive: true });
+      await writeFile(
+        new URL("package.json", tmpDir),
+        JSON.stringify({ name: "transform-dynamic-test", type: "module" }),
+      );
+      await writeFile(
+        new URL("hello-world.ts", srcDir),
+        `export default (): string => "hello-world";\n`,
+      );
+      await writeFile(new URL("tpl.ts", srcDir), `export const label: string = "tpl";\n`);
+      await writeFile(
+        new URL("sub/index.ts", srcDir),
+        `export const fromSub = async (): Promise<string> => (await import("../hello-world.ts")).default();\n`,
+      );
+      await writeFile(
+        new URL("index.ts", srcDir),
+        [
+          `export type HelloFn = typeof import("./hello-world.ts").default;`,
+          `export const loadHello = (): Promise<typeof import("./hello-world.ts")> =>`,
+          `  import(/* @vite-ignore */ "./hello-world.ts");`,
+          `export const loadSub = (): Promise<typeof import("./sub/index.ts")> => import('./sub');`,
+          `export const loadTpl = (): Promise<typeof import("./tpl.ts")> => import(\`./tpl.ts\`);`,
+          `export const loadDynamic = (name: string): Promise<unknown> => import(\`./sub/\${name}.mjs\`);`,
+          `export const loadVar = (spec: string): Promise<unknown> => import(spec);`,
+          `export const loadBuiltin = (): Promise<typeof import("node:os")> => import("node:os");`,
+          `export const loadPrebuilt = (): Promise<unknown> => import("./prebuilt.mjs" as string);`,
+          `export const run = async (): Promise<string> => {`,
+          `  const { default: hello } = await loadHello();`,
+          `  const { fromSub } = await loadSub();`,
+          `  const { label } = await loadTpl();`,
+          `  return \`\${hello()}:\${await fromSub()}:\${label}\`;`,
+          `};`,
+          ``,
+        ].join("\n"),
+      );
+
+      await build({
+        cwd: tmpDir,
+        entries: [{ type: "transform", input: "./src", outDir: "./out" }],
+      });
+
+      const indexCode = await readFile(new URL("index.mjs", outDir), "utf8");
+      expect(indexCode).toMatch(/import\(\s*\/\* @vite-ignore \*\/\s*"\.\/hello-world\.mjs"\s*\)/);
+      expect(indexCode).toContain(`import("./sub/index.mjs")`);
+      expect(indexCode).toContain(`import("./tpl.mjs")`);
+      expect(indexCode).toContain("import(`./sub/${name}.mjs`)");
+      expect(indexCode).toContain(`import(spec)`);
+      expect(indexCode).toContain(`import("node:os")`);
+      expect(indexCode).toContain(`import("./prebuilt.mjs")`);
+      expect(indexCode).not.toContain(".ts");
+
+      const subCode = await readFile(new URL("sub/index.mjs", outDir), "utf8");
+      expect(subCode).toContain(`import("../hello-world.mjs")`);
+
+      const indexDts = await readFile(new URL("index.d.mts", outDir), "utf8");
+      expect(indexDts).toContain(`import("./hello-world.mjs")`);
+      expect(indexDts).toContain(`import("./sub/index.mjs")`);
+      expect(indexDts).toContain(`import("./tpl.mjs")`);
+      expect(indexDts).not.toContain(".ts");
+
+      const mod = await import(new URL("index.mjs", outDir).href);
+      expect(await mod.run()).toBe("hello-world:hello-world:tpl");
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
 });

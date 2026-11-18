@@ -9,7 +9,7 @@ import { resolveModulePath, type ResolveOptions } from "exsolve";
 import MagicString from "magic-string";
 import { fmtPath, removeComments } from "../utils.ts";
 import { glob } from "tinyglobby";
-import { minifySync, transformSync, parseSync } from "rolldown/utils";
+import { minifySync, transformSync, parseSync, Visitor } from "rolldown/utils";
 import { makeExecutable, SHEBANG_RE } from "./plugins/shebang.ts";
 
 /**
@@ -169,7 +169,10 @@ async function transformModule(entryPath: string, entry: TransformEntry, entryDi
 
   // Rewrite relative imports
   const updatedStarts = new Set<number>();
-  const rewriteSpecifier = (req: { value: string; start: number; end: number }) => {
+  const rewriteSpecifier = (
+    req: { value: string; start: number; end: number },
+    tryResolve = false,
+  ) => {
     const moduleId = req.value;
     if (!moduleId.startsWith(".")) {
       return;
@@ -178,7 +181,12 @@ async function transformModule(entryPath: string, entry: TransformEntry, entryDi
       return; // prevent double rewritings
     }
     updatedStarts.add(req.start);
-    const resolvedAbsolute = resolveModulePath(moduleId, resolveOptions);
+    const resolvedAbsolute = tryResolve
+      ? resolveModulePath(moduleId, { ...resolveOptions, try: true })
+      : resolveModulePath(moduleId, resolveOptions);
+    if (!resolvedAbsolute) {
+      return;
+    }
     const newId = relative(dirname(entryPath), resolvedAbsolute.replace(/\.ts$/, ".mjs"));
     magicString.remove(req.start, req.end);
     magicString.prependLeft(
@@ -197,6 +205,33 @@ async function transformModule(entryPath: string, entry: TransformEntry, entryDi
         rewriteSpecifier(staticExportEntry.moduleRequest);
       }
     }
+  }
+
+  if (parsed.module.dynamicImports.length > 0 || sourceText.includes("import")) {
+    new Visitor({
+      ImportExpression(node) {
+        let source = node.source;
+        while (
+          source.type === "ParenthesizedExpression" ||
+          source.type === "TSAsExpression" ||
+          source.type === "TSSatisfiesExpression" ||
+          source.type === "TSTypeAssertion"
+        ) {
+          source = source.expression;
+        }
+        if (source.type === "Literal" && typeof source.value === "string") {
+          rewriteSpecifier({ value: source.value, start: source.start, end: source.end }, true);
+        } else if (source.type === "TemplateLiteral" && source.expressions.length === 0) {
+          const cooked = source.quasis[0]?.value.cooked;
+          if (cooked !== null && cooked !== undefined) {
+            rewriteSpecifier({ value: cooked, start: source.start, end: source.end }, true);
+          }
+        }
+      },
+      TSImportType(node) {
+        rewriteSpecifier(node.source, true);
+      },
+    }).visit(parsed.program);
   }
 
   sourceText = magicString.toString();
