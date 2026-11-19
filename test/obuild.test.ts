@@ -4,6 +4,7 @@ import { createServer } from "node:http";
 import { createRequire } from "node:module";
 import { randomBytes } from "node:crypto";
 import { execFile } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import type { AddressInfo } from "node:net";
 
@@ -482,6 +483,101 @@ export { getCount, basename as base, name as "kebab-name" };
         new URL("prebuilt%23part.mjs?instance=2", outDir).href,
         "hello-world",
       ]);
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  test("transform preserves imports of files the entry does not emit", async () => {
+    const tmpDir = new URL("dist-transform-external/", fixtureDir);
+    const srcDir = new URL("src/", tmpDir);
+    const outDir = new URL("out/", tmpDir);
+    try {
+      await mkdir(srcDir, { recursive: true });
+      await writeFile(new URL("shared.ts", tmpDir), `export const value: string = "shared";\n`);
+      await writeFile(new URL("excluded.ts", srcDir), `export const value: string = "excluded";\n`);
+      await writeFile(
+        new URL("index.ts", srcDir),
+        `export const load = (): Promise<typeof import("../shared.ts")> => import("../shared.ts");
+export const loadExcluded = (): Promise<typeof import("./excluded.ts")> => import("./excluded.ts");
+`,
+      );
+      await build({
+        cwd: tmpDir,
+        entries: [
+          {
+            type: "transform",
+            input: "./src",
+            outDir: "./out",
+            filter: async (file) => file !== "excluded.ts",
+          },
+        ],
+      });
+
+      const { stdout } = await promisify(execFile)(
+        process.execPath,
+        [
+          "--input-type=module",
+          "--eval",
+          `import { load } from "./index.mjs"; console.log((await load()).value);`,
+        ],
+        { cwd: outDir },
+      );
+      expect(stdout.trim()).toBe("shared");
+      expect((await readdir(outDir)).sort()).toEqual(["index.d.mts", "index.mjs"]);
+      expect(await readFile(new URL("index.mjs", outDir), "utf8")).toContain(
+        `import("./excluded.ts")`,
+      );
+      const declarations = await readFile(new URL("index.d.mts", outDir), "utf8");
+      expect(declarations).toContain(`import("../shared.ts")`);
+      expect(declarations).toContain(`import("./excluded.ts")`);
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  test("transform writes declaration paths that TypeScript can resolve", async () => {
+    const tmpDir = new URL("dist-transform-declaration-path/", fixtureDir);
+    const srcDir = new URL("src/", tmpDir);
+    try {
+      await mkdir(srcDir, { recursive: true });
+      await writeFile(new URL("named%20module.ts", srcDir), `export const value: 42 = 42;\n`);
+      await writeFile(
+        new URL("index.ts", srcDir),
+        `export { value } from "./named module.ts";
+export type Value = typeof import("./named module.ts").value;
+export const load = (): Promise<typeof import("./named module.ts")> => import("./named module.ts");
+`,
+      );
+      await writeFile(
+        new URL("consumer.mts", tmpDir),
+        `import { load, value, type Value } from "./out/index.mjs";
+const loaded: Value = (await load()).value;
+const exact: 42 = value;
+console.log(loaded, exact);
+`,
+      );
+      await writeFile(
+        new URL("tsconfig.json", tmpDir),
+        JSON.stringify({
+          compilerOptions: { module: "nodenext", noEmit: true, strict: true, types: [] },
+          files: ["consumer.mts"],
+        }),
+      );
+      await build({
+        cwd: tmpDir,
+        entries: [{ type: "transform", input: "./src", outDir: "./out" }],
+      });
+
+      const exec = promisify(execFile);
+      const { stdout } = await exec(process.execPath, ["consumer.mts"], { cwd: tmpDir });
+      expect(stdout.trim()).toBe("42 42");
+      const tsc = new URL("bin/tsc", import.meta.resolve("typescript/package.json"));
+      await exec(process.execPath, [fileURLToPath(tsc), "-p", "."], { cwd: tmpDir }).catch(
+        (error) => {
+          throw new Error(error.stdout || error.message, { cause: error });
+        },
+      );
     } finally {
       await rm(tmpDir, { recursive: true, force: true });
     }

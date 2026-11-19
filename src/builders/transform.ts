@@ -2,7 +2,7 @@ import type { BuildContext, TransformEntry } from "../types.ts";
 
 import { pathToFileURL } from "node:url";
 import { dirname, extname, join, relative } from "pathe";
-import { mkdir, readFile, symlink, writeFile } from "node:fs/promises";
+import { mkdir, readFile, realpath, symlink, writeFile } from "node:fs/promises";
 import { consola } from "consola";
 import { colors as c } from "consola/utils";
 import { resolveModulePath, type ResolveOptions } from "exsolve";
@@ -16,62 +16,54 @@ import { makeExecutable, SHEBANG_RE } from "./plugins/shebang.ts";
  * Transform all .ts modules in a directory using oxc-transform.
  */
 export async function transformDir(ctx: BuildContext, entry: TransformEntry): Promise<void> {
-  const promises: Promise<string>[] = [];
-
-  for await (const entryName of await glob("**/*.*", { cwd: entry.input })) {
+  const outputPaths = new Map<string, string>();
+  for (const entryName of await glob("**/*.*", { cwd: entry.input })) {
     if (entry.filter && (await entry.filter(entryName)) === false) {
       continue;
     }
-    promises.push(
-      (async () => {
-        const entryPath = join(entry.input, entryName);
-        const ext = extname(entryPath);
-        switch (ext) {
-          case ".ts": {
-            {
-              const entryDistPath = join(entry.outDir!, entryName.replace(/\.ts$/, ".mjs"));
-              const transformed = await transformModule(entryPath, entry, entryDistPath);
-              await mkdir(dirname(entryDistPath), { recursive: true });
-              await writeFile(entryDistPath, transformed.code, "utf8");
-
-              if (SHEBANG_RE.test(transformed.code)) {
-                await makeExecutable(entryDistPath);
-              }
-
-              if (transformed.declaration) {
-                await writeFile(
-                  entryDistPath.replace(/\.mjs$/, ".d.mts"),
-                  transformed.declaration,
-                  "utf8",
-                );
-              }
-              return entryDistPath;
-            }
-          }
-          default: {
-            {
-              const entryDistPath = join(entry.outDir!, entryName);
-              await mkdir(dirname(entryDistPath), { recursive: true });
-              if (entry.stub) {
-                await symlink(entryPath, entryDistPath, "junction").catch(() => {
-                  /* exists */
-                });
-              } else {
-                const code = await readFile(entryPath, "utf8");
-                await writeFile(entryDistPath, code, "utf8");
-                if (SHEBANG_RE.test(code)) {
-                  await makeExecutable(entryDistPath);
-                }
-              }
-              return entryDistPath;
-            }
-          }
-        }
-      })(),
-    );
+    outputPaths.set(entryName, join(entry.outDir!, entryName.replace(/\.ts$/, ".mjs")));
   }
 
-  const results = await Promise.allSettled(promises);
+  // exsolve resolves symlinks, so use the real input directory for lookups.
+  const inputDir = await realpath(entry.input).catch(() => entry.input);
+  const findOutputPath = (sourcePath: string) => outputPaths.get(relative(inputDir, sourcePath));
+
+  const results = await Promise.allSettled(
+    Array.from(outputPaths, async ([entryName, entryDistPath]) => {
+      const entryPath = join(entry.input, entryName);
+      if (extname(entryPath) === ".ts") {
+        const { code, declaration } = await transformModule(
+          entryPath,
+          entry,
+          entryDistPath,
+          findOutputPath,
+        );
+        await mkdir(dirname(entryDistPath), { recursive: true });
+        await writeFile(entryDistPath, code, "utf8");
+        if (SHEBANG_RE.test(code)) {
+          await makeExecutable(entryDistPath);
+        }
+        if (declaration) {
+          await writeFile(entryDistPath.replace(/\.mjs$/, ".d.mts"), declaration, "utf8");
+        }
+        return entryDistPath;
+      }
+
+      await mkdir(dirname(entryDistPath), { recursive: true });
+      if (entry.stub) {
+        await symlink(entryPath, entryDistPath, "junction").catch(() => {
+          /* exists */
+        });
+      } else {
+        const code = await readFile(entryPath, "utf8");
+        await writeFile(entryDistPath, code, "utf8");
+        if (SHEBANG_RE.test(code)) {
+          await makeExecutable(entryDistPath);
+        }
+      }
+      return entryDistPath;
+    }),
+  );
 
   const errors = results
     .filter((result): result is PromiseRejectedResult => result.status === "rejected")
@@ -125,8 +117,13 @@ function itemsTable(items: string[], consoleWidth: number = process.stdout.colum
 /**
  * Transform a .ts module using oxc-transform.
  */
-async function transformModule(entryPath: string, entry: TransformEntry, entryDistPath: string) {
-  let sourceText = await readFile(entryPath, "utf8");
+async function transformModule(
+  entryPath: string,
+  entry: TransformEntry,
+  entryDistPath: string,
+  findOutputPath: (sourcePath: string) => string | undefined,
+) {
+  const sourceText = await readFile(entryPath, "utf8");
 
   const sourceOptions = {
     lang: "ts",
@@ -168,6 +165,7 @@ async function transformModule(entryPath: string, entry: TransformEntry, entryDi
   };
 
   const magicString = new MagicString(sourceText);
+  let declarationString: MagicString | undefined;
 
   // Rewrite relative imports
   const updatedStarts = new Set<number>();
@@ -193,13 +191,22 @@ async function transformModule(entryPath: string, entry: TransformEntry, entryDi
     if (!resolvedAbsolute) {
       return;
     }
-    const newPath = relative(dirname(entryPath), resolvedAbsolute.replace(/\.ts$/, ".mjs"))
-      .split("/")
-      .map(encodeURIComponent)
-      .join("/");
-    const newId = (newPath.startsWith(".") ? newPath : `./${newPath}`) + suffix;
-    magicString.remove(req.start, req.end);
-    magicString.prependLeft(req.start, JSON.stringify(newId));
+    const outputPath = findOutputPath(resolvedAbsolute);
+    if (tryResolve && !outputPath) {
+      return;
+    }
+    // Static imports can also target output from another build entry.
+    const newPath = outputPath
+      ? relative(dirname(entryDistPath), outputPath)
+      : relative(dirname(entryPath), resolvedAbsolute.replace(/\.ts$/, ".mjs"));
+    const specifier = newPath.startsWith("../") ? newPath : `./${newPath}`;
+    const runtimeId = specifier.split("/").map(encodeURIComponent).join("/") + suffix;
+    const declarationId = specifier + suffix;
+    if (runtimeId !== declarationId) {
+      declarationString ??= magicString.clone();
+    }
+    magicString.overwrite(req.start, req.end, JSON.stringify(runtimeId));
+    declarationString?.overwrite(req.start, req.end, JSON.stringify(declarationId));
   };
 
   for (const staticImport of parsed.module.staticImports) {
@@ -241,7 +248,8 @@ async function transformModule(entryPath: string, entry: TransformEntry, entryDi
     }).visit(parsed.program);
   }
 
-  sourceText = magicString.toString();
+  const runtimeSource = magicString.toString();
+  const declarationSource = declarationString?.toString() ?? runtimeSource;
 
   let emitDeclaration = entry.dts ?? true;
   if (typeof emitDeclaration === "function") {
@@ -249,7 +257,7 @@ async function transformModule(entryPath: string, entry: TransformEntry, entryDi
   }
 
   const runTransform = (declaration: boolean) =>
-    transformSync(entryPath, sourceText, {
+    transformSync(entryPath, declaration ? declarationSource : runtimeSource, {
       ...entry.oxc,
       ...sourceOptions,
       cwd: dirname(entryPath),
@@ -277,6 +285,10 @@ async function transformModule(entryPath: string, entry: TransformEntry, entryDi
       `[obuild] declaration emit skipped for ${fmtPath(entryPath)} (--isolatedDeclarations); .mjs still emitted, .d.mts missing`,
     );
     transformed = runTransform(false);
+  } else if (emitDeclaration && declarationString && transformed.errors.length === 0) {
+    // Node resolves module URLs, while TypeScript resolves literal paths in declarations.
+    const { declaration, warnings } = transformed;
+    transformed = { ...runTransform(false), declaration, warnings };
   }
 
   if (transformed.warnings.length > 0) {

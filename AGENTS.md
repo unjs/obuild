@@ -36,6 +36,7 @@
 
 - Uses **oxc-transform** (via `rolldown/utils`) for file-by-file `.ts` -> `.mjs` transpilation
 - Uses **magic-string** + **exsolve** for static, dynamic, and type import specifier rewriting (`.ts` -> `.mjs`)
+- Rewrites dynamic and type imports of files emitted by the entry. Runtime paths use URL encoding, and declarations use literal file paths.
 - Caches resolution within each module transform by default so subsequent builds see filesystem changes
 - Supports isolated declarations via oxc (`stripInternal: true`)
 - Supports `filter` and `dts` callback functions per entry
