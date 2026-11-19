@@ -3,6 +3,9 @@ import { gunzipSync } from "node:zlib";
 import { createServer } from "node:http";
 import { createRequire } from "node:module";
 import { randomBytes } from "node:crypto";
+import { execFile } from "node:child_process";
+import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
 import type { AddressInfo } from "node:net";
 
 import { build } from "../src/build.ts";
@@ -384,5 +387,248 @@ export { getCount, basename as base, name as "kebab-name" };
     const runtimeIndex = await import(new URL("runtime/index.mjs", distDir).href);
     const broken = await runtimeIndex.loadBroken();
     expect(broken.Flags).toMatchObject({ None: 0 });
+  });
+
+  test("transform rewrites dynamic and type import specifiers", async () => {
+    const tmpDir = new URL("dist-transform-dynamic/", fixtureDir);
+    const srcDir = new URL("src/", tmpDir);
+    const outDir = new URL("out/", tmpDir);
+    await rm(tmpDir, { recursive: true, force: true });
+    try {
+      await mkdir(new URL("sub/", srcDir), { recursive: true });
+      await writeFile(
+        new URL("package.json", tmpDir),
+        JSON.stringify({ name: "transform-dynamic-test", type: "module" }),
+      );
+      await writeFile(
+        new URL("hello-world.ts", srcDir),
+        `export default (): string => "hello-world";\n`,
+      );
+      await writeFile(new URL("tpl.ts", srcDir), `export const label: string = "tpl";\n`);
+      await writeFile(new URL("prebuilt%23part.mjs", srcDir), `export default import.meta.url;\n`);
+      await writeFile(
+        new URL("sub/index.ts", srcDir),
+        `export const fromSub = async (): Promise<string> => (await import("../hello-world.ts")).default();\n`,
+      );
+      await writeFile(
+        new URL("index.ts", srcDir),
+        [
+          `export type HelloFn = typeof import("./hello-world.ts").default;`,
+          `export const loadHello = (): Promise<typeof import("./hello-world.ts")> =>`,
+          `  import(/* @vite-ignore */ "./hello-world.ts");`,
+          `export const loadSub = (): Promise<typeof import("./sub/index.ts")> => import('./sub');`,
+          `export const loadTpl = (): Promise<typeof import("./tpl.ts")> => import(\`./tpl.ts\`);`,
+          `export const loadDynamic = (name: string): Promise<unknown> => import(\`./sub/\${name}.mjs\`);`,
+          `export const loadVar = (spec: string): Promise<unknown> => import(spec);`,
+          `export const loadBuiltin = (): Promise<typeof import("node:os")> => import("node:os");`,
+          `export const loadPrebuilt = (): Promise<unknown> => import("./prebuilt.mjs" as string);`,
+          `export const loadTagged = (): Promise<{ default: string }> => import("./prebuilt%23part.mjs?instance=1#named");`,
+          `export const loadOther = (): Promise<{ default: string }> => import("./prebuilt%23part.mjs?instance=2");`,
+          `export const loadTsWithQuery = (): Promise<unknown> => import("./hello-world?instance=3");`,
+          `export const run = async (): Promise<string> => {`,
+          `  const { default: hello } = await loadHello();`,
+          `  const { fromSub } = await loadSub();`,
+          `  const { label } = await loadTpl();`,
+          `  return \`\${hello()}:\${await fromSub()}:\${label}\`;`,
+          `};`,
+          ``,
+        ].join("\n"),
+      );
+
+      await build({
+        cwd: tmpDir,
+        entries: [{ type: "transform", input: "./src", outDir: "./out" }],
+      });
+
+      const indexCode = await readFile(new URL("index.mjs", outDir), "utf8");
+      expect(indexCode).toMatch(/import\(\s*\/\* @vite-ignore \*\/\s*"\.\/hello-world\.mjs"\s*\)/);
+      expect(indexCode).toContain(`import("./sub/index.mjs")`);
+      expect(indexCode).toContain(`import("./tpl.mjs")`);
+      expect(indexCode).toContain("import(`./sub/${name}.mjs`)");
+      expect(indexCode).toContain(`import(spec)`);
+      expect(indexCode).toContain(`import("node:os")`);
+      expect(indexCode).toContain(`import("./prebuilt.mjs")`);
+      expect(indexCode).not.toContain(".ts");
+
+      const subCode = await readFile(new URL("sub/index.mjs", outDir), "utf8");
+      expect(subCode).toContain(`import("../hello-world.mjs")`);
+
+      const indexDts = await readFile(new URL("index.d.mts", outDir), "utf8");
+      expect(indexDts).toContain(`import("./hello-world.mjs")`);
+      expect(indexDts).toContain(`import("./sub/index.mjs")`);
+      expect(indexDts).toContain(`import("./tpl.mjs")`);
+      expect(indexDts).not.toContain(".ts");
+
+      const mod = await import(new URL("index.mjs", outDir).href);
+      expect(await mod.run()).toBe("hello-world:hello-world:tpl");
+      // Run with Node's loader so URL handling is tested independently of Vitest.
+      const { stdout } = await promisify(execFile)(
+        process.execPath,
+        [
+          "--input-type=module",
+          "--eval",
+          `
+            import { loadTagged, loadOther, loadTsWithQuery } from "./index.mjs";
+            console.log(JSON.stringify([
+              (await loadTagged()).default,
+              (await loadOther()).default,
+              (await loadTsWithQuery()).default(),
+            ]));
+          `,
+        ],
+        { cwd: outDir },
+      );
+      expect(JSON.parse(stdout)).toEqual([
+        new URL("prebuilt%23part.mjs?instance=1#named", outDir).href,
+        new URL("prebuilt%23part.mjs?instance=2", outDir).href,
+        "hello-world",
+      ]);
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  test("transform preserves imports of files the entry does not emit", async () => {
+    const tmpDir = new URL("dist-transform-external/", fixtureDir);
+    const srcDir = new URL("src/", tmpDir);
+    const outDir = new URL("out/", tmpDir);
+    try {
+      await mkdir(srcDir, { recursive: true });
+      await writeFile(new URL("shared.ts", tmpDir), `export const value: string = "shared";\n`);
+      await writeFile(new URL("excluded.ts", srcDir), `export const value: string = "excluded";\n`);
+      await writeFile(
+        new URL("index.ts", srcDir),
+        `export const load = (): Promise<typeof import("../shared.ts")> => import("../shared.ts");
+export const loadExcluded = (): Promise<typeof import("./excluded.ts")> => import("./excluded.ts");
+`,
+      );
+      await build({
+        cwd: tmpDir,
+        entries: [
+          {
+            type: "transform",
+            input: "./src",
+            outDir: "./out",
+            filter: async (file) => file !== "excluded.ts",
+          },
+        ],
+      });
+
+      const { stdout } = await promisify(execFile)(
+        process.execPath,
+        [
+          "--input-type=module",
+          "--eval",
+          `import { load } from "./index.mjs"; console.log((await load()).value);`,
+        ],
+        { cwd: outDir },
+      );
+      expect(stdout.trim()).toBe("shared");
+      expect((await readdir(outDir)).sort()).toEqual(["index.d.mts", "index.mjs"]);
+      expect(await readFile(new URL("index.mjs", outDir), "utf8")).toContain(
+        `import("./excluded.ts")`,
+      );
+      const declarations = await readFile(new URL("index.d.mts", outDir), "utf8");
+      expect(declarations).toContain(`import("../shared.ts")`);
+      expect(declarations).toContain(`import("./excluded.ts")`);
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  test("transform writes declaration paths that TypeScript can resolve", async () => {
+    const tmpDir = new URL("dist-transform-declaration-path/", fixtureDir);
+    const srcDir = new URL("src/", tmpDir);
+    try {
+      await mkdir(srcDir, { recursive: true });
+      await writeFile(new URL("named%20module.ts", srcDir), `export const value: 42 = 42;\n`);
+      await writeFile(
+        new URL("index.ts", srcDir),
+        `export { value } from "./named module.ts";
+export type Value = typeof import("./named module.ts").value;
+export const load = (): Promise<typeof import("./named module.ts")> => import("./named module.ts");
+`,
+      );
+      await writeFile(
+        new URL("consumer.mts", tmpDir),
+        `import { load, value, type Value } from "./out/index.mjs";
+const loaded: Value = (await load()).value;
+const exact: 42 = value;
+console.log(loaded, exact);
+`,
+      );
+      await writeFile(
+        new URL("tsconfig.json", tmpDir),
+        JSON.stringify({
+          compilerOptions: { module: "nodenext", noEmit: true, strict: true, types: [] },
+          files: ["consumer.mts"],
+        }),
+      );
+      await build({
+        cwd: tmpDir,
+        entries: [{ type: "transform", input: "./src", outDir: "./out" }],
+      });
+
+      const exec = promisify(execFile);
+      const { stdout } = await exec(process.execPath, ["consumer.mts"], { cwd: tmpDir });
+      expect(stdout.trim()).toBe("42 42");
+      const tsc = new URL("bin/tsc", import.meta.resolve("typescript/package.json"));
+      await exec(process.execPath, [fileURLToPath(tsc), "-p", "."], { cwd: tmpDir }).catch(
+        (error) => {
+          throw new Error(error.stdout || error.message, { cause: error });
+        },
+      );
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  test("transform resolves dynamic imports again on a subsequent build", async () => {
+    const tmpDir = new URL("dist-transform-rebuild/", fixtureDir);
+    const srcDir = new URL("src/", tmpDir);
+    const outDir = new URL("out/", tmpDir);
+    await rm(tmpDir, { recursive: true, force: true });
+    try {
+      await mkdir(srcDir, { recursive: true });
+      await writeFile(
+        new URL("index.ts", srcDir),
+        `export const load = () => import("./feature");\n`,
+      );
+
+      const rebuild = () =>
+        build({
+          cwd: tmpDir,
+          entries: [{ type: "transform", input: "./src", outDir: "./out", dts: false }],
+        });
+      const readIndex = () => readFile(new URL("index.mjs", outDir), "utf8");
+      const loadFeature = async () => {
+        const { stdout } = await promisify(execFile)(
+          process.execPath,
+          [
+            "--input-type=module",
+            "--eval",
+            `import { load } from "./index.mjs"; console.log((await load()).default);`,
+          ],
+          { cwd: outDir },
+        );
+        return stdout.trim();
+      };
+
+      await rebuild();
+      expect(await readIndex()).toContain(`import("./feature")`);
+
+      const featureTs = new URL("feature.ts", srcDir);
+      await writeFile(featureTs, `export default "from TypeScript";\n`);
+      await rebuild();
+      expect(await loadFeature()).toBe("from TypeScript");
+
+      await rm(featureTs);
+      await mkdir(new URL("feature/", srcDir));
+      await writeFile(new URL("feature/index.mjs", srcDir), `export default "from JavaScript";\n`);
+      await rebuild();
+      expect(await loadFeature()).toBe("from JavaScript");
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
   });
 });
