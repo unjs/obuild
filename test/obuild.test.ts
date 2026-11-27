@@ -15,7 +15,7 @@ import {
   compressModule,
 } from "../src/builders/plugins/compress-libs.ts";
 import { libChunkName } from "../src/utils.ts";
-import { mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, rm, stat, symlink, writeFile } from "node:fs/promises";
 
 const fixtureDir = new URL("fixture/", import.meta.url);
 const distDir = new URL("dist/", fixtureDir);
@@ -627,6 +627,124 @@ console.log(loaded, exact);
       await writeFile(new URL("feature/index.mjs", srcDir), `export default "from JavaScript";\n`);
       await rebuild();
       expect(await loadFeature()).toBe("from JavaScript");
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  test("transform rewrites dynamic and type imports of symlinked inputs", async () => {
+    const tmpDir = new URL("dist-transform-symlink/", fixtureDir);
+    const srcDir = new URL("src/", tmpDir);
+    const outDir = new URL("out/", tmpDir);
+    const extDir = new URL("ext-dir/", tmpDir);
+    await rm(tmpDir, { recursive: true, force: true });
+    try {
+      await mkdir(srcDir, { recursive: true });
+      await mkdir(extDir, { recursive: true });
+      await writeFile(new URL("external.ts", tmpDir), `export const ext: string = "external";\n`);
+      await writeFile(new URL("shared.mjs", tmpDir), `export default "shared-mjs";\n`);
+      await writeFile(
+        new URL("shared-typed.ts", tmpDir),
+        `export const value: string = "shared-ts";\n`,
+      );
+      await writeFile(new URL("excluded-shared.mjs", tmpDir), `export default "excluded";\n`);
+      await writeFile(new URL("mod.ts", extDir), `export const dirValue: string = "linked-dir";\n`);
+      await writeFile(
+        new URL("a-real.ts", srcDir),
+        `export const canonical: string = "canonical";\n`,
+      );
+
+      await symlink(
+        extDir,
+        new URL("linked", srcDir),
+        process.platform === "win32" ? "junction" : "dir",
+      );
+
+      let hasFileSymlinks = true;
+      try {
+        await symlink(new URL("shared.mjs", tmpDir), new URL("feature.mjs", srcDir), "file");
+        await symlink(new URL("shared-typed.ts", tmpDir), new URL("typed.ts", srcDir), "file");
+        await symlink(
+          new URL("excluded-shared.mjs", tmpDir),
+          new URL("excluded-link.mjs", srcDir),
+          "file",
+        );
+        await symlink(new URL("a-real.ts", srcDir), new URL("z-alias.ts", srcDir), "file");
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === "EPERM" && process.platform === "win32") {
+          hasFileSymlinks = false;
+        } else {
+          throw error;
+        }
+      }
+
+      const indexLines = [
+        `export const loadLinked = (): Promise<typeof import("./linked/mod")> => import("./linked/mod");`,
+        `export const loadExternal = (): Promise<typeof import("../external.ts")> => import("../external.ts");`,
+        `export const loadCanonical = (): Promise<typeof import("./a-real")> => import("./a-real");`,
+      ];
+      if (hasFileSymlinks) {
+        indexLines.push(
+          `export const loadFeature = (): Promise<{ default: string }> => import("./feature");`,
+          `export const loadTyped = (): Promise<typeof import("./typed")> => import("./typed");`,
+          `export const loadExcluded = (): Promise<unknown> => import("./excluded-link");`,
+        );
+      }
+      await writeFile(new URL("index.ts", srcDir), `${indexLines.join("\n")}\n`);
+
+      await build({
+        cwd: tmpDir,
+        entries: [
+          {
+            type: "transform",
+            input: "./src",
+            outDir: "./out",
+            filter: (file) => file !== "excluded-link.mjs",
+          },
+        ],
+      });
+
+      const indexCode = await readFile(new URL("index.mjs", outDir), "utf8");
+      const indexDts = await readFile(new URL("index.d.mts", outDir), "utf8");
+      expect(indexCode).toContain(`import("./linked/mod.mjs")`);
+      expect(indexCode).toContain(`import("../external.ts")`);
+      expect(indexCode).toContain(`import("./a-real.mjs")`);
+      expect(indexDts).toContain(`import("./linked/mod.mjs")`);
+      expect(indexDts).toContain(`import("../external.ts")`);
+      expect(indexDts).toContain(`import("./a-real.mjs")`);
+
+      if (hasFileSymlinks) {
+        expect(indexCode).toContain(`import("./feature.mjs")`);
+        expect(indexCode).toContain(`import("./typed.mjs")`);
+        expect(indexCode).toContain(`import("./excluded-link")`);
+        expect(indexDts).toContain(`import("./typed.mjs")`);
+        expect(await readdir(outDir)).not.toContain("excluded-link.mjs");
+      }
+
+      const evalScript = hasFileSymlinks
+        ? `import { loadLinked, loadCanonical, loadFeature, loadTyped } from "./index.mjs";
+console.log(JSON.stringify([
+  (await loadLinked()).dirValue,
+  (await loadCanonical()).canonical,
+  (await loadFeature()).default,
+  (await loadTyped()).value,
+]));`
+        : `import { loadLinked, loadCanonical } from "./index.mjs";
+console.log(JSON.stringify([
+  (await loadLinked()).dirValue,
+  (await loadCanonical()).canonical,
+]));`;
+
+      const { stdout } = await promisify(execFile)(
+        process.execPath,
+        ["--input-type=module", "--eval", evalScript],
+        { cwd: outDir },
+      );
+      expect(JSON.parse(stdout)).toEqual(
+        hasFileSymlinks
+          ? ["linked-dir", "canonical", "shared-mjs", "shared-ts"]
+          : ["linked-dir", "canonical"],
+      );
     } finally {
       await rm(tmpDir, { recursive: true, force: true });
     }

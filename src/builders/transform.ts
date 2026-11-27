@@ -1,7 +1,7 @@
 import type { BuildContext, TransformEntry } from "../types.ts";
 
 import { pathToFileURL } from "node:url";
-import { dirname, extname, join, relative } from "pathe";
+import { dirname, extname, join, normalize, relative } from "pathe";
 import { mkdir, readFile, realpath, symlink, writeFile } from "node:fs/promises";
 import { consola } from "consola";
 import { colors as c } from "consola/utils";
@@ -16,21 +16,39 @@ import { makeExecutable, SHEBANG_RE } from "./plugins/shebang.ts";
  * Transform all .ts modules in a directory using oxc-transform.
  */
 export async function transformDir(ctx: BuildContext, entry: TransformEntry): Promise<void> {
+  const entries: Array<[entryName: string, entryPath: string, entryDistPath: string]> = [];
   const outputPaths = new Map<string, string>();
   for (const entryName of await glob("**/*.*", { cwd: entry.input })) {
     if (entry.filter && (await entry.filter(entryName)) === false) {
       continue;
     }
-    outputPaths.set(entryName, join(entry.outDir!, entryName.replace(/\.ts$/, ".mjs")));
+    const entryPath = join(entry.input, entryName);
+    const entryDistPath = join(entry.outDir!, entryName.replace(/\.ts$/, ".mjs"));
+    entries.push([entryName, entryPath, entryDistPath]);
+    outputPaths.set(entryPath, entryDistPath);
   }
 
-  // exsolve resolves symlinks, so use the real input directory for lookups.
-  const inputDir = await realpath(entry.input).catch(() => entry.input);
-  const findOutputPath = (sourcePath: string) => outputPaths.get(relative(inputDir, sourcePath));
+  const inputDir = normalize(await realpath(entry.input).catch(() => entry.input));
+  const outputPathsByRealPath = new Map<string, string>();
+  const resolvedEntries = await Promise.all(
+    entries.map(async ([entryName, entryPath, entryDistPath]) => {
+      const realEntryPath = normalize(await realpath(entryPath).catch(() => entryPath));
+      return [entryName, entryDistPath, realEntryPath] as const;
+    }),
+  );
+  for (const [entryName, entryDistPath, realEntryPath] of resolvedEntries) {
+    if (!outputPathsByRealPath.has(realEntryPath) || realEntryPath === join(inputDir, entryName)) {
+      outputPathsByRealPath.set(realEntryPath, entryDistPath);
+    }
+  }
+
+  const findOutputPath = (sourcePath: string) => {
+    const normalizedPath = normalize(sourcePath);
+    return outputPaths.get(normalizedPath) ?? outputPathsByRealPath.get(normalizedPath);
+  };
 
   const results = await Promise.allSettled(
-    Array.from(outputPaths, async ([entryName, entryDistPath]) => {
-      const entryPath = join(entry.input, entryName);
+    entries.map(async ([, entryPath, entryDistPath]) => {
       if (extname(entryPath) === ".ts") {
         const { code, declaration } = await transformModule(
           entryPath,
